@@ -1,0 +1,72 @@
+name: CI — API
+
+on:
+  pull_request:
+    paths:
+      - "packages/api/**"
+      - ".github/workflows/ci-api.yml"
+  push:
+    branches: [main]
+    paths:
+      - "packages/api/**"
+      - ".github/workflows/ci-api.yml"
+
+defaults:
+  run:
+    working-directory: packages/api
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: dailyloadout
+          POSTGRES_PASSWORD: dailyloadout
+          POSTGRES_DB: dailyloadout_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U dailyloadout"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          allow-prereleases: true
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: packages/api/.venv
+          key: api-venv-${{ runner.os }}-py3.14-${{ hashFiles('packages/api/poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Ruff check
+        run: poetry run ruff check .
+
+      - name: Ruff format check
+        run: poetry run ruff format --check .
+
+      - name: Mypy
+        run: poetry run mypy src/
+
+      - name: Pytest
+        env:
+          DATABASE_URL: postgresql+asyncpg://dailyloadout:dailyloadout@localhost:5433/dailyloadout_test
+          REDIS_URL: redis://localhost:6380/0
+          APP_ENV: test
+          SECRET_KEY: test-secret
+        run: poetry run pytest --cov=src/dailyloadout --cov-report=term-missing
