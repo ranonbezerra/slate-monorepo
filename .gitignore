@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────
+# DailyLoadout — .gitignore
+# ─────────────────────────────────────────────
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─────────────────────────────────────────────
+# Python (packages/api)
+# ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.cover
+
+# ─────────────────────────────────────────────
+# Flutter (packages/app)
+# Detailed rules in packages/app/.gitignore
+# ─────────────────────────────────────────────
+.fvm/
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+packages/app/.metadata
+
+# ─────────────────────────────────────────────
+# Node / Bun (packages/web)
+# ─────────────────────────────────────────────
+node_modules/
+packages/web/dist/
+
+# ─────────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─────────────────────────────────────────────
+# Uploads / local storage
+# ─────────────────────────────────────────────
+uploads/
+*.sqlite3

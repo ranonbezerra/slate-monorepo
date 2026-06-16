@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "dailyloadout"
+version = "0.1.0"
+description = "DailyLoadout API — gaming session planner powered by local LLMs"
+authors = ["Ranon Bezerra"]
+license = "MIT"
+packages = [{ include = "dailyloadout", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.14,<4.0"
+fastapi = ">=0.115"
+uvicorn = { version = "*", extras = ["standard"] }
+pydantic = ">=2"
+pydantic-settings = "*"
+sqlalchemy = { version = ">=2", extras = ["asyncio"] }
+asyncpg = "*"
+alembic = "*"
+arq = "*"
+redis = { version = "*", extras = ["hiredis"] }
+httpx = "*"
+structlog = "*"
+slowapi = "*"
+python-jose = { version = "*", extras = ["cryptography"] }
+passlib = { version = "*", extras = ["bcrypt"] }
+python-multipart = "*"
+jinja2 = "*"
+sentry-sdk = { version = "*", extras = ["fastapi"], optional = true }
+
+[tool.poetry.extras]
+sentry = ["sentry-sdk"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+factory-boy = "*"
+ruff = "*"
+mypy = "*"
+httpx = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ---------------------------------------------------------------------------
+# Tooling
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 99
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

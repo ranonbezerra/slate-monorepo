@@ -96,7 +96,7 @@ Detailed architecture in [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] **Daily Loadout** — 3 questions → 1 suggested game with reasoning
 - [x] **Analytics dashboard** (web) — play heatmap, genre distribution, mission timeline
 - [x] Single-user mode for personal self-hosting
-- [x] Cross-platform: iOS, Android, macOS, Linux, Windows, Web
+- [x] Mobile: iOS, Android
 
 ### Out of scope (deliberate)
 

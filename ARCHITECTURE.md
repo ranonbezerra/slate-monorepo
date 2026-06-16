@@ -23,7 +23,7 @@ dailyloadout-monorepo/
 │       └── ci-web.yml              # bun test + biome
 ├── packages/
 │   ├── api/                        # FastAPI backend
-│   ├── app/                        # Flutter cross-platform client
+│   ├── app/                        # Flutter mobile client (iOS + Android)
 │   └── web/                        # Bun + React + Mantine dashboard
 ├── infra/
 │   ├── ollama/                     # Custom Modelfiles, model pull scripts
@@ -59,7 +59,7 @@ dailyloadout-monorepo/
 
 **Why FastAPI for both API and AI orchestration:** the AI workload is "thin" — call Ollama, validate output, persist. No fine-tuning, no model serving, no GPU pipeline. Splitting into a separate NestJS API and Python AI engine adds inter-service communication overhead with no real boundary benefit at this scale. A clean `infrastructure/llm/` module inside FastAPI carries the AI concern; if a future product (CoupleQuest, WishTrip, CleanMarket) needs the same briefing engine, then it gets extracted. YAGNI until then.
 
-### 2.2 `packages/app/` — Flutter cross-platform client
+### 2.2 `packages/app/` — Flutter mobile client
 
 - **Flutter 3.27+ / Dart 3.6+**
 - **BLoC** (`bloc` ^9 + `flutter_bloc` ^9 + `bloc_concurrency` ^0.3 + `bloc_test` for tests) — chosen for consistency with author's other Flutter codebases
@@ -76,7 +76,7 @@ dailyloadout-monorepo/
 - **sentry_flutter** (env-gated)
 - **uuid**, **logger**, **intl**
 
-Target platforms: **iOS, Android, macOS, Linux, Windows, Web.** Web has known audio-capture limitations and is treated as best-effort.
+Target platforms: **iOS, Android.** Desktop users are served by the web dashboard (`packages/web/`).
 
 ### 2.3 `packages/web/` — React dashboard
 

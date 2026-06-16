@@ -39,7 +39,7 @@ Total: **10 weekends ≈ 2.5 months** assuming 8–12 productive hours per weeke
 - [ ] `.env.example` complete (every env var from ARCHITECTURE.md §7)
 - [ ] `packages/api/pyproject.toml` with Poetry, Python 3.14, base deps (FastAPI, Pydantic v2, SQLAlchemy, asyncpg, alembic, arq, structlog, ruff, mypy, pytest, pytest-asyncio)
 - [ ] `packages/api/src/dailyloadout/main.py` with minimal app factory + `/health`
-- [ ] `packages/app/` initialized via `flutter create`, configured for iOS/Android/macOS/Linux/Windows. Renders "DailyLoadout WIP"
+- [ ] `packages/app/` initialized via `flutter create`, configured for iOS/Android. Renders "DailyLoadout WIP"
 - [ ] `packages/web/` initialized with Vite (Bun), React 19, TypeScript, Mantine v8. Renders empty layout on `localhost:3000`
 - [ ] GitHub Actions: three separate workflows (`ci-api.yml`, `ci-app.yml`, `ci-web.yml`) running lint + test on every PR
 - [ ] Issue templates (bug, feature, question)

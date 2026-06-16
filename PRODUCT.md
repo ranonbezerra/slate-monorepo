@@ -17,7 +17,7 @@ This is an adapted version of the original product. The product premise is ident
 - Sign in with Apple, APNs
 
 **Changed:**
-- iOS-only (Swift + SwiftUI) → **cross-platform Flutter** (iOS, Android, macOS, Linux, Windows, Web)
+- iOS-only (Swift + SwiftUI) → **Flutter mobile** (iOS, Android)
 - Amazon Bedrock (Claude Sonnet/Haiku) → **Ollama local-first** (Gemma 3 4B + 12B), Bedrock as opt-in fallback
 - OpenAI Whisper API → **faster-whisper local** in-process
 - VisionKit on-device OCR → **multimodal LLM** (Gemma 3 vision) on backend

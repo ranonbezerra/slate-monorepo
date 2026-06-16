@@ -7,6 +7,8 @@ COMPOSE := docker compose -f docker-compose.yml -f docker-compose.dev.yml
 API_DIR := packages/api
 APP_DIR := packages/app
 WEB_DIR := packages/web
+FLUTTER := fvm flutter
+DART    := fvm dart
 
 # Load .env if present
 ifneq (,$(wildcard .env))
@@ -114,28 +116,24 @@ web-install: ## Install web dependencies
 # ─────────────────────────────────────────────
 
 .PHONY: app
-app: ## Run Flutter app (default: macOS)
-	cd $(APP_DIR) && flutter run -d macos
+app: ## Run Flutter app on iOS simulator
+	cd $(APP_DIR) && $(FLUTTER) run -d ios
 
 .PHONY: app-android
-app-android: ## Run Flutter app on Android
-	cd $(APP_DIR) && flutter run -d android
-
-.PHONY: app-ios
-app-ios: ## Run Flutter app on iOS
-	cd $(APP_DIR) && flutter run -d ios
+app-android: ## Run Flutter app on Android emulator
+	cd $(APP_DIR) && $(FLUTTER) run -d android
 
 .PHONY: app-test
 app-test: ## Run Flutter tests
-	cd $(APP_DIR) && flutter test
+	cd $(APP_DIR) && $(FLUTTER) test
 
 .PHONY: app-lint
 app-lint: ## Analyze Flutter code
-	cd $(APP_DIR) && flutter analyze
+	cd $(APP_DIR) && $(FLUTTER) analyze
 
 .PHONY: app-install
 app-install: ## Get Flutter dependencies
-	cd $(APP_DIR) && flutter pub get
+	cd $(APP_DIR) && $(FLUTTER) pub get
 
 # ─────────────────────────────────────────────
 # Quality gate (all packages)
