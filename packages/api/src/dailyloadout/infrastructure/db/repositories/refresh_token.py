@@ -48,11 +48,7 @@ class RefreshTokenRepository:
     async def revoke(self, token_id: int) -> None:
         """Mark a single refresh token as revoked."""
         now = datetime.now(UTC)
-        stmt = (
-            update(RefreshToken)
-            .where(RefreshToken.id == token_id)
-            .values(revoked_at=now)
-        )
+        stmt = update(RefreshToken).where(RefreshToken.id == token_id).values(revoked_at=now)
         await self._session.execute(stmt)
 
     async def revoke_all_for_user(self, user_id: int) -> None:
