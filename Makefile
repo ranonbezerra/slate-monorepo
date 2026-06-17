@@ -64,8 +64,8 @@ api-test: ## Run API tests
 	cd $(API_DIR) && poetry run pytest
 
 .PHONY: api-lint
-api-lint: ## Lint API (ruff + mypy)
-	cd $(API_DIR) && poetry run ruff check . && poetry run mypy src/
+api-lint: ## Lint API (ruff + ruff format + mypy)
+	cd $(API_DIR) && poetry run ruff check . && poetry run ruff format --check . && poetry run mypy src/
 
 .PHONY: api-fmt
 api-fmt: ## Format API code
