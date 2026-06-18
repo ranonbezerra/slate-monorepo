@@ -25,8 +25,8 @@ class _CaptureTextPageState extends State<CaptureTextPage> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<CaptureBloc>().add(
-          SubmitTextCapture(rawText: _textController.text.trim()),
-        );
+      SubmitTextCapture(rawText: _textController.text.trim()),
+    );
   }
 
   @override
@@ -34,9 +34,7 @@ class _CaptureTextPageState extends State<CaptureTextPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Text Capture'),
-      ),
+      appBar: AppBar(title: const Text('Text Capture')),
       body: BlocListener<CaptureBloc, CaptureState>(
         listener: (context, state) {
           if (state is CaptureSubmitted) {

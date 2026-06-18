@@ -7,8 +7,8 @@ class AuthRepository {
   AuthRepository({
     required ApiClient apiClient,
     required AuthTokenStore tokenStore,
-  })  : _apiClient = apiClient,
-        _tokenStore = tokenStore;
+  }) : _apiClient = apiClient,
+       _tokenStore = tokenStore;
 
   final ApiClient _apiClient;
   final AuthTokenStore _tokenStore;
@@ -19,14 +19,9 @@ class AuthRepository {
     required String password,
     required String displayName,
   }) async {
-    final response =
-        await _apiClient.dio.post<Map<String, dynamic>>(
+    final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/auth/register',
-      data: {
-        'email': email,
-        'password': password,
-        'display_name': displayName,
-      },
+      data: {'email': email, 'password': password, 'display_name': displayName},
     );
     return AuthTokens.fromJson(response.data!);
   }
@@ -36,23 +31,16 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    final response =
-        await _apiClient.dio.post<Map<String, dynamic>>(
+    final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/auth/login',
-      data: {
-        'email': email,
-        'password': password,
-      },
+      data: {'email': email, 'password': password},
     );
     return AuthTokens.fromJson(response.data!);
   }
 
   /// Exchanges a refresh token for a new token pair.
-  Future<AuthTokens> refreshToken({
-    required String refreshToken,
-  }) async {
-    final response =
-        await _apiClient.dio.post<Map<String, dynamic>>(
+  Future<AuthTokens> refreshToken({required String refreshToken}) async {
+    final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/auth/refresh',
       data: {'refresh_token': refreshToken},
     );
@@ -69,8 +57,9 @@ class AuthRepository {
 
   /// Fetches the current user's profile.
   Future<User> getMe() async {
-    final response =
-        await _apiClient.dio.get<Map<String, dynamic>>('/v1/auth/me');
+    final response = await _apiClient.dio.get<Map<String, dynamic>>(
+      '/v1/auth/me',
+    );
     return User.fromJson(response.data!);
   }
 

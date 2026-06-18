@@ -74,17 +74,17 @@ class Game extends Equatable {
 
   @override
   List<Object?> get props => [
-        publicId,
-        slug,
-        title,
-        igdbId,
-        summary,
-        coverUrl,
-        firstReleaseDate,
-        genres,
-        metadataSource,
-        createdAt,
-      ];
+    publicId,
+    slug,
+    title,
+    igdbId,
+    summary,
+    coverUrl,
+    firstReleaseDate,
+    genres,
+    metadataSource,
+    createdAt,
+  ];
 }
 
 /// Represents a game entry in the user's library.
@@ -134,17 +134,17 @@ class LibraryEntry extends Equatable {
 
   @override
   List<Object?> get props => [
-        publicId,
-        game,
-        platform,
-        status,
-        acquiredAt,
-        lastPlayedAt,
-        missionNextAction,
-        notes,
-        createdAt,
-        updatedAt,
-      ];
+    publicId,
+    game,
+    platform,
+    status,
+    acquiredAt,
+    lastPlayedAt,
+    missionNextAction,
+    notes,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 /// Paginated response for library entries.

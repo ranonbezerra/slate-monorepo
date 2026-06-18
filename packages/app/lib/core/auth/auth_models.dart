@@ -2,10 +2,7 @@ import 'package:equatable/equatable.dart';
 
 /// Holds the access and refresh tokens returned by auth endpoints.
 class AuthTokens extends Equatable {
-  const AuthTokens({
-    required this.accessToken,
-    required this.refreshToken,
-  });
+  const AuthTokens({required this.accessToken, required this.refreshToken});
 
   factory AuthTokens.fromJson(Map<String, dynamic> json) {
     return AuthTokens(
@@ -58,13 +55,13 @@ class User extends Equatable {
 
   @override
   List<Object?> get props => [
-        publicId,
-        email,
-        displayName,
-        avatarUrl,
-        emailVerified,
-        locale,
-        timezone,
-        createdAt,
-      ];
+    publicId,
+    email,
+    displayName,
+    avatarUrl,
+    emailVerified,
+    locale,
+    timezone,
+    createdAt,
+  ];
 }

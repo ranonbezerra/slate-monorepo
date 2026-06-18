@@ -163,15 +163,15 @@ class _AddGamePageState extends State<AddGamePage> {
       if (!mounted) return;
 
       context.read<LibraryBloc>().add(
-            AddEntry(
-              gamePublicId: gamePublicId,
-              platformId: _selectedPlatformId!,
-              status: _selectedStatus,
-              notes: _notesController.text.trim().isEmpty
-                  ? null
-                  : _notesController.text.trim(),
-            ),
-          );
+        AddEntry(
+          gamePublicId: gamePublicId,
+          platformId: _selectedPlatformId!,
+          status: _selectedStatus,
+          notes: _notesController.text.trim().isEmpty
+              ? null
+              : _notesController.text.trim(),
+        ),
+      );
 
       context.go('/library');
     } on Exception catch (e) {
@@ -236,9 +236,8 @@ class _AddGamePageState extends State<AddGamePage> {
                             child: Image.network(
                               game.coverUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.videogame_asset,
-                              ),
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.videogame_asset),
                             ),
                           )
                         : const Icon(Icons.videogame_asset),
@@ -284,17 +283,17 @@ class _AddGamePageState extends State<AddGamePage> {
           ] else ...[
             Text(
               _selectedGame!.title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             if (_selectedGame!.summary != null) ...[
               const SizedBox(height: 8),
               Text(
                 _selectedGame!.summary!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -310,12 +309,7 @@ class _AddGamePageState extends State<AddGamePage> {
               border: OutlineInputBorder(),
             ),
             items: _platforms
-                .map(
-                  (p) => DropdownMenuItem(
-                    value: p.id,
-                    child: Text(p.label),
-                  ),
-                )
+                .map((p) => DropdownMenuItem(value: p.id, child: Text(p.label)))
                 .toList(),
             onChanged: (value) {
               if (value != null) {

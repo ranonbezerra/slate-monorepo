@@ -26,11 +26,11 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<AuthBloc>().add(
-          LoginRequested(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          ),
-        );
+      LoginRequested(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      ),
+    );
   }
 
   @override
@@ -61,18 +61,15 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     Text(
                       'DailyLoadout',
-                      style:
-                          Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.headlineLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Sign in to your account',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(

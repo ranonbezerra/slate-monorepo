@@ -18,9 +18,10 @@ class ApiClient {
     OnForceLogout? onForceLogout,
     String baseUrl = 'http://localhost:8100',
     Dio? dio,
-  })  : _tokenStore = tokenStore,
-        _onForceLogout = onForceLogout {
-    _dio = dio ??
+  }) : _tokenStore = tokenStore,
+       _onForceLogout = onForceLogout {
+    _dio =
+        dio ??
         Dio(
           BaseOptions(
             baseUrl: baseUrl,
@@ -33,12 +34,14 @@ class ApiClient {
           ),
         );
 
-    _dio.interceptors.add(_AuthInterceptor(
-      dio: _dio,
-      tokenStore: _tokenStore,
-      onForceLogout: _onForceLogout,
-      logger: _logger,
-    ));
+    _dio.interceptors.add(
+      _AuthInterceptor(
+        dio: _dio,
+        tokenStore: _tokenStore,
+        onForceLogout: _onForceLogout,
+        logger: _logger,
+      ),
+    );
   }
 
   final AuthTokenStore _tokenStore;
@@ -56,8 +59,8 @@ class _AuthInterceptor extends Interceptor {
     required AuthTokenStore tokenStore,
     required this.onForceLogout,
     required this.logger,
-  })  : _dio = dio,
-        _tokenStore = tokenStore;
+  }) : _dio = dio,
+       _tokenStore = tokenStore;
 
   final Dio _dio;
   final AuthTokenStore _tokenStore;
@@ -94,10 +97,9 @@ class _AuthInterceptor extends Interceptor {
     if (_isRefreshing) {
       // Another request is already refreshing — queue this one.
       final completer = Completer<Response<dynamic>>();
-      _pendingRetries.add(_RetryEntry(
-        options: requestOptions,
-        completer: completer,
-      ));
+      _pendingRetries.add(
+        _RetryEntry(options: requestOptions, completer: completer),
+      );
       try {
         final result = await completer.future;
         return handler.resolve(result);
@@ -157,7 +159,9 @@ class _AuthInterceptor extends Interceptor {
   void _resolveAllPending(String newAccessToken) {
     for (final entry in _pendingRetries) {
       entry.options.headers['Authorization'] = 'Bearer $newAccessToken';
-      _dio.fetch<dynamic>(entry.options).then(
+      _dio
+          .fetch<dynamic>(entry.options)
+          .then(
             entry.completer.complete,
             onError: entry.completer.completeError,
           );

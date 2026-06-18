@@ -9,8 +9,7 @@ class LibraryRepository {
 
   /// Fetches all available platforms.
   Future<List<Platform>> listPlatforms() async {
-    final response =
-        await _apiClient.dio.get<List<dynamic>>('/v1/platforms');
+    final response = await _apiClient.dio.get<List<dynamic>>('/v1/platforms');
     return response.data!
         .map((e) => Platform.fromJson(e as Map<String, dynamic>))
         .toList();

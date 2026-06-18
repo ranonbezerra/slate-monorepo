@@ -56,10 +56,7 @@ class _LibraryListPageState extends State<LibraryListPage> {
               underline: const SizedBox.shrink(),
               items: _statusFilters.entries
                   .map(
-                    (e) => DropdownMenuItem(
-                      value: e.key,
-                      child: Text(e.value),
-                    ),
+                    (e) => DropdownMenuItem(value: e.key, child: Text(e.value)),
                   )
                   .toList(),
               onChanged: _onFilterChanged,
@@ -174,8 +171,8 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Add your first game!',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
@@ -191,10 +188,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _LibraryEntryCard extends StatelessWidget {
-  const _LibraryEntryCard({
-    required this.entry,
-    required this.onTap,
-  });
+  const _LibraryEntryCard({required this.entry, required this.onTap});
 
   final LibraryEntry entry;
   final VoidCallback onTap;
@@ -297,8 +291,8 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final bgColor = _chipColor(colors);
-    final isOnDark = ThemeData.estimateBrightnessForColor(bgColor) ==
-        Brightness.dark;
+    final isOnDark =
+        ThemeData.estimateBrightnessForColor(bgColor) == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -309,8 +303,8 @@ class _StatusChip extends StatelessWidget {
       child: Text(
         status[0].toUpperCase() + status.substring(1),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isOnDark ? Colors.white : Colors.black,
-            ),
+          color: isOnDark ? Colors.white : Colors.black,
+        ),
       ),
     );
   }

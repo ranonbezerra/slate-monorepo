@@ -10,8 +10,8 @@ part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({required AuthRepository authRepository})
-      : _authRepository = authRepository,
-        super(const AuthInitial()) {
+    : _authRepository = authRepository,
+      super(const AuthInitial()) {
     on<AppStarted>(_onAppStarted);
     on<LoginRequested>(_onLoginRequested);
     on<RegisterRequested>(_onRegisterRequested);
@@ -21,10 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
   final Logger _logger = Logger(printer: PrettyPrinter(methodCount: 0));
 
-  Future<void> _onAppStarted(
-    AppStarted event,
-    Emitter<AuthState> emit,
-  ) async {
+  Future<void> _onAppStarted(AppStarted event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
 
     try {

@@ -19,10 +19,7 @@ final class CaptureLoading extends CaptureState {
 
 /// Capture list has been loaded successfully.
 final class CaptureLoaded extends CaptureState {
-  const CaptureLoaded({
-    required this.captures,
-    required this.total,
-  });
+  const CaptureLoaded({required this.captures, required this.total});
 
   final List<Capture> captures;
   final int total;

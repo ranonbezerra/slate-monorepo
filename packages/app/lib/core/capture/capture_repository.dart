@@ -38,6 +38,21 @@ class CaptureRepository {
     return TranscribeResult.fromJson(response.data!);
   }
 
+  /// Uploads a photo for vision-based game extraction.
+  Future<Capture> submitPhoto(String imagePath) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        imagePath,
+        contentType: DioMediaType('image', 'jpeg'),
+      ),
+    });
+    final response = await _apiClient.dio.post<Map<String, dynamic>>(
+      '/v1/captures/photo',
+      data: formData,
+    );
+    return Capture.fromJson(response.data!);
+  }
+
   /// Lists the current user's captures.
   Future<CaptureListResponse> listCaptures({
     String? status,
@@ -74,19 +89,13 @@ class CaptureRepository {
   }) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/captures/$captureId/candidates/$candidateId/confirm',
-      data: {
-        'platform_id': platformId,
-        'status': status,
-      },
+      data: {'platform_id': platformId, 'status': status},
     );
     return response.data!;
   }
 
   /// Rejects a candidate.
-  Future<void> rejectCandidate(
-    String captureId,
-    String candidateId,
-  ) async {
+  Future<void> rejectCandidate(String captureId, String candidateId) async {
     await _apiClient.dio.post<void>(
       '/v1/captures/$captureId/candidates/$candidateId/reject',
     );

@@ -28,12 +28,12 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<AuthBloc>().add(
-          RegisterRequested(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-            displayName: _displayNameController.text.trim(),
-          ),
-        );
+      RegisterRequested(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        displayName: _displayNameController.text.trim(),
+      ),
+    );
   }
 
   @override
@@ -64,18 +64,15 @@ class _RegisterPageState extends State<RegisterPage> {
                   children: [
                     Text(
                       'DailyLoadout',
-                      style:
-                          Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.headlineLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Create your account',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     TextFormField(

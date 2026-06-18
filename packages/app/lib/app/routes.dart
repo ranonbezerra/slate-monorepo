@@ -6,6 +6,7 @@ import 'package:app/features/auth/view/login_page.dart';
 import 'package:app/features/auth/view/register_page.dart';
 import 'package:app/features/auth/view/splash_page.dart';
 import 'package:app/features/capture/view/capture_choice_page.dart';
+import 'package:app/features/capture/view/capture_photo_page.dart';
 import 'package:app/features/capture/view/capture_review_page.dart';
 import 'package:app/features/capture/view/capture_text_page.dart';
 import 'package:app/features/capture/view/capture_voice_page.dart';
@@ -48,37 +49,26 @@ GoRouter createRouter(
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashPage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterPage(),
       ),
-      GoRoute(
-        path: '/',
-        redirect: (context, state) => '/library',
-      ),
+      GoRoute(path: '/', redirect: (context, state) => '/library'),
       GoRoute(
         path: '/library',
         builder: (context, state) => const LibraryListPage(),
       ),
       GoRoute(
         path: '/library/add',
-        builder: (context, state) => AddGamePage(
-          libraryRepository: libraryRepository,
-        ),
+        builder: (context, state) =>
+            AddGamePage(libraryRepository: libraryRepository),
       ),
       GoRoute(
         path: '/library/:id',
-        builder: (context, state) => LibraryDetailPage(
-          entryPublicId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            LibraryDetailPage(entryPublicId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/capture',
@@ -91,6 +81,10 @@ GoRouter createRouter(
       GoRoute(
         path: '/capture/voice',
         builder: (context, state) => const CaptureVoicePage(),
+      ),
+      GoRoute(
+        path: '/capture/photo',
+        builder: (context, state) => const CapturePhotoPage(),
       ),
       GoRoute(
         path: '/capture/review/:id',

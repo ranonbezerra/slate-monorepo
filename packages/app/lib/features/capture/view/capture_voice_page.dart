@@ -44,9 +44,7 @@ class _CaptureVoicePageState extends State<CaptureVoicePage> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            const SnackBar(
-              content: Text('Microphone permission is required.'),
-            ),
+            const SnackBar(content: Text('Microphone permission is required.')),
           );
       }
       return;
@@ -95,8 +93,8 @@ class _CaptureVoicePageState extends State<CaptureVoicePage> {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<CaptureBloc>().add(
-          SubmitVoiceCapture(rawText: _textController.text.trim()),
-        );
+      SubmitVoiceCapture(rawText: _textController.text.trim()),
+    );
   }
 
   void _onRecordAgain() {
@@ -119,9 +117,7 @@ class _CaptureVoicePageState extends State<CaptureVoicePage> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Voice Capture'),
-      ),
+      appBar: AppBar(title: const Text('Voice Capture')),
       body: BlocListener<CaptureBloc, CaptureState>(
         listener: (context, state) {
           if (state is CaptureTranscribed) {
@@ -181,9 +177,7 @@ class _CaptureVoicePageState extends State<CaptureVoicePage> {
                           SizedBox(height: 16),
                           Center(child: CircularProgressIndicator()),
                           SizedBox(height: 12),
-                          Center(
-                            child: Text('Transcribing your audio...'),
-                          ),
+                          Center(child: Text('Transcribing your audio...')),
                         ],
                       );
                     }
@@ -219,8 +213,8 @@ class _CaptureVoicePageState extends State<CaptureVoicePage> {
             _isRecording
                 ? 'Recording... (max ${_maxDurationSeconds}s)'
                 : _audioPath != null
-                    ? 'Recording complete'
-                    : 'Tap the mic to start',
+                ? 'Recording complete'
+                : 'Tap the mic to start',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colors.onSurfaceVariant,
             ),
