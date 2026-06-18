@@ -217,7 +217,10 @@ abstract final class DailyLoadoutTheme {
         filled: true,
         fillColor: DLColors.surface,
         hintStyle: const TextStyle(color: DLColors.textDim),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: DLColors.line, width: 0.5),

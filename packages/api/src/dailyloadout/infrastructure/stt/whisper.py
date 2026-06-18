@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 import structlog
 
 from dailyloadout.config import Settings
 
 from .base import AbstractSTTClient, TranscriptionResult
+
+if TYPE_CHECKING:
+    from faster_whisper import WhisperModel
 
 logger = structlog.get_logger()
 
@@ -18,9 +23,9 @@ class WhisperSTTClient(AbstractSTTClient):
         self._model_size = settings.whisper_model_size
         self._device = settings.whisper_device
         self._compute_type = settings.whisper_compute_type
-        self._model = None  # lazy init
+        self._model: WhisperModel | None = None
 
-    def _get_model(self):  # noqa: ANN202
+    def _get_model(self) -> WhisperModel:
         if self._model is None:
             from faster_whisper import WhisperModel
 
@@ -37,7 +42,7 @@ class WhisperSTTClient(AbstractSTTClient):
 
         model = self._get_model()
 
-        def _run():  # noqa: ANN202
+        def _run() -> tuple[str, Any]:
             segments, info = model.transcribe(
                 audio_path,
                 language=language,
