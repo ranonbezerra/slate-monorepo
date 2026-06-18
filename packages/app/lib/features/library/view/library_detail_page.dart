@@ -47,20 +47,18 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
     if (_entry == null) return;
 
     context.read<LibraryBloc>().add(
-          UpdateEntry(
-            publicId: _entry!.publicId,
-            status: _selectedStatus,
-            notes: _notesController.text.trim().isEmpty
-                ? null
-                : _notesController.text.trim(),
-          ),
-        );
+      UpdateEntry(
+        publicId: _entry!.publicId,
+        status: _selectedStatus,
+        notes: _notesController.text.trim().isEmpty
+            ? null
+            : _notesController.text.trim(),
+      ),
+    );
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Entry updated')),
-      );
+      ..showSnackBar(const SnackBar(content: Text('Entry updated')));
   }
 
   Future<void> _onDelete() async {
@@ -86,8 +84,8 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
 
     if ((confirmed ?? false) && mounted) {
       context.read<LibraryBloc>().add(
-            DeleteEntry(publicId: widget.entryPublicId),
-          );
+        DeleteEntry(publicId: widget.entryPublicId),
+      );
       context.go('/library');
     }
   }
@@ -150,8 +148,8 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 Text(
                   entry.game.title,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
 
@@ -159,8 +157,8 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 Text(
                   entry.platform.label,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -175,9 +173,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                       .map(
                         (s) => DropdownMenuItem(
                           value: s,
-                          child: Text(
-                            s[0].toUpperCase() + s.substring(1),
-                          ),
+                          child: Text(s[0].toUpperCase() + s.substring(1)),
                         ),
                       )
                       .toList(),

@@ -49,37 +49,26 @@ GoRouter createRouter(
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashPage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterPage(),
       ),
-      GoRoute(
-        path: '/',
-        redirect: (context, state) => '/library',
-      ),
+      GoRoute(path: '/', redirect: (context, state) => '/library'),
       GoRoute(
         path: '/library',
         builder: (context, state) => const LibraryListPage(),
       ),
       GoRoute(
         path: '/library/add',
-        builder: (context, state) => AddGamePage(
-          libraryRepository: libraryRepository,
-        ),
+        builder: (context, state) =>
+            AddGamePage(libraryRepository: libraryRepository),
       ),
       GoRoute(
         path: '/library/:id',
-        builder: (context, state) => LibraryDetailPage(
-          entryPublicId: state.pathParameters['id']!,
-        ),
+        builder: (context, state) =>
+            LibraryDetailPage(entryPublicId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/capture',
@@ -95,8 +84,7 @@ GoRouter createRouter(
       ),
       GoRoute(
         path: '/capture/photo',
-        builder: (context, state) =>
-            const CapturePhotoPage(),
+        builder: (context, state) => const CapturePhotoPage(),
       ),
       GoRoute(
         path: '/capture/review/:id',

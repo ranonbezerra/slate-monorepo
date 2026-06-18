@@ -34,10 +34,12 @@ Future<void> main() async {
   final libraryBloc = LibraryBloc(libraryRepository: libraryRepository);
   final captureBloc = CaptureBloc(captureRepository: captureRepository);
 
-  runApp(App(
-    authBloc: authBloc,
-    libraryBloc: libraryBloc,
-    captureBloc: captureBloc,
-    libraryRepository: libraryRepository,
-  ));
+  runApp(
+    App(
+      authBloc: authBloc,
+      libraryBloc: libraryBloc,
+      captureBloc: captureBloc,
+      libraryRepository: libraryRepository,
+    ),
+  );
 }

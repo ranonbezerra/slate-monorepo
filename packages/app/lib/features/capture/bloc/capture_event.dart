@@ -77,10 +77,7 @@ final class ConfirmCandidate extends CaptureEvent {
 
 /// Dispatched when the user rejects a candidate.
 final class RejectCandidate extends CaptureEvent {
-  const RejectCandidate({
-    required this.captureId,
-    required this.candidateId,
-  });
+  const RejectCandidate({required this.captureId, required this.candidateId});
 
   final String captureId;
   final String candidateId;

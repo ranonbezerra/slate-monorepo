@@ -10,8 +10,8 @@ part 'library_state.dart';
 
 class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
   LibraryBloc({required LibraryRepository libraryRepository})
-      : _libraryRepository = libraryRepository,
-        super(const LibraryInitial()) {
+    : _libraryRepository = libraryRepository,
+      super(const LibraryInitial()) {
     on<LoadLibrary>(_onLoadLibrary);
     on<AddEntry>(_onAddEntry);
     on<UpdateEntry>(_onUpdateEntry);
@@ -43,11 +43,13 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
 
       final hasMore = response.offset + response.items.length < response.total;
 
-      emit(LibraryLoaded(
-        entries: response.items,
-        total: response.total,
-        hasMore: hasMore,
-      ));
+      emit(
+        LibraryLoaded(
+          entries: response.items,
+          total: response.total,
+          hasMore: hasMore,
+        ),
+      );
     } on DioException catch (e) {
       final message = _extractErrorMessage(e);
       emit(LibraryError(message: message));
@@ -56,10 +58,7 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
     }
   }
 
-  Future<void> _onAddEntry(
-    AddEntry event,
-    Emitter<LibraryState> emit,
-  ) async {
+  Future<void> _onAddEntry(AddEntry event, Emitter<LibraryState> emit) async {
     emit(const LibraryLoading());
 
     try {
@@ -148,11 +147,13 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
 
     final hasMore = response.offset + response.items.length < response.total;
 
-    emit(LibraryLoaded(
-      entries: response.items,
-      total: response.total,
-      hasMore: hasMore,
-    ));
+    emit(
+      LibraryLoaded(
+        entries: response.items,
+        total: response.total,
+        hasMore: hasMore,
+      ),
+    );
   }
 
   String _extractErrorMessage(DioException e) {

@@ -209,9 +209,7 @@ abstract final class DailyLoadoutTheme {
         backgroundColor: DLColors.surface2,
         labelStyle: const TextStyle(color: DLColors.textMuted, fontSize: 13),
         side: BorderSide.none,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(9),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

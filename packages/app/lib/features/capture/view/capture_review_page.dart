@@ -72,11 +72,8 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
     CaptureCandidate candidate,
   ) {
     context.read<CaptureBloc>().add(
-          RejectCandidate(
-            captureId: captureId,
-            candidateId: candidate.publicId,
-          ),
-        );
+      RejectCandidate(captureId: captureId, candidateId: candidate.publicId),
+    );
   }
 
   void _showConfirmSheet(
@@ -84,8 +81,7 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
     String captureId,
     CaptureCandidate candidate,
   ) {
-    var selectedPlatformId =
-        _platforms.isNotEmpty ? _platforms.first.id : null;
+    var selectedPlatformId = _platforms.isNotEmpty ? _platforms.first.id : null;
     var selectedStatus = 'backlog';
 
     showModalBottomSheet<void>(
@@ -107,9 +103,7 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
                 children: [
                   Text(
                     'Confirm: ${candidate.igdbTitle ?? candidate.title}',
-                    style: Theme.of(sheetContext)
-                        .textTheme
-                        .titleMedium
+                    style: Theme.of(sheetContext).textTheme.titleMedium
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 20),
@@ -148,9 +142,7 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
                         .map(
                           (s) => DropdownMenuItem(
                             value: s,
-                            child: Text(
-                              s[0].toUpperCase() + s.substring(1),
-                            ),
+                            child: Text(s[0].toUpperCase() + s.substring(1)),
                           ),
                         )
                         .toList(),
@@ -171,13 +163,13 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
                           : () {
                               Navigator.of(sheetContext).pop();
                               context.read<CaptureBloc>().add(
-                                    ConfirmCandidate(
-                                      captureId: captureId,
-                                      candidateId: candidate.publicId,
-                                      platformId: selectedPlatformId!,
-                                      status: selectedStatus,
-                                    ),
-                                  );
+                                ConfirmCandidate(
+                                  captureId: captureId,
+                                  candidateId: candidate.publicId,
+                                  platformId: selectedPlatformId!,
+                                  status: selectedStatus,
+                                ),
+                              );
                             },
                       child: const Text('Add to Library'),
                     ),
@@ -203,9 +195,7 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Review Captures'),
-      ),
+      appBar: AppBar(title: const Text('Review Captures')),
       body: BlocBuilder<CaptureBloc, CaptureState>(
         builder: (context, state) {
           if (state is CaptureSubmitting || state is CaptureLoading) {
@@ -222,9 +212,7 @@ class _CaptureReviewPageState extends State<CaptureReviewPage> {
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: theme.colorScheme.error,
-                      ),
+                      style: TextStyle(color: theme.colorScheme.error),
                     ),
                     const SizedBox(height: 16),
                     FilledButton(
@@ -436,8 +424,8 @@ class _CaptureStatusBadge extends StatelessWidget {
       child: Text(
         status[0].toUpperCase() + status.substring(1),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isOnDark ? Colors.white : Colors.black,
-            ),
+          color: isOnDark ? Colors.white : Colors.black,
+        ),
       ),
     );
   }
@@ -619,8 +607,8 @@ class _CandidateStatusBadge extends StatelessWidget {
       child: Text(
         status[0].toUpperCase() + status.substring(1),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isOnDark ? Colors.white : Colors.black,
-            ),
+          color: isOnDark ? Colors.white : Colors.black,
+        ),
       ),
     );
   }
@@ -638,8 +626,8 @@ class _ConfidenceIndicator extends StatelessWidget {
     final color = confidence >= 0.8
         ? theme.colorScheme.tertiary
         : confidence >= 0.5
-            ? theme.colorScheme.secondary
-            : theme.colorScheme.error;
+        ? theme.colorScheme.secondary
+        : theme.colorScheme.error;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -651,8 +639,7 @@ class _ConfidenceIndicator extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: confidence,
-              backgroundColor:
-                  theme.colorScheme.surfaceContainerHighest,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
               color: color,
             ),
           ),

@@ -29,8 +29,7 @@ void main() {
     mockCaptureRepository = MockCaptureRepository();
 
     // Stub the hasTokens call that AppStarted will trigger.
-    when(() => mockAuthRepository.hasTokens())
-        .thenAnswer((_) async => false);
+    when(() => mockAuthRepository.hasTokens()).thenAnswer((_) async => false);
 
     authBloc = AuthBloc(authRepository: mockAuthRepository);
     libraryBloc = LibraryBloc(libraryRepository: mockLibraryRepository);
@@ -43,28 +42,32 @@ void main() {
     captureBloc.close();
   });
 
-  testWidgets('App widget mounts and renders MaterialApp',
-      (tester) async {
-    await tester.pumpWidget(App(
-      authBloc: authBloc,
-      libraryBloc: libraryBloc,
-      captureBloc: captureBloc,
-      libraryRepository: mockLibraryRepository,
-    ));
+  testWidgets('App widget mounts and renders MaterialApp', (tester) async {
+    await tester.pumpWidget(
+      App(
+        authBloc: authBloc,
+        libraryBloc: libraryBloc,
+        captureBloc: captureBloc,
+        libraryRepository: mockLibraryRepository,
+      ),
+    );
 
     // The App widget should be mounted successfully.
     expect(find.byType(App), findsOneWidget);
     expect(find.byType(MaterialApp), findsOneWidget);
   });
 
-  testWidgets('App shows splash with loading indicator on startup',
-      (tester) async {
-    await tester.pumpWidget(App(
-      authBloc: authBloc,
-      libraryBloc: libraryBloc,
-      captureBloc: captureBloc,
-      libraryRepository: mockLibraryRepository,
-    ));
+  testWidgets('App shows splash with loading indicator on startup', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      App(
+        authBloc: authBloc,
+        libraryBloc: libraryBloc,
+        captureBloc: captureBloc,
+        libraryRepository: mockLibraryRepository,
+      ),
+    );
 
     // The splash screen should show a progress indicator.
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -75,10 +78,7 @@ void main() {
 
     await expectLater(
       authBloc.stream,
-      emitsInOrder(<Matcher>[
-        isA<AuthLoading>(),
-        isA<Unauthenticated>(),
-      ]),
+      emitsInOrder(<Matcher>[isA<AuthLoading>(), isA<Unauthenticated>()]),
     );
   });
 }

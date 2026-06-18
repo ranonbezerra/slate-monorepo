@@ -89,19 +89,13 @@ class CaptureRepository {
   }) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/captures/$captureId/candidates/$candidateId/confirm',
-      data: {
-        'platform_id': platformId,
-        'status': status,
-      },
+      data: {'platform_id': platformId, 'status': status},
     );
     return response.data!;
   }
 
   /// Rejects a candidate.
-  Future<void> rejectCandidate(
-    String captureId,
-    String candidateId,
-  ) async {
+  Future<void> rejectCandidate(String captureId, String candidateId) async {
     await _apiClient.dio.post<void>(
       '/v1/captures/$captureId/candidates/$candidateId/reject',
     );

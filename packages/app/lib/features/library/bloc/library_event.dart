@@ -39,11 +39,7 @@ final class AddEntry extends LibraryEvent {
 
 /// Dispatched to update an existing library entry.
 final class UpdateEntry extends LibraryEvent {
-  const UpdateEntry({
-    required this.publicId,
-    this.status,
-    this.notes,
-  });
+  const UpdateEntry({required this.publicId, this.status, this.notes});
 
   final String publicId;
   final String? status;
@@ -75,10 +71,7 @@ final class SearchGames extends LibraryEvent {
 
 /// Dispatched to create a game manually.
 final class CreateGame extends LibraryEvent {
-  const CreateGame({
-    required this.slug,
-    required this.title,
-  });
+  const CreateGame({required this.slug, required this.title});
 
   final String slug;
   final String title;

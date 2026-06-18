@@ -49,9 +49,7 @@ class _CapturePhotoPageState extends State<CapturePhotoPage> {
   void _onSubmit() {
     if (_imagePath == null) return;
 
-    context.read<CaptureBloc>().add(
-          SubmitPhotoCapture(imagePath: _imagePath!),
-        );
+    context.read<CaptureBloc>().add(SubmitPhotoCapture(imagePath: _imagePath!));
   }
 
   @override
@@ -60,15 +58,11 @@ class _CapturePhotoPageState extends State<CapturePhotoPage> {
     final colors = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Photo Capture'),
-      ),
+      appBar: AppBar(title: const Text('Photo Capture')),
       body: BlocListener<CaptureBloc, CaptureState>(
         listener: (context, state) {
           if (state is CaptureSubmitted) {
-            context.go(
-              '/capture/review/${state.capture.publicId}',
-            );
+            context.go('/capture/review/${state.capture.publicId}');
           }
 
           if (state is CaptureError) {
@@ -114,10 +108,7 @@ class _CapturePhotoPageState extends State<CapturePhotoPage> {
     );
   }
 
-  Widget _buildPickerSection(
-    ThemeData theme,
-    ColorScheme colors,
-  ) {
+  Widget _buildPickerSection(ThemeData theme, ColorScheme colors) {
     return Column(
       children: [
         // Camera button.
@@ -163,8 +154,7 @@ class _CapturePhotoPageState extends State<CapturePhotoPage> {
                   const SizedBox(width: 8),
                   Text(
                     'Tips for best results',
-                    style:
-                        theme.textTheme.titleSmall?.copyWith(
+                    style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -187,10 +177,7 @@ class _CapturePhotoPageState extends State<CapturePhotoPage> {
     );
   }
 
-  Widget _buildPreviewSection(
-    ThemeData theme,
-    ColorScheme colors,
-  ) {
+  Widget _buildPreviewSection(ThemeData theme, ColorScheme colors) {
     return Column(
       children: [
         // Image preview.
@@ -219,21 +206,17 @@ class _CapturePhotoPageState extends State<CapturePhotoPage> {
               flex: 2,
               child: BlocBuilder<CaptureBloc, CaptureState>(
                 builder: (context, state) {
-                  final isSubmitting =
-                      state is CaptureSubmitting;
+                  final isSubmitting = state is CaptureSubmitting;
                   return FilledButton(
-                    onPressed:
-                        isSubmitting ? null : _onSubmit,
+                    onPressed: isSubmitting ? null : _onSubmit,
                     child: isSubmitting
                         ? const Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SizedBox(
                                 height: 20,
                                 width: 20,
-                                child:
-                                    CircularProgressIndicator(
+                                child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               ),

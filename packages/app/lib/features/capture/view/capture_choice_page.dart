@@ -11,9 +11,7 @@ class CaptureChoicePage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quick Add'),
-      ),
+      appBar: AppBar(title: const Text('Quick Add')),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(

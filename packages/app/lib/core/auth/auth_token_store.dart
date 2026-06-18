@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// Refresh tokens are persisted using flutter_secure_storage.
 class AuthTokenStore {
   AuthTokenStore({FlutterSecureStorage? secureStorage})
-      : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+    : _secureStorage = secureStorage ?? const FlutterSecureStorage();
 
   static const String _refreshTokenKey = 'refresh_token';
 

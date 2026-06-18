@@ -14,10 +14,7 @@ final class AppStarted extends AuthEvent {
 
 /// Dispatched when the user submits the login form.
 final class LoginRequested extends AuthEvent {
-  const LoginRequested({
-    required this.email,
-    required this.password,
-  });
+  const LoginRequested({required this.email, required this.password});
 
   final String email;
   final String password;

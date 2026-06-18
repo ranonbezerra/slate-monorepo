@@ -42,16 +42,16 @@ class CaptureCandidate extends Equatable {
 
   @override
   List<Object?> get props => [
-        publicId,
-        title,
-        platformHint,
-        igdbTitle,
-        igdbCoverUrl,
-        igdbSummary,
-        igdbGenres,
-        confidence,
-        status,
-      ];
+    publicId,
+    title,
+    platformHint,
+    igdbTitle,
+    igdbCoverUrl,
+    igdbSummary,
+    igdbGenres,
+    confidence,
+    status,
+  ];
 }
 
 /// Represents a text/voice/photo capture with its extracted candidates.
@@ -74,11 +74,9 @@ class Capture extends Equatable {
       rawText: json['raw_text'] as String?,
       status: json['status'] as String,
       errorMessage: json['error_message'] as String?,
-      candidates: (json['candidates'] as List<dynamic>?)
-              ?.map(
-                (e) =>
-                    CaptureCandidate.fromJson(e as Map<String, dynamic>),
-              )
+      candidates:
+          (json['candidates'] as List<dynamic>?)
+              ?.map((e) => CaptureCandidate.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
       createdAt: DateTime.parse(json['created_at'] as String),
@@ -97,15 +95,15 @@ class Capture extends Equatable {
 
   @override
   List<Object?> get props => [
-        publicId,
-        inputType,
-        rawText,
-        status,
-        errorMessage,
-        candidates,
-        createdAt,
-        updatedAt,
-      ];
+    publicId,
+    inputType,
+    rawText,
+    status,
+    errorMessage,
+    candidates,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 /// Result of transcribing an audio file.
@@ -134,10 +132,7 @@ class TranscribeResult extends Equatable {
 
 /// Paginated response for capture listings.
 class CaptureListResponse extends Equatable {
-  const CaptureListResponse({
-    required this.items,
-    required this.total,
-  });
+  const CaptureListResponse({required this.items, required this.total});
 
   factory CaptureListResponse.fromJson(Map<String, dynamic> json) {
     return CaptureListResponse(

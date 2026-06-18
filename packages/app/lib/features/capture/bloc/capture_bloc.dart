@@ -10,8 +10,8 @@ part 'capture_state.dart';
 
 class CaptureBloc extends Bloc<CaptureEvent, CaptureState> {
   CaptureBloc({required CaptureRepository captureRepository})
-      : _captureRepository = captureRepository,
-        super(const CaptureInitial()) {
+    : _captureRepository = captureRepository,
+      super(const CaptureInitial()) {
     on<LoadCaptures>(_onLoadCaptures);
     on<SubmitTextCapture>(_onSubmitTextCapture);
     on<SubmitVoiceCapture>(_onSubmitVoiceCapture);
@@ -35,10 +35,7 @@ class CaptureBloc extends Bloc<CaptureEvent, CaptureState> {
         status: event.status,
       );
 
-      emit(CaptureLoaded(
-        captures: response.items,
-        total: response.total,
-      ));
+      emit(CaptureLoaded(captures: response.items, total: response.total));
     } on DioException catch (e) {
       final message = _extractErrorMessage(e);
       emit(CaptureError(message: message));
@@ -108,9 +105,7 @@ class CaptureBloc extends Bloc<CaptureEvent, CaptureState> {
     emit(const CaptureSubmitting());
 
     try {
-      final capture = await _captureRepository.submitPhoto(
-        event.imagePath,
-      );
+      final capture = await _captureRepository.submitPhoto(event.imagePath);
       emit(CaptureSubmitted(capture: capture));
     } on DioException catch (e) {
       final message = _extractErrorMessage(e);
