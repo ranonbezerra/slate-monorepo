@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
@@ -135,12 +136,12 @@ class MissionRepository:
     async def set_extracted_state(
         self,
         mission_id: int,
-        extracted_state: dict[str, object],
+        extracted_state: Mapping[str, object],
     ) -> None:
         """Set the LLM-extracted state on a mission."""
         mission = await self._session.get(Mission, mission_id)
         if mission is not None:
-            mission.extracted_state = extracted_state
+            mission.extracted_state = dict(extracted_state)
             await self._session.flush()
 
     async def end_mission(
