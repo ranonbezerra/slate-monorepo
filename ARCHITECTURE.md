@@ -57,7 +57,7 @@ dailyloadout-monorepo/
 - **ruff** for lint + format, **mypy** for types
 - **pytest** + **pytest-asyncio** + **factory-boy** for tests
 
-**Why FastAPI for both API and AI orchestration:** the AI workload is "thin" — call Ollama, validate output, persist. No fine-tuning, no model serving, no GPU pipeline. Splitting into a separate NestJS API and Python AI engine adds inter-service communication overhead with no real boundary benefit at this scale. A clean `infrastructure/llm/` module inside FastAPI carries the AI concern; if a future product (CoupleQuest, WishTrip, CleanMarket) needs the same briefing engine, then it gets extracted. YAGNI until then.
+**Why FastAPI for both API and AI orchestration:** the AI workload is "thin" — call Ollama, validate output, persist. No fine-tuning, no model serving, no GPU pipeline. Splitting into a separate NestJS API and Python AI engine adds inter-service communication overhead with no real boundary benefit at this scale. A clean `infrastructure/llm/` module inside FastAPI carries the AI concern; if a future product needs the same briefing engine, then it gets extracted. YAGNI until then.
 
 ### 2.2 `packages/app/` — Flutter mobile client
 
@@ -674,7 +674,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT=
   host process   host process   host process
 ```
 
-Ports are remapped from standard defaults to avoid conflicts with other local projects (ocs-online, cleanmarket, trezya, etc.). All ports are configurable via `.env`.
+All ports are configurable via `.env`.
 
 ### 8.2 Production self-host (Fly.io / Railway)
 
