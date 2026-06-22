@@ -212,6 +212,7 @@ quality-web: ## Full Web quality gate
 .PHONY: quality-app
 quality-app: ## Full App quality gate
 	@echo "\n\033[1;36m══════ App Quality Gate ══════\033[0m"
+	$(call check,Dart format,      cd $(APP_DIR) && $(DART) format --set-exit-if-changed .)
 	$(call check,Flutter analyze,  cd $(APP_DIR) && $(FLUTTER) analyze)
 	$(call check,Flutter test,     cd $(APP_DIR) && $(FLUTTER) test)
 	@echo "\033[1;32m══════ App: All checks passed ══════\033[0m\n"
@@ -232,6 +233,7 @@ quality: ## Run ALL quality gates (pre-commit + api + web + app)
 	$(call check,Pre-commit hooks,  pre-commit run --all-files)
 	@$(MAKE) quality-api
 	@$(MAKE) quality-web
+	@$(MAKE) quality-app
 	$(call warn,Code duplication (jscpd ≤5%),  npx jscpd --silent)
 	@echo "\033[1;32m╔══════════════════════════════════════╗\033[0m"
 	@echo "\033[1;32m║     All quality gates passed ✓       ║\033[0m"
