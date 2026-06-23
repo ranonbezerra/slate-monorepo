@@ -16,7 +16,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+  // Try .env first (local overrides, gitignored), fall back to .env.example.
+  try {
+    await dotenv.load();
+  } catch (_) {
+    await dotenv.load(fileName: '.env.example');
+  }
 
   // Core dependencies
   final tokenStore = AuthTokenStore();
