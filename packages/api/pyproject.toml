@@ -33,6 +33,7 @@ pillow = "^12.2.0"
 pillow-heif = "^1.4.0"
 langgraph = "*"
 langgraph-checkpoint = "*"
+langchain-ollama = "*"
 
 [tool.poetry.extras]
 sentry = ["sentry-sdk"]
@@ -94,6 +95,7 @@ env = [
     "AGENT_PROVIDER=dummy",
     "RESEARCH_PROVIDER=dummy",
     "LLM_PROVIDER=dummy",
+    "CONCIERGE_PROVIDER=dummy",
 ]
 
 [tool.coverage.run]
@@ -105,6 +107,8 @@ omit = [
     "src/dailyloadout/infrastructure/llm/ollama.py",
     "src/dailyloadout/infrastructure/igdb/client.py",
     "src/dailyloadout/infrastructure/stt/whisper.py",
+    # ChatOllama tool-calling path — exercised only with a real model, not in CI.
+    "src/dailyloadout/infrastructure/agent/concierge/langgraph_agent.py",
 ]
 
 [tool.coverage.report]

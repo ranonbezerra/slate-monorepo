@@ -11,6 +11,7 @@ from scalar_fastapi import get_scalar_api_reference
 
 from dailyloadout.api.v1.auth import router as auth_router
 from dailyloadout.api.v1.capture import router as capture_router
+from dailyloadout.api.v1.concierge import router as concierge_router
 from dailyloadout.api.v1.library import router as library_router
 from dailyloadout.api.v1.loadout import router as loadout_router
 from dailyloadout.api.v1.mission import router as mission_router
@@ -140,6 +141,7 @@ def create_app() -> FastAPI:
     application.include_router(mission_router)
     application.include_router(loadout_router)
     application.include_router(stats_router)
+    application.include_router(concierge_router)
 
     @application.get("/health")
     async def health() -> dict[str, str]:

@@ -1,0 +1,63 @@
+import type { ConciergeEvent } from "../types/concierge";
+import { BASE_URL, getAccessToken } from "./api";
+
+// ---------------------------------------------------------------------------
+// Backlog Concierge chat — consumes the SSE endpoint as an async generator.
+//
+// The endpoint streams `data: {"delta": "..."}` events while the guarded reply
+// is chunked out, then a final `data: {"done": true, "thread_id": "..."}`.
+// ---------------------------------------------------------------------------
+
+export async function* streamConcierge(
+	message: string,
+	threadId?: string,
+	signal?: AbortSignal,
+): AsyncGenerator<ConciergeEvent> {
+	const accessToken = getAccessToken();
+	const res = await fetch(`${BASE_URL}/v1/concierge/chat`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+		},
+		body: JSON.stringify({ message, thread_id: threadId }),
+		signal,
+	});
+
+	if (!res.ok) {
+		throw new Error(`Concierge request failed (${res.status})`);
+	}
+	if (!res.body) {
+		throw new Error("Concierge response had no body");
+	}
+
+	const reader = res.body.getReader();
+	const decoder = new TextDecoder();
+	let buffer = "";
+
+	try {
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+
+			buffer += decoder.decode(value, { stream: true });
+			// SSE events are separated by a blank line; process complete lines.
+			const lines = buffer.split("\n");
+			buffer = lines.pop() ?? "";
+
+			for (const line of lines) {
+				const trimmed = line.trim();
+				if (!trimmed.startsWith("data:")) continue;
+				const payload = trimmed.slice("data:".length).trim();
+				if (!payload) continue;
+				try {
+					yield JSON.parse(payload) as ConciergeEvent;
+				} catch {
+					// Skip malformed events rather than aborting the stream.
+				}
+			}
+		}
+	} finally {
+		reader.releaseLock();
+	}
+}

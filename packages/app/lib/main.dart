@@ -4,12 +4,15 @@ import 'package:app/core/api/api_client.dart';
 import 'package:app/core/auth/auth_repository.dart';
 import 'package:app/core/auth/auth_token_store.dart';
 import 'package:app/core/capture/capture_repository.dart';
+import 'package:app/core/concierge/concierge_repository.dart';
+import 'package:app/core/config/feature_flags.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/loadout/loadout_repository.dart';
 import 'package:app/core/mission/mission_repository.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
+import 'package:app/features/concierge/bloc/concierge_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/loadout/bloc/loadout_bloc.dart';
 import 'package:app/features/mission/bloc/mission_bloc.dart';
@@ -25,6 +28,7 @@ Future<void> main() async {
       : '.env.example';
   await dotenv.load(fileName: envFile);
   const apiUrlOverride = String.fromEnvironment('API_URL');
+  final featureFlags = FeatureFlags.fromEnv();
 
   // Core dependencies
   final tokenStore = AuthTokenStore();
@@ -46,6 +50,7 @@ Future<void> main() async {
   final missionRepository = MissionRepository(apiClient: apiClient);
   final loadoutRepository = LoadoutRepository(apiClient: apiClient);
   final analyticsRepository = AnalyticsRepository(apiClient: apiClient);
+  final conciergeRepository = ConciergeRepository(apiClient: apiClient);
 
   final authBloc = AuthBloc(authRepository: authRepository);
   final libraryBloc = LibraryBloc(libraryRepository: libraryRepository);
@@ -53,6 +58,7 @@ Future<void> main() async {
   final missionBloc = MissionBloc(missionRepository: missionRepository);
   final loadoutBloc = LoadoutBloc(loadoutRepository: loadoutRepository);
   final analyticsBloc = AnalyticsBloc(analyticsRepository: analyticsRepository);
+  final conciergeBloc = ConciergeBloc(conciergeRepository: conciergeRepository);
 
   runApp(
     App(
@@ -62,7 +68,9 @@ Future<void> main() async {
       missionBloc: missionBloc,
       loadoutBloc: loadoutBloc,
       analyticsBloc: analyticsBloc,
+      conciergeBloc: conciergeBloc,
       libraryRepository: libraryRepository,
+      featureFlags: featureFlags,
     ),
   );
 }

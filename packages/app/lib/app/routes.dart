@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/app/shell_page.dart';
+import 'package:app/core/config/feature_flags.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/features/analytics/view/analytics_page.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:app/features/capture/view/capture_photo_page.dart';
 import 'package:app/features/capture/view/capture_review_page.dart';
 import 'package:app/features/capture/view/capture_text_page.dart';
 import 'package:app/features/capture/view/capture_voice_page.dart';
+import 'package:app/features/concierge/view/concierge_page.dart';
 import 'package:app/features/library/view/add_game_page.dart';
 import 'package:app/features/library/view/library_detail_page.dart';
 import 'package:app/features/library/view/library_list_page.dart';
@@ -25,6 +27,7 @@ import 'package:go_router/go_router.dart';
 GoRouter createRouter(
   AuthBloc authBloc, {
   required LibraryRepository libraryRepository,
+  FeatureFlags featureFlags = const FeatureFlags(),
 }) {
   return GoRouter(
     initialLocation: '/splash',
@@ -64,9 +67,12 @@ GoRouter createRouter(
       ),
       GoRoute(path: '/', redirect: (context, state) => '/library'),
 
-      // ---- Shell: bottom-nav tabs (Library + Missions) ----
+      // ---- Shell: bottom-nav tabs ----
       ShellRoute(
-        builder: (context, state, child) => ShellPage(child: child),
+        builder: (context, state, child) => ShellPage(
+          conciergeEnabled: featureFlags.backlogConcierge,
+          child: child,
+        ),
         routes: [
           GoRoute(
             path: '/library',
@@ -84,6 +90,12 @@ GoRouter createRouter(
             path: '/analytics',
             builder: (context, state) => const AnalyticsPage(),
           ),
+          // Backlog Concierge — hidden unless the feature flag is enabled.
+          if (featureFlags.backlogConcierge)
+            GoRoute(
+              path: '/concierge',
+              builder: (context, state) => const ConciergePage(),
+            ),
         ],
       ),
 
