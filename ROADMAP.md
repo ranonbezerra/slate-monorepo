@@ -565,7 +565,64 @@ This is the genuinely agentic case: multi-turn, stateful (conversation threads v
 
 ---
 
-## Epic 12 — Firecrawl research provider (evaluate, v1.1+)
+## Epic 12 — Unified Mission Pipeline (v1.1+)
+
+**Goal:** make **Mission the single spine** of the play loop and turn "deciding what to play" and "getting a briefing" into independent, **skippable** stages that all converge on one `start_mission` orchestrator. Today the same end state — an active mission — is reachable through three divergent, inconsistent code paths; this epic consolidates them and reframes Loadout and Concierge as *entrances* to the mission flow rather than separate destinations.
+
+### The problem (what the code shows today)
+
+A mission gets created three different ways, and they disagree:
+
+| Path | Game chosen by | Briefing |
+|---|---|---|
+| `LoadoutService.accept_loadout` (`/v1/loadouts/{id}/accept`) | AI (3-question form) | **none** — creates an *empty* mission |
+| `MissionService.start_mission` (`POST /v1/missions`) | user (already knows) | optional `quick` / `deep` / skip |
+| `submit_retroactive_debrief` (`/v1/missions/retroactive-debrief`) | user | n/a (pre-ended "I played offline") |
+
+Accepting a Loadout yields a briefing-less mission; starting one directly yields a briefing — same outcome, two behaviours, duplicated active-mission guards. And the **Concierge dead-ends**: it recommends a game but cannot start it, brief it, or log a session, so it only *overlaps* Loadout without doing any real work.
+
+### The model
+
+Every existing and desired flow is one point in a small cube:
+
+```text
+START A MISSION = DECIDE (self | AI one-tap loadout | conversational concierge)
+                × BRIEF  (none | quick | deep)
+                × MODE   (live | retroactive)
+```
+
+`Mission` is the aggregate root. `Loadout` stays a **decision record** (keep its accept-rate history + 24h auto-ignore), but its acceptance routes through the same orchestrator. The Concierge becomes the **conversational operator** of the whole pipeline, not a second recommender.
+
+### Tasks
+
+- [x] Extract a single `start_mission` orchestrator (`core/mission/start.py::create_mission_for_entry`, free function over repos, mirroring `briefing.py`'s pattern); it owns the one-active-mission guard (409 backstop) and `last_played_at` update.
+- [x] Refactor `MissionService.start_mission` to delegate to it (no behaviour change — existing tests stay green).
+- [x] Refactor `LoadoutService.accept_loadout` to delegate to it, gaining an **optional briefing stage** (`briefing_text` on `LoadoutAcceptRequest`; backward-compatible default).
+- [x] Add a "let the AI pick" path (`LoadoutService.create_and_start` → `POST /v1/loadouts/start`): AI-pick a game and start a mission in one step, so DECIDE=AI and BRIEF are independent.
+- [x] Give the Concierge **write tools** — `start_mission`, `generate_briefing`, `submit_retroactive_debrief`, `set_status` (`infrastructure/agent/concierge/tools_write.py`); gated by `concierge_write_tools_enabled`. Each is UUID-validated and respects the one-active-mission guard.
+- [ ] Client nav restructure: collapse Loadout + Missions (+ Concierge) into one **Play** hub (active mission front-and-centre; three doors: "What's the move?" one-tap, "I'll choose", "Ask"); keep Library (+ capture) and Stats. Web sidebar and Flutter shell.
+- [x] Tests: orchestrator unit tests (`test_mission_start.py`); loadout-accept-with-briefing and `/start` (`test_loadout.py`); concierge write-tool guards (`test_concierge_tools_write.py`).
+
+### Definition of Done
+
+- One `start_mission` orchestrator; `accept_loadout`, direct start, and the Concierge all funnel through it.
+- Briefing is a genuinely optional stage regardless of how the game was chosen.
+- The Concierge can start/brief/log a session, not just recommend.
+- Nav presents ~3 areas (Play / Library / Stats) instead of 5–6 tabs.
+- **The zero-friction default is preserved:** "What's the move?" is still one tap → AI picks → quick briefing → playing. Stages are skippable with smart defaults, never a forced wizard.
+
+### Why this is a separate epic
+
+It's a cross-cutting refactor (service consolidation + new write surface + nav on both clients) touching api, web, and app. Sequenced in phases — **(1) API orchestrator consolidation, (2) Concierge write tools, (3) client nav** — so each phase ships independently without breaking the others. The guard rails (one active mission per user; UUID-existence on every pick) and the product thesis ("you don't choose, the app picks") are invariants, not things this epic relaxes.
+
+### Risks
+
+- **Wizardisation.** Turning a one-tap action into a multi-step flow would betray the core promise. Mitigation: defaults collapse the common path to one action; steps are opt-in.
+- **Losing Loadout's analytics/auto-ignore.** Keep the `Loadout` row as a decision record; only its *acceptance path* changes.
+
+---
+
+## Epic 13 — Firecrawl research provider (evaluate, v1.1+)
 
 **Goal:** evaluate [Firecrawl](https://www.firecrawl.dev/) as a research source for the Deep Research Briefing (Epic 10) — as a reliability fallback for SearXNG, a page-scrape enrichment step, or the **primary** search/scrape in the hosted build — without disturbing the self-host default.
 
@@ -616,7 +673,7 @@ SearXNG finds URLs → Firecrawl `/scrape` turns the top 1–2 into markdown →
 
 ---
 
-## Epic 13 — Cloud LLM adapters: Bedrock / Vertex (evaluate, v1.1+)
+## Epic 14 — Cloud LLM adapters: Bedrock / Vertex (evaluate, v1.1+)
 
 **Goal:** add cloud LLM providers behind the existing `AbstractLLMClient` port so the project can ship a **hosted** distribution (cloud inference) alongside the **self-host** one (local Ollama), choosing per deployment via `LLM_PROVIDER`. Keep Ollama the default for the OSS build; `dummy` stays the test default.
 
@@ -676,7 +733,7 @@ A deep briefing fires up to ~4 LLM calls (`grade` → `refine`×0–2 → `synth
 
 ---
 
-## Epic 14 — Frictionless Library Import: platform screenshot ingestion (v1.1+)
+## Epic 15 — Frictionless Library Import: platform screenshot ingestion (v1.1+)
 
 **Goal:** make bulk onboarding nearly frictionless — a user populates 50–100 games in one shot by photographing (or screenshotting) their existing library from the major platforms, with the per-import cost driven toward ~zero. Extends Epic 5 (photo capture) from "a shelf of a few games" into "my whole Steam/PSN/Xbox/Switch/GOG/Epic library at once."
 
@@ -774,9 +831,11 @@ It adds a new hexagonal port (`ocr/`), a catalog-matching layer, a batch capture
 
 ---
 
-## Epic 15 — Live token-streaming Concierge (v1.1+)
+## Epic 16 — Live token-streaming Concierge (v1.1+)
 
 **Goal:** upgrade the Backlog Concierge (Epic 11) from "buffer → validate → stream the guarded answer in chunks" to **true token-level streaming** — the chat types out live as the model generates — while keeping the Epic 7 UUID-existence guard intact.
+
+> Builds on the **operator Concierge from Epic 12**: once the Concierge can start/brief/log missions (not just recommend), live streaming also means surfacing those write actions as they happen ("▶ starting your mission…"), not just text and read-only tool calls.
 
 ### Context
 
