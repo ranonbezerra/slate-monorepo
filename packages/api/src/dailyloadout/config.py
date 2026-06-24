@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     # latency + tokens and enlarges the spoiler surface the filter must catch.
     deep_briefing_scrape_top_n: int = 2
 
+    # ── Backlog Concierge (Epic 11) ──────────────────────────────────────
+    concierge_provider: str = "dummy"  # langgraph | dummy
+    # Tool-calling model — Gemma is weak at function-calling; Qwen3 is robust.
+    ollama_agent_model: str = "qwen3:8b"
+    concierge_max_tool_loops: int = 6
+
     # ── STT ──────────────────────────────────────────────────────────────
     stt_provider: str = "dummy"
     whisper_model_size: str = "base"

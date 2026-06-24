@@ -774,6 +774,45 @@ It adds a new hexagonal port (`ocr/`), a catalog-matching layer, a batch capture
 
 ---
 
+## Epic 15 — Live token-streaming Concierge (v1.1+)
+
+**Goal:** upgrade the Backlog Concierge (Epic 11) from "buffer → validate → stream the guarded answer in chunks" to **true token-level streaming** — the chat types out live as the model generates — while keeping the Epic 7 UUID-existence guard intact.
+
+### Context
+
+Epic 11 ships a deliberately simple streaming model: the agent runs its tool loop to completion, the service validates any recommended `library_entry_public_id` (reroll once, else degrade), and only the **guarded** final answer is streamed over SSE in chunks. That preserves the guarantee ("never surface a game that isn't in the library") but adds a pause before output begins and isn't real token streaming. This epic closes that gap.
+
+### The hard part: streaming and the guard fight each other
+
+To validate (and possibly reroll) a recommendation you need the **whole** answer; to stream live you emit tokens **before** the answer exists. Options to resolve, in order of preference:
+
+- **Stream prose live, gate only the recommendation.** Stream every token as it arrives, but hold back the machine-readable `RECOMMEND: <id>` tail until the id is validated; if invalid, emit a corrected/degraded ending instead. The user sees the reasoning type out live; only the final pick is gated.
+- **Speculative stream + correction event.** Stream everything, and if the post-hoc validation fails, emit an SSE `correction` event the client renders (strike-through + replacement). Simpler server-side, more client work.
+- **Tool-aware event stream.** Use LangGraph's `astream_events` to surface `tool_call` / `tool_result` / `token` events so the UI can show "🔎 searching your library…" affordances mid-turn, not just text.
+
+### Tasks
+
+- [ ] Switch the LangGraph concierge agent to `astream` / `astream_events`; surface token, tool-call, and tool-result events
+- [ ] SSE endpoint emits typed events (`token`, `tool`, `recommendation`, `correction`, `done`) instead of buffered chunks
+- [ ] Re-implement the UUID guard as a streaming gate (hold the recommendation tail until validated; reroll-once or degrade in-stream)
+- [ ] Durable threads: swap the in-memory `MemorySaver` for `AsyncPostgresSaver` against the existing PostgreSQL so conversations survive restarts and are resumable
+- [ ] Cancellation: client can abort a turn mid-stream (drop the SSE connection → cancel the graph run)
+- [ ] App/Web: token-by-token rendering + tool affordances + cancel button in the chat UI
+- [ ] Pytest: streaming-gate test (valid recommendation streams through; invalid one is held and corrected), scripted-event dummy, resume-after-restart test with the Postgres saver
+
+### Definition of Done
+
+- Chat types out live, token by token, with visible tool affordances
+- The UUID guard still holds: an invalid recommendation never reaches the user as a valid pick (held/corrected in-stream, not after the fact)
+- Conversations are durable and resumable across restarts (Postgres checkpointer)
+- A turn can be cancelled mid-stream
+
+### Why this is a separate epic
+
+Epic 11 is already useful with buffered streaming; the live path adds real complexity — event-typed SSE, an in-stream guard, a Postgres checkpointer, and cancellation — plus client work to render tokens and tool events. Folding it into Epic 11 would risk the guard guarantee for a UX nicety. Ship the guarded buffered version first; layer live streaming on top once it's proven.
+
+---
+
 ## Descope guide if time runs short
 
 If at some point you feel you're pushing, these are the epics to defer to **v1.1** without destroying the vitrine:
