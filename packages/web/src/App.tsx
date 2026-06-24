@@ -5,13 +5,16 @@ import {
 	IconDice3,
 	IconHistory,
 	IconLogout,
+	IconMessageChatbot,
 	IconSwords,
 } from "@tabler/icons-react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuthContext } from "./contexts/AuthContext";
+import { FEATURES } from "./lib/features";
 import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { CapturesPage } from "./pages/CapturesPage";
+import { ConciergePage } from "./pages/ConciergePage";
 import { LibraryPage } from "./pages/LibraryPage";
 import { LoadoutPage } from "./pages/LoadoutPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -61,6 +64,14 @@ function AppLayout() {
 							active={location.pathname.startsWith("/analytics")}
 							onClick={() => navigate("/analytics")}
 						/>
+						{FEATURES.backlogConcierge && (
+							<NavLink
+								label="Concierge"
+								leftSection={<IconMessageChatbot size={18} />}
+								active={location.pathname.startsWith("/concierge")}
+								onClick={() => navigate("/concierge")}
+							/>
+						)}
 					</Stack>
 					<Button
 						variant="subtle"
@@ -81,6 +92,7 @@ function AppLayout() {
 					<Route path="/missions" element={<MissionsPage />} />
 					<Route path="/captures" element={<CapturesPage />} />
 					<Route path="/analytics" element={<AnalyticsPage />} />
+					{FEATURES.backlogConcierge && <Route path="/concierge" element={<ConciergePage />} />}
 					<Route path="*" element={<Navigate to="/library" replace />} />
 				</Routes>
 			</AppShell.Main>

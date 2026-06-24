@@ -2,12 +2,15 @@ import 'package:app/app/app.dart';
 import 'package:app/core/analytics/analytics_repository.dart';
 import 'package:app/core/auth/auth_repository.dart';
 import 'package:app/core/capture/capture_repository.dart';
+import 'package:app/core/concierge/concierge_repository.dart';
+import 'package:app/core/config/feature_flags.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/loadout/loadout_repository.dart';
 import 'package:app/core/mission/mission_repository.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
+import 'package:app/features/concierge/bloc/concierge_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/loadout/bloc/loadout_bloc.dart';
 import 'package:app/features/mission/bloc/mission_bloc.dart';
@@ -28,6 +31,8 @@ class MockLoadoutRepository extends Mock implements LoadoutRepository {}
 
 class MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
+class MockConciergeRepository extends Mock implements ConciergeRepository {}
+
 void main() {
   late MockAuthRepository mockAuthRepository;
   late MockLibraryRepository mockLibraryRepository;
@@ -35,12 +40,14 @@ void main() {
   late MockMissionRepository mockMissionRepository;
   late MockLoadoutRepository mockLoadoutRepository;
   late MockAnalyticsRepository mockAnalyticsRepository;
+  late MockConciergeRepository mockConciergeRepository;
   late AuthBloc authBloc;
   late LibraryBloc libraryBloc;
   late CaptureBloc captureBloc;
   late MissionBloc missionBloc;
   late LoadoutBloc loadoutBloc;
   late AnalyticsBloc analyticsBloc;
+  late ConciergeBloc conciergeBloc;
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
@@ -49,6 +56,7 @@ void main() {
     mockMissionRepository = MockMissionRepository();
     mockLoadoutRepository = MockLoadoutRepository();
     mockAnalyticsRepository = MockAnalyticsRepository();
+    mockConciergeRepository = MockConciergeRepository();
 
     // Stub the hasTokens call that AppStarted will trigger.
     when(() => mockAuthRepository.hasTokens()).thenAnswer((_) async => false);
@@ -59,6 +67,7 @@ void main() {
     missionBloc = MissionBloc(missionRepository: mockMissionRepository);
     loadoutBloc = LoadoutBloc(loadoutRepository: mockLoadoutRepository);
     analyticsBloc = AnalyticsBloc(analyticsRepository: mockAnalyticsRepository);
+    conciergeBloc = ConciergeBloc(conciergeRepository: mockConciergeRepository);
   });
 
   tearDown(() {
@@ -68,6 +77,7 @@ void main() {
     missionBloc.close();
     loadoutBloc.close();
     analyticsBloc.close();
+    conciergeBloc.close();
   });
 
   Widget buildSubject() {
@@ -78,7 +88,9 @@ void main() {
       missionBloc: missionBloc,
       loadoutBloc: loadoutBloc,
       analyticsBloc: analyticsBloc,
+      conciergeBloc: conciergeBloc,
       libraryRepository: mockLibraryRepository,
+      featureFlags: const FeatureFlags(),
     );
   }
 

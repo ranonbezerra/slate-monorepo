@@ -3,58 +3,73 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Shell scaffold that wraps the main authenticated pages with a
-/// [BottomNavigationBar] for tab-based navigation between Library and Missions.
+/// [BottomNavigationBar] for tab-based navigation. The Concierge tab is only
+/// shown when [conciergeEnabled] (gated by a feature flag).
 class ShellPage extends StatelessWidget {
-  const ShellPage({required this.child, super.key});
+  const ShellPage({
+    required this.child,
+    this.conciergeEnabled = false,
+    super.key,
+  });
 
   /// The current page rendered by [GoRouter] inside the shell.
   final Widget child;
 
-  /// Returns the tab index that matches the current route location.
-  int _currentIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    if (location.startsWith('/loadout')) return 1;
-    if (location.startsWith('/missions')) return 2;
-    if (location.startsWith('/analytics')) return 3;
-    return 0; // /library is the default
+  /// Whether to surface the Backlog Concierge tab.
+  final bool conciergeEnabled;
+
+  /// Ordered tab definitions, with Concierge appended last when enabled.
+  List<_Tab> _tabs() {
+    return [
+      const _Tab(
+        path: '/library',
+        icon: Icons.videogame_asset,
+        label: 'Library',
+      ),
+      const _Tab(path: '/loadout', icon: Icons.casino, label: 'Loadout'),
+      const _Tab(path: '/missions', icon: Icons.flag, label: 'Missions'),
+      const _Tab(path: '/analytics', icon: Icons.bar_chart, label: 'Stats'),
+      if (conciergeEnabled)
+        const _Tab(
+          path: '/concierge',
+          icon: Icons.auto_awesome,
+          label: 'Concierge',
+        ),
+    ];
   }
 
-  void _onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        context.go('/library');
-      case 1:
-        context.go('/loadout');
-      case 2:
-        context.go('/missions');
-      case 3:
-        context.go('/analytics');
-    }
+  int _currentIndex(BuildContext context, List<_Tab> tabs) {
+    final location = GoRouterState.of(context).matchedLocation;
+    final index = tabs.indexWhere((t) => location.startsWith(t.path));
+    return index < 0 ? 0 : index;
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentIndex = _currentIndex(context);
+    final tabs = _tabs();
 
     return Scaffold(
       body: child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (index) => _onTap(context, index),
+        currentIndex: _currentIndex(context, tabs),
+        onTap: (index) => context.go(tabs[index].path),
         type: BottomNavigationBarType.fixed,
         backgroundColor: DLColors.bg,
         selectedItemColor: DLColors.coral,
         unselectedItemColor: DLColors.textDim,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.videogame_asset),
-            label: 'Library',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.casino), label: 'Loadout'),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Missions'),
-          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Stats'),
+        items: [
+          for (final tab in tabs)
+            BottomNavigationBarItem(icon: Icon(tab.icon), label: tab.label),
         ],
       ),
     );
   }
+}
+
+class _Tab {
+  const _Tab({required this.path, required this.icon, required this.label});
+
+  final String path;
+  final IconData icon;
+  final String label;
 }

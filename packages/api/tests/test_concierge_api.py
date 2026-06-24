@@ -85,3 +85,64 @@ async def test_chat_rejects_empty_message(
         "/v1/concierge/chat", json={"message": ""}, headers=auth_headers
     )
     assert resp.status_code == 422
+
+
+async def test_chat_emits_error_event_on_failure(
+    async_client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    """An agent failure degrades to a clean SSE error event, not a 500."""
+    from dailyloadout.deps.concierge import get_concierge_service
+    from dailyloadout.main import app
+
+    class _BoomService:
+        async def reply(self, **_: object) -> str:
+            raise RuntimeError("model unavailable")
+
+    app.dependency_overrides[get_concierge_service] = _BoomService
+    try:
+        resp = await async_client.post(
+            "/v1/concierge/chat",
+            json={"message": "what should I play?"},
+            headers=auth_headers,
+        )
+        assert resp.status_code == 200
+        events = _parse_sse(resp.text)
+        errors = [e for e in events if "error" in e]
+        assert errors and "unavailable" in errors[0]["error"]
+        assert any(e.get("done") for e in events)
+    finally:
+        app.dependency_overrides.pop(get_concierge_service, None)
+
+
+async def test_chat_times_out_without_hanging(
+    async_client: AsyncClient, auth_headers: dict[str, str], monkeypatch: Any
+) -> None:
+    """A stalled agent closes the stream with a timeout event, never hangs."""
+    import asyncio
+
+    from dailyloadout.api.v1 import concierge as concierge_module
+    from dailyloadout.deps.concierge import get_concierge_service
+    from dailyloadout.main import app
+
+    # Make the ceiling tiny and the agent slower than it.
+    monkeypatch.setattr(concierge_module, "_REPLY_TIMEOUT_SECONDS", 0.05)
+
+    class _SlowService:
+        async def reply(self, **_: object) -> str:
+            await asyncio.sleep(5)
+            return "too late"
+
+    app.dependency_overrides[get_concierge_service] = _SlowService
+    try:
+        resp = await async_client.post(
+            "/v1/concierge/chat",
+            json={"message": "what should I play?"},
+            headers=auth_headers,
+        )
+        assert resp.status_code == 200
+        events = _parse_sse(resp.text)
+        errors = [e for e in events if "error" in e]
+        assert errors and "too long" in errors[0]["error"]
+        assert any(e.get("done") for e in events)  # stream always closes
+    finally:
+        app.dependency_overrides.pop(get_concierge_service, None)

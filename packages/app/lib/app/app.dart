@@ -1,9 +1,11 @@
 import 'package:app/app/routes.dart';
+import 'package:app/core/config/feature_flags.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/theme/dailyloadout_theme.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
+import 'package:app/features/concierge/bloc/concierge_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/loadout/bloc/loadout_bloc.dart';
 import 'package:app/features/mission/bloc/mission_bloc.dart';
@@ -19,7 +21,9 @@ class App extends StatefulWidget {
     required this.missionBloc,
     required this.loadoutBloc,
     required this.analyticsBloc,
+    required this.conciergeBloc,
     required this.libraryRepository,
+    required this.featureFlags,
     super.key,
   });
 
@@ -29,7 +33,9 @@ class App extends StatefulWidget {
   final MissionBloc missionBloc;
   final LoadoutBloc loadoutBloc;
   final AnalyticsBloc analyticsBloc;
+  final ConciergeBloc conciergeBloc;
   final LibraryRepository libraryRepository;
+  final FeatureFlags featureFlags;
 
   @override
   State<App> createState() => _AppState();
@@ -44,6 +50,7 @@ class _AppState extends State<App> {
     _router = createRouter(
       widget.authBloc,
       libraryRepository: widget.libraryRepository,
+      featureFlags: widget.featureFlags,
     );
     widget.authBloc.add(const AppStarted());
   }
@@ -64,6 +71,7 @@ class _AppState extends State<App> {
         BlocProvider<MissionBloc>.value(value: widget.missionBloc),
         BlocProvider<LoadoutBloc>.value(value: widget.loadoutBloc),
         BlocProvider<AnalyticsBloc>.value(value: widget.analyticsBloc),
+        BlocProvider<ConciergeBloc>.value(value: widget.conciergeBloc),
       ],
       child: MaterialApp.router(
         title: 'DailyLoadout',

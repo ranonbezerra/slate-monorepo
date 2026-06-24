@@ -46,8 +46,14 @@ class Settings(BaseSettings):
 
     # ── Backlog Concierge (Epic 11) ──────────────────────────────────────
     concierge_provider: str = "dummy"  # langgraph | dummy
-    # Tool-calling model — Gemma is weak at function-calling; Qwen3 is robust.
-    ollama_agent_model: str = "qwen3:8b"
+    # Tool-calling model — Gemma is weak at function-calling. qwen2.5-instruct does
+    # fast, coherent tool use with no <think> overhead (qwen3 reasoning is slow;
+    # qwen3 without reasoning is incoherent on multi-step grounded tasks).
+    ollama_agent_model: str = "qwen2.5:7b-instruct"
+    # Qwen3 is a reasoning model: its <think> chains add huge latency to every
+    # ReAct step. Disable for fast tool-calling; enable only if answer quality
+    # demands deliberation.
+    concierge_agent_reasoning: bool = False
     concierge_max_tool_loops: int = 6
 
     # ── STT ──────────────────────────────────────────────────────────────
