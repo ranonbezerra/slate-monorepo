@@ -107,6 +107,18 @@ final _rejectedLoadout2 = Loadout(
 );
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(
+      const CreateLoadout(
+        mood: 'chill',
+        availableMinutes: 60,
+        mentalEnergy: 'medium',
+      ),
+    );
+    registerFallbackValue(const AcceptLoadout(publicId: 'x'));
+    registerFallbackValue(const RejectLoadout(publicId: 'x'));
+  });
+
   late MockLoadoutBloc mockLoadoutBloc;
 
   setUp(() {
@@ -377,6 +389,71 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       // Let the route transition settle.
       await tester.pumpAndSettle();
+    });
+
+    testWidgets('"Roll the dice" dispatches CreateLoadout with defaults', (
+      tester,
+    ) async {
+      when(() => mockLoadoutBloc.state).thenReturn(const LoadoutInitial());
+
+      await tester.pumpWidget(buildSubject());
+
+      await tester.tap(find.text('Roll the dice'));
+      await tester.pump();
+
+      verify(
+        () => mockLoadoutBloc.add(
+          const CreateLoadout(
+            mood: 'chill',
+            availableMinutes: 60,
+            mentalEnergy: 'medium',
+          ),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('Accept on a result card dispatches AcceptLoadout', (
+      tester,
+    ) async {
+      whenListen(
+        mockLoadoutBloc,
+        Stream<LoadoutState>.fromIterable([
+          LoadoutResultsLoaded(results: [_loadout]),
+        ]),
+        initialState: const LoadoutInitial(),
+      );
+
+      await tester.pumpWidget(buildRoutedSubject());
+      await tester.pump();
+
+      await tester.tap(find.text('Accept & Start Mission'));
+      await tester.pump();
+
+      verify(
+        () => mockLoadoutBloc.add(const AcceptLoadout(publicId: 'loadout-001')),
+      ).called(1);
+    });
+
+    testWidgets('Reject on a result card dispatches RejectLoadout', (
+      tester,
+    ) async {
+      whenListen(
+        mockLoadoutBloc,
+        Stream<LoadoutState>.fromIterable([
+          LoadoutResultsLoaded(results: [_loadout]),
+        ]),
+        initialState: const LoadoutInitial(),
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      await tester.tap(find.text('Reject'));
+      await tester.pump();
+
+      verify(
+        () => mockLoadoutBloc.add(const RejectLoadout(publicId: 'loadout-001')),
+      ).called(1);
     });
   });
 }

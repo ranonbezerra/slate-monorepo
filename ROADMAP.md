@@ -2,14 +2,14 @@
 
 Execution plan organized in weekend-sized epics. Each epic ends in a **demonstrable state** — if the weekend runs out, descope the epic rather than ending in a broken halfway state.
 
-The repository is public from Epic 0 onward. Every commit and PR is part of the narrative. A recruiter cloning at any point should see something that runs.
+The repository is public from Epic 0 onward. Every commit and PR is part of the narrative.
 
 ---
 
 ## Calendar overview
 
 | Weekend | Epic | Focus |
-|---|---|---|
+| --- | --- | --- |
 | 1 | Foundation | Setup, Docker Compose, 3 packages booting |
 | 2 | Auth + Users | fastapi-users, JWT rotation, login on app + web |
 | 3 | Library | Manual CRUD, schema working end to end |
@@ -468,7 +468,7 @@ The full design (state schema, node signatures, conditional edges, ports, valida
 
 ### Module layout (hexagonal — same shape as `llm/`, `stt/`, `storage/`)
 
-```
+```text
 infrastructure/
 ├── research/                # web search port
 │   ├── base.py              # AbstractResearchClient.search(query) / fetch(url)
@@ -574,7 +574,7 @@ This is the genuinely agentic case: multi-turn, stateful (conversation threads v
 A mission gets created three different ways, and they disagree:
 
 | Path | Game chosen by | Briefing |
-|---|---|---|
+| --- | --- | --- |
 | `LoadoutService.accept_loadout` (`/v1/loadouts/{id}/accept`) | AI (3-question form) | **none** — creates an *empty* mission |
 | `MissionService.start_mission` (`POST /v1/missions`) | user (already knows) | optional `quick` / `deep` / skip |
 | `submit_retroactive_debrief` (`/v1/missions/retroactive-debrief`) | user | n/a (pre-ended "I played offline") |
@@ -600,7 +600,7 @@ START A MISSION = DECIDE (self | AI one-tap loadout | conversational concierge)
 - [x] Refactor `LoadoutService.accept_loadout` to delegate to it, gaining an **optional briefing stage** (`briefing_text` on `LoadoutAcceptRequest`; backward-compatible default).
 - [x] Add a "let the AI pick" path (`LoadoutService.create_and_start` → `POST /v1/loadouts/start`): AI-pick a game and start a mission in one step, so DECIDE=AI and BRIEF are independent.
 - [x] Give the Concierge **write tools** — `start_mission`, `generate_briefing`, `submit_retroactive_debrief`, `set_status` (`infrastructure/agent/concierge/tools_write.py`); gated by `concierge_write_tools_enabled`. Each is UUID-validated and respects the one-active-mission guard.
-- [ ] Client nav restructure: collapse Loadout + Missions (+ Concierge) into one **Play** hub (active mission front-and-centre; three doors: "What's the move?" one-tap, "I'll choose", "Ask"); keep Library (+ capture) and Stats. Web sidebar and Flutter shell.
+- [x] Client nav restructure: collapsed Loadout + Missions + Concierge into one **Play** hub (active mission front-and-centre; three doors: "What's the move?" one-tap, "I'll choose", "Ask"); nav trimmed to **Play / Library / Stats** on both the web sidebar (`pages/PlayPage.tsx`, `App.tsx`) and Flutter shell (`features/play/view/play_page.dart`, `shell_page.dart`, `routes.dart`). Old paths redirect to `/play/*`.
 - [x] Tests: orchestrator unit tests (`test_mission_start.py`); loadout-accept-with-briefing and `/start` (`test_loadout.py`); concierge write-tool guards (`test_concierge_tools_write.py`).
 
 ### Definition of Done
@@ -637,7 +637,7 @@ Epic 10's research layer is a hexagonal port (`infrastructure/research/`, `Abstr
 Because LLM and research both live behind ports (Epic 13), one codebase ships two configurations selected by env. Firecrawl's role flips depending on which build you're optimizing:
 
 | Build | LLM | Research | Firecrawl's role |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **Self-host / OSS** | Ollama (local) | SearXNG (local) | optional fallback only; SearXNG stays default |
 | **Hosted / production** | Bedrock / Vertex (Epic 13) | **Firecrawl** | sensible **primary** — once you're paying for cloud inference, SearXNG's "free + local" edge is gone and its ops cost (rate-limits, captchas, IP reputation) becomes a liability |
 
@@ -688,7 +688,7 @@ Everything LLM-shaped already goes through `infrastructure/llm/` (`AbstractLLMCl
 Our two model roles map cleanly onto cloud tiers — a cheap tier for the frequent calls, a premium tier only where output quality is user-visible. On **Claude via Bedrock** (model IDs carry an `anthropic.` prefix):
 
 | Role | Used by | Bedrock-Claude model |
-|---|---|---|
+| --- | --- | --- |
 | `fast` | `grade`, `refine`, debrief extraction, captures | `anthropic.claude-haiku-4-5` |
 | `smart` | `synthesize`, `spoiler_filter`, quick briefing, loadout pick | `anthropic.claude-sonnet-4-6` |
 | (optional max-quality `smart`) | briefings only, if quality demands | `anthropic.claude-opus-4-8` |
@@ -750,7 +750,7 @@ Most platform libraries *default* to a **cover-art grid**, and cover art is styl
 For some platforms the cleanest text source is the **web account / purchase-history page**, not a console or launcher screenshot — worth guiding per platform:
 
 | Platform | Best clean-text source | Notes |
-|---|---|---|
+| --- | --- | --- |
 | Steam | Library → **list view** (left rail, vertical titles) | gold standard; near-perfect text extraction |
 | Xbox | My games & apps / Full library → **list/details view** | titles render as text rows |
 | GOG | GOG Galaxy **list view**, or web library list | clean text either way |
@@ -762,7 +762,7 @@ For some platforms the cleanest text source is the **web account / purchase-hist
 
 ### Pipeline (local-first, cloud only as low-confidence fallback)
 
-```
+```text
 platform hint → user captures list-view / purchase-history screenshot(s)
    → local OCR (Tesseract + preprocessing)         [free, on the VPS]
    → confidence check ──low──► cloud vision model    [cents, capped]
@@ -776,13 +776,13 @@ platform hint → user captures list-view / purchase-history screenshot(s)
 - **Catalog fuzzy-match, not LLM.** Extracted lines are dirty (`Sid Meier's Civ VI`, OCR swaps `l`/`I`). Normalize and error-correct by fuzzy-matching against a canonical games catalog (reuse the **Epic 3 IGDB** client; RAWG or a local snapshot as alternates) — string distance / trigram / embeddings, no model call. This is where most "wrong title" errors die for free.
 - **Confirmation over perfection.** Don't chase 100% extraction. Present a checkbox list of what was parsed; the user unticks the few wrong rows and taps confirm. Confirmation costs zero tokens and makes 95%-accurate extraction feel reliable.
 
-### Does this violate the no-API-integration principle? No.
+### Does this violate the no-API-integration principle? No
 
 The product rule is **no account sync** with Steam/PSN/Nintendo (no playtime, achievements, or library-sync via official APIs) — a deliberate independence choice. A **canonical games-metadata catalog** (IGDB/RAWG) is a reference database, not an account link: different category entirely. We read a *screenshot the user took*, then clean the strings against a metadata dictionary. No platform account is ever connected. Worth a sentence in `PRODUCT.md` so the distinction is explicit.
 
 ### Module layout (hexagonal — same shape as `llm/`, `stt/`, `research/`)
 
-```
+```text
 infrastructure/
 ├── ocr/                     # new port: image → text lines
 │   ├── base.py              # AbstractOCRClient.extract_lines(image) -> list[OcrLine] (text, confidence, bbox)
