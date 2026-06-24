@@ -4,8 +4,8 @@
 use_default_settings: true
 
 server:
-  # Override via the SEARXNG_SECRET env var in production.
-  secret_key: "change-me-in-prod-searxng"
+  # Placeholder only — override via the SEARXNG_SECRET env var in production.
+  secret_key: "change-me-in-prod-searxng"  # pragma: allowlist secret
   limiter: false
   image_proxy: false
 

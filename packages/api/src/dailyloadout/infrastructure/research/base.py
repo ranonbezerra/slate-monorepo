@@ -26,3 +26,11 @@ class AbstractResearchClient(ABC):
     async def search(self, query: str, limit: int = 6) -> list[SearchResult]:
         """Return up to *limit* search results for *query*."""
         ...
+
+    async def fetch(self, url: str) -> str:
+        """Return cleaned page text for *url*, for richer briefing grounding.
+
+        Optional capability: the default returns an empty string (snippets-only
+        grounding). Providers that can scrape override this.
+        """
+        return ""

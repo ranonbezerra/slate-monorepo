@@ -60,6 +60,14 @@ class DummyResearchClient(AbstractResearchClient):
                 return results[:limit]
         return _FALLBACK[:limit]
 
+    async def fetch(self, url: str) -> str:
+        """Return canned page text so scrape-enriched synthesis is deterministic."""
+        return (
+            "Walkthrough page. From your current area, head through the eastern "
+            "passage and look for the locked door past the fountain; the lever for "
+            "it is on the ledge above. Stock up on consumables before continuing."
+        )
+
 
 class EmptyResearchClient(AbstractResearchClient):
     """Research client that always returns nothing — exercises the empty/fallback path."""

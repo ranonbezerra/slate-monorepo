@@ -108,14 +108,31 @@ async def synthesize(
     state: ResearchBriefingState,
     *,
     llm: AbstractLLMClient,
+    research: AbstractResearchClient | None = None,
+    scrape_top_n: int = 0,
 ) -> dict[str, object]:
-    """Synthesize a draft briefing from the context and results (smart model)."""
+    """Synthesize a draft briefing (smart model).
+
+    When *scrape_top_n* > 0 and a *research* client is given, the top results'
+    pages are fetched and fed in full for richer, more specific grounding;
+    otherwise synthesis falls back to the search snippets.
+    """
+    results = state.get("results", [])
+    pages: list[dict[str, str]] = []
+    if research is not None and scrape_top_n > 0:
+        for r in results[:scrape_top_n]:
+            content = await research.fetch(r["url"])
+            if content:
+                pages.append({"title": r["title"], "url": r["url"], "content": content})
+
     prompt = render(
         "briefing_research.j2",
         context=state["context"],
-        results=state["results"],
+        results=results,
+        pages=pages,
     )
-    return {"draft": (await llm.complete(prompt, role="smart")).strip()}
+    draft = (await llm.complete(prompt, role="smart")).strip()
+    return {"draft": draft, "scraped_text": " ".join(p["content"] for p in pages)}
 
 
 async def spoiler_filter(
@@ -140,7 +157,8 @@ async def anti_hallucination(state: ResearchBriefingState) -> dict[str, object]:
     """
     ctx = state["context"]
     snippets = " ".join(r["snippet"] for r in state.get("results", []))
-    grounding = f"{_context_text(ctx)} {snippets}".strip()
+    scraped = state.get("scraped_text", "")
+    grounding = f"{_context_text(ctx)} {snippets} {scraped}".strip()
 
     result = validate_briefing(state["filtered"], grounding)
     text = state["filtered"]

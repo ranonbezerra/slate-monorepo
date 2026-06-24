@@ -151,7 +151,7 @@ class DummyLLMClient(AbstractLLMClient):
         lowered = prompt.lower()
         if "reformulate the search query" in lowered:
             return "refined query: next area directions spoiler-free"
-        if "rewrite the recap" in lowered:
+        if "clean up the recap" in lowered:
             return "Head toward the next area and finish your current objective."
         if '"grade"' in lowered:
             return '{"grade": "sufficient"}'

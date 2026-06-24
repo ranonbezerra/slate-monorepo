@@ -7,9 +7,12 @@ import structlog
 
 from dailyloadout.config import Settings
 
+from ._html import extract_text
 from .base import AbstractResearchClient, ResearchUnavailableError, SearchResult
 
 logger = structlog.get_logger()
+
+_SCRAPE_MAX_CHARS = 4000
 
 
 class SearxngResearchClient(AbstractResearchClient):
@@ -54,3 +57,16 @@ class SearxngResearchClient(AbstractResearchClient):
                 )
             )
         return results
+
+    async def fetch(self, url: str) -> str:
+        """Fetch *url* and return cleaned page text for briefing grounding."""
+        if not url.startswith(("http://", "https://")):
+            return ""
+        client = await self._get_client()
+        try:
+            resp = await client.get(url, follow_redirects=True)
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            logger.warning("searxng_scrape_failed", url=url, error=str(exc))
+            return ""
+        return extract_text(resp.text, max_chars=_SCRAPE_MAX_CHARS)

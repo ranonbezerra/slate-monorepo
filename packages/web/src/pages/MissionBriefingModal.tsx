@@ -1,13 +1,4 @@
-import {
-	Button,
-	Group,
-	Modal,
-	SegmentedControl,
-	Stack,
-	Text,
-	Textarea,
-	Title,
-} from "@mantine/core";
+import { Button, Group, Modal, Stack, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRef, useState } from "react";
 import { AiBriefingOverlay } from "../components/AiBriefingOverlay";
@@ -18,18 +9,19 @@ import {
 	useStartMission,
 } from "../hooks/useMission";
 import type { BriefingMode } from "../lib/mission-api";
-import type { BriefingPreview, Mission } from "../types/mission";
+import type { LibraryEntry } from "../types/library";
+import type { Mission } from "../types/mission";
 
 // ---------------------------------------------------------------------------
-// Preview mode: user is reviewing a briefing before starting a mission
+// Preview mode: user picks a briefing mode, then reviews it before starting.
+// The briefing is fetched on demand (after the mode choice), not pre-fetched.
 // ---------------------------------------------------------------------------
 
 interface PreviewModeProps {
 	mode: "preview";
-	preview: BriefingPreview;
+	libraryEntry: LibraryEntry;
 	libraryEntryPublicId: string;
 	onConfirm: (mission: Mission) => void;
-	onPreviewUpdated?: (preview: BriefingPreview) => void;
 	onClose: () => void;
 }
 
@@ -46,24 +38,25 @@ interface ViewModeProps {
 
 type MissionBriefingModalProps = PreviewModeProps | ViewModeProps;
 
-type ModalStep = "correct" | "retroactive" | "briefing";
+// "chooseMode" → pick quick vs deep; "update" → pick which fix to apply.
+type ModalStep = "chooseMode" | "briefing" | "update" | "correct" | "retroactive";
 
 export function MissionBriefingModal(props: MissionBriefingModalProps) {
 	const isPreview = props.mode === "preview";
 
 	const gameTitle = isPreview
-		? props.preview.libraryEntry.game.title
+		? props.libraryEntry.game.title
 		: props.mission.libraryEntry.game.title;
 	const platformLabel = isPreview
-		? props.preview.libraryEntry.platform.label
+		? props.libraryEntry.platform.label
 		: props.mission.libraryEntry.platform.label;
-	const briefingText = isPreview ? props.preview.briefingText : props.mission.briefingText;
+	// In view mode the briefing is already on the mission; in preview it's fetched.
+	const baseBriefing = isPreview ? null : props.mission.briefingText;
 
-	const [step, setStep] = useState<ModalStep>("briefing");
+	const [step, setStep] = useState<ModalStep>(isPreview ? "chooseMode" : "briefing");
 	const [correction, setCorrection] = useState("");
 	const [retroactiveText, setRetroactiveText] = useState("");
 	const [currentBriefing, setCurrentBriefing] = useState<string | null>(null);
-	const [briefingMode, setBriefingMode] = useState<BriefingMode>("quick");
 	const [deepLoading, setDeepLoading] = useState(false);
 	const deepAbortRef = useRef<AbortController | null>(null);
 
@@ -82,17 +75,76 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 	const [prevKey, setPrevKey] = useState<string | null>(null);
 	if (contentKey !== prevKey) {
 		setPrevKey(contentKey);
-		setStep("briefing");
+		setStep(isPreview ? "chooseMode" : "briefing");
 		setCorrection("");
 		setRetroactiveText("");
 		setCurrentBriefing(null);
-		setBriefingMode("quick");
 		setDeepLoading(false);
 		deepAbortRef.current?.abort();
 		deepAbortRef.current = null;
 	}
 
-	const displayBriefing = currentBriefing ?? briefingText;
+	const displayBriefing = currentBriefing ?? baseBriefing;
+
+	// -- Mode choice ----------------------------------------------------------
+
+	const handleChooseMode = async (next: BriefingMode) => {
+		if (!isPreview) return;
+		deepAbortRef.current?.abort();
+		deepAbortRef.current = null;
+		setStep("briefing");
+
+		if (next === "quick") {
+			setDeepLoading(false);
+			try {
+				const updated = await previewMutation.mutateAsync({
+					libraryEntryPublicId: props.libraryEntryPublicId,
+					mode: "quick",
+				});
+				setCurrentBriefing(updated.briefingText);
+			} catch (err) {
+				notifications.show({
+					title: "Couldn't load briefing",
+					message: err instanceof Error ? err.message : "An unexpected error occurred",
+					color: "red",
+				});
+			}
+			return;
+		}
+
+		const controller = new AbortController();
+		deepAbortRef.current = controller;
+		setDeepLoading(true);
+		try {
+			const updated = await previewMutation.mutateAsync({
+				libraryEntryPublicId: props.libraryEntryPublicId,
+				mode: "deep",
+				signal: controller.signal,
+			});
+			if (!controller.signal.aborted) setCurrentBriefing(updated.briefingText);
+		} catch (err) {
+			if (controller.signal.aborted) return; // user cancelled — stay silent
+			notifications.show({
+				title: "Deep briefing unavailable",
+				message: err instanceof Error ? err.message : "Try the quick briefing instead",
+				color: "yellow",
+			});
+		} finally {
+			if (deepAbortRef.current === controller) {
+				deepAbortRef.current = null;
+				setDeepLoading(false);
+			}
+		}
+	};
+
+	const handleCancelDeep = () => {
+		deepAbortRef.current?.abort();
+		deepAbortRef.current = null;
+		setDeepLoading(false);
+		setStep("chooseMode"); // nothing loaded yet — let them pick again
+	};
+
+	// -- Briefing corrections -------------------------------------------------
 
 	const handleCorrection = async () => {
 		if (!correction.trim()) return;
@@ -129,7 +181,6 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 				debriefText: retroactiveText.trim(),
 			});
 			setCurrentBriefing(updatedPreview.briefingText);
-			props.onPreviewUpdated?.(updatedPreview);
 			setRetroactiveText("");
 			setStep("briefing");
 			notifications.show({
@@ -163,59 +214,15 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 		}
 	};
 
-	const handleCancelDeep = () => {
-		deepAbortRef.current?.abort();
-		deepAbortRef.current = null;
-		setDeepLoading(false);
-		setBriefingMode("quick");
-	};
-
-	const handleSelectMode = async (value: string) => {
-		if (!isPreview) return;
-		const next = value as BriefingMode;
-		// Abort any in-flight deep request before switching.
-		deepAbortRef.current?.abort();
-		setBriefingMode(next);
-
-		if (next === "quick") {
-			// Revert to the original quick briefing from the preview.
-			deepAbortRef.current = null;
-			setDeepLoading(false);
-			setCurrentBriefing(null);
-			return;
-		}
-
-		const controller = new AbortController();
-		deepAbortRef.current = controller;
-		setDeepLoading(true);
-		try {
-			const updated = await previewMutation.mutateAsync({
-				libraryEntryPublicId: props.libraryEntryPublicId,
-				mode: "deep",
-				signal: controller.signal,
-			});
-			if (!controller.signal.aborted) {
-				setCurrentBriefing(updated.briefingText);
-			}
-		} catch (err) {
-			if (controller.signal.aborted) return; // user cancelled — stay silent
-			setBriefingMode("quick");
-			notifications.show({
-				title: "Deep briefing unavailable",
-				message: err instanceof Error ? err.message : "Falling back to the quick briefing",
-				color: "yellow",
-			});
-		} finally {
-			if (deepAbortRef.current === controller) {
-				deepAbortRef.current = null;
-				setDeepLoading(false);
-			}
-		}
-	};
-
 	const isRegenerating = isPreview
 		? previewMutation.isPending && !deepLoading
 		: regenerate.isPending;
+
+	const choiceButtonStyles = {
+		root: { height: "auto" },
+		inner: { justifyContent: "flex-start" },
+		label: { whiteSpace: "normal" as const, textAlign: "left" as const },
+	};
 
 	return (
 		<Modal
@@ -229,6 +236,42 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 					{platformLabel}
 				</Text>
 
+				{step === "chooseMode" && isPreview && (
+					<>
+						<Text size="sm">How should we prepare your briefing?</Text>
+						<Button
+							variant="default"
+							fullWidth
+							justify="flex-start"
+							py="md"
+							styles={choiceButtonStyles}
+							onClick={() => handleChooseMode("quick")}
+						>
+							<Stack gap={2} align="flex-start">
+								<Text fw={600}>⚡ Quick briefing</Text>
+								<Text size="sm" c="dimmed">
+									Instant — built from your own past sessions. Recommended.
+								</Text>
+							</Stack>
+						</Button>
+						<Button
+							variant="default"
+							fullWidth
+							justify="flex-start"
+							py="md"
+							styles={choiceButtonStyles}
+							onClick={() => handleChooseMode("deep")}
+						>
+							<Stack gap={2} align="flex-start">
+								<Text fw={600}>🔎 Deep briefing (web)</Text>
+								<Text size="sm" c="dimmed">
+									Searches the web for spoiler-free next steps. Takes up to a minute.
+								</Text>
+							</Stack>
+						</Button>
+					</>
+				)}
+
 				{step === "correct" && (
 					<>
 						<Text size="sm">Tell us where you actually are so we can adjust the briefing:</Text>
@@ -241,7 +284,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							maxRows={4}
 						/>
 						<Group justify="flex-end">
-							<Button variant="subtle" onClick={() => setStep("briefing")}>
+							<Button variant="subtle" onClick={() => setStep(isPreview ? "update" : "briefing")}>
 								Back
 							</Button>
 							<Button
@@ -269,7 +312,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							maxRows={6}
 						/>
 						<Group justify="flex-end">
-							<Button variant="subtle" onClick={() => setStep("briefing")}>
+							<Button variant="subtle" onClick={() => setStep("update")}>
 								Back
 							</Button>
 							<Button
@@ -283,34 +326,27 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 					</>
 				)}
 
+				{step === "update" && isPreview && (
+					<>
+						<Text size="sm">What would you like to fix?</Text>
+						<Button variant="default" justify="flex-start" onClick={() => setStep("correct")}>
+							Correct my current position
+						</Button>
+						<Button variant="default" justify="flex-start" onClick={() => setStep("retroactive")}>
+							Log a session I didn't register
+						</Button>
+						<Group justify="flex-end">
+							<Button variant="subtle" onClick={() => setStep("briefing")}>
+								Back
+							</Button>
+						</Group>
+					</>
+				)}
+
 				{step === "briefing" && (
 					<>
-						{isPreview && (
-							<Group justify="space-between" align="center" wrap="nowrap">
-								<Text size="sm" c="dimmed">
-									Briefing depth
-								</Text>
-								<SegmentedControl
-									size="xs"
-									value={briefingMode}
-									onChange={handleSelectMode}
-									disabled={deepLoading}
-									data={[
-										{ label: "Quick", value: "quick" },
-										{ label: "Deep (web)", value: "deep" },
-									]}
-								/>
-							</Group>
-						)}
 						{displayBriefing ? (
-							<Text
-								style={{
-									whiteSpace: "pre-wrap",
-									lineHeight: 1.6,
-								}}
-							>
-								{displayBriefing}
-							</Text>
+							<Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{displayBriefing}</Text>
 						) : (
 							<Text c="dimmed" fs="italic">
 								No briefing available for this session. This is your first mission for this game —
@@ -318,18 +354,10 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							</Text>
 						)}
 						<Group justify="flex-end" wrap="wrap">
-							{isPreview && (
-								<Button variant="subtle" onClick={() => setStep("retroactive")}>
-									I played without registering
-								</Button>
-							)}
-							<Button variant="subtle" onClick={() => setStep("correct")}>
-								That's not right
-							</Button>
 							{isPreview ? (
 								<>
-									<Button variant="subtle" onClick={props.onClose}>
-										Cancel
+									<Button variant="subtle" onClick={() => setStep("update")}>
+										Update this briefing
 									</Button>
 									<Button
 										color="teal"
@@ -340,7 +368,12 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 									</Button>
 								</>
 							) : (
-								<Button onClick={props.onClose}>Got it, let's go</Button>
+								<>
+									<Button variant="subtle" onClick={() => setStep("correct")}>
+										That's not right
+									</Button>
+									<Button onClick={props.onClose}>Got it, let's go</Button>
+								</>
 							)}
 						</Group>
 					</>

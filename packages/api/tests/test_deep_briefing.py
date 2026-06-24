@@ -53,7 +53,7 @@ class ScriptedLLM(DummyLLMClient):
         low = prompt.lower()
         if "reformulate the search query" in low:
             return "refined query directions spoiler-free"
-        if "rewrite the recap" in low:
+        if "clean up the recap" in low:
             return self._filtered
         if '"grade"' in low:
             grade = self._grades.pop(0) if self._grades else "sufficient"
@@ -135,6 +135,43 @@ class TestNodes:
             {"context": _ctx(), "results": []}, llm=ScriptedLLM(draft="DRAFT TEXT")
         )
         assert out["draft"] == "DRAFT TEXT"
+
+    async def test_synthesize_scrapes_and_grounds_on_page_content(self) -> None:
+        captured: dict[str, str] = {}
+
+        class CapturingLLM(DummyLLMClient):
+            async def complete(self, prompt, *, role="fast", json=False):  # type: ignore[override]
+                captured["prompt"] = prompt
+                return "DRAFT"
+
+        state = {
+            "context": _ctx(),
+            "results": [{"title": "Guide", "url": "https://x.test/g", "snippet": "s"}],
+        }
+        out = await nodes.synthesize(
+            state, llm=CapturingLLM(), research=DummyResearchClient(), scrape_top_n=1
+        )
+        assert out["draft"] == "DRAFT"
+        # The dummy's fetched page text must reach the synthesis prompt.
+        assert "locked door past the fountain" in captured["prompt"]
+
+    async def test_synthesize_snippets_only_when_scrape_disabled(self) -> None:
+        captured: dict[str, str] = {}
+
+        class CapturingLLM(DummyLLMClient):
+            async def complete(self, prompt, *, role="fast", json=False):  # type: ignore[override]
+                captured["prompt"] = prompt
+                return "DRAFT"
+
+        state = {
+            "context": _ctx(),
+            "results": [{"title": "T", "url": "u", "snippet": "SNIPPET-XYZ"}],
+        }
+        await nodes.synthesize(
+            state, llm=CapturingLLM(), research=DummyResearchClient(), scrape_top_n=0
+        )
+        assert "SNIPPET-XYZ" in captured["prompt"]
+        assert "locked door past the fountain" not in captured["prompt"]
 
     async def test_spoiler_filter_returns_filtered(self) -> None:
         out = await nodes.spoiler_filter(

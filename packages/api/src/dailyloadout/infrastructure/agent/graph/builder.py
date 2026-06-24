@@ -50,7 +50,15 @@ def build_graph(
     )
     graph.add_node("grade_results", partial(nodes.grade_results, llm=llm))
     graph.add_node("refine_query", partial(nodes.refine_query, llm=llm))
-    graph.add_node("synthesize", partial(nodes.synthesize, llm=llm))
+    graph.add_node(
+        "synthesize",
+        partial(
+            nodes.synthesize,
+            llm=llm,
+            research=research,
+            scrape_top_n=settings.deep_briefing_scrape_top_n,
+        ),
+    )
     graph.add_node("spoiler_filter", partial(nodes.spoiler_filter, llm=llm))
     graph.add_node("anti_hallucination", nodes.anti_hallucination)
     graph.add_node("fallback_quick", partial(nodes.fallback_quick, llm=llm))

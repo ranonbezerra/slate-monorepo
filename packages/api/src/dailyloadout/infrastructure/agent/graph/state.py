@@ -44,6 +44,7 @@ class ResearchBriefingState(TypedDict, total=False):
 
     # --- synthesis + guards ---
     draft: str
+    scraped_text: str  # full page text fed to synthesis; also grounds the guard
     filtered: str
     overlap: float
     suspicious: bool

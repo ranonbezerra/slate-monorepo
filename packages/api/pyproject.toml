@@ -89,6 +89,11 @@ env = [
     "APP_ENV=testing",
     "DATABASE_URL=sqlite+aiosqlite://",
     "BCRYPT_ROUNDS=4",
+    # Pin AI providers to dummies so tests never depend on a developer's local
+    # .env (e.g. RESEARCH_PROVIDER=searxng) or hit real network/LLM services.
+    "AGENT_PROVIDER=dummy",
+    "RESEARCH_PROVIDER=dummy",
+    "LLM_PROVIDER=dummy",
 ]
 
 [tool.coverage.run]

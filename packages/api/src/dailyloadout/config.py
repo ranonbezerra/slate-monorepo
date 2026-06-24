@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     deep_briefing_deadline_seconds: int = 60
     deep_briefing_max_refines: int = 2
     deep_briefing_max_results: int = 6
+    # Scrape the top-N result URLs into full text for richer synthesis grounding.
+    # 0 = snippets only (cheaper/faster, less specific). Trade-off: scraping adds
+    # latency + tokens and enlarges the spoiler surface the filter must catch.
+    deep_briefing_scrape_top_n: int = 2
 
     # ── STT ──────────────────────────────────────────────────────────────
     stt_provider: str = "dummy"
