@@ -6,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { QuickAddMenu } from "../components/QuickAddMenu";
 import { useCaptures } from "../hooks/useCapture";
 import type { CaptureListItem } from "../types/capture";
+import { AddGameModal } from "./AddGameModal";
 import { CapturePhotoModal } from "./CapturePhotoModal";
 import { CaptureReviewModal } from "./CaptureReviewModal";
 import { CaptureTextModal } from "./CaptureTextModal";
 import { CaptureVoiceModal } from "./CaptureVoiceModal";
+import { ImageSourceModal } from "./ImageSourceModal";
 
 const STATUS_TABS: { value: string; label: string }[] = [
 	{ value: "all", label: "All" },
@@ -42,9 +44,11 @@ function getCaptureDescription(capture: CaptureListItem): {
 export function CapturesPage() {
 	const navigate = useNavigate();
 	const [statusFilter, setStatusFilter] = useState("all");
+	const [manualModalOpened, setManualModalOpened] = useState(false);
 	const [textModalOpened, setTextModalOpened] = useState(false);
 	const [voiceModalOpened, setVoiceModalOpened] = useState(false);
 	const [photoModalOpened, setPhotoModalOpened] = useState(false);
+	const [imageChooserOpened, setImageChooserOpened] = useState(false);
 	const [reviewCaptureId, setReviewCaptureId] = useState<string | null>(null);
 
 	const activeStatus = statusFilter === "all" ? undefined : statusFilter;
@@ -72,10 +76,10 @@ export function CapturesPage() {
 			<Group justify="space-between">
 				<Title order={2}>Capture History</Title>
 				<QuickAddMenu
+					onManual={() => setManualModalOpened(true)}
 					onText={() => setTextModalOpened(true)}
 					onVoice={() => setVoiceModalOpened(true)}
-					onPhoto={() => setPhotoModalOpened(true)}
-					onImport={() => navigate("/library/import")}
+					onImage={() => setImageChooserOpened(true)}
 				/>
 			</Group>
 
@@ -152,6 +156,15 @@ export function CapturesPage() {
 					]}
 				/>
 			)}
+
+			<AddGameModal opened={manualModalOpened} onClose={() => setManualModalOpened(false)} />
+
+			<ImageSourceModal
+				opened={imageChooserOpened}
+				onClose={() => setImageChooserOpened(false)}
+				onPhoto={() => setPhotoModalOpened(true)}
+				onScreenshots={() => navigate("/library/import")}
+			/>
 
 			<CaptureTextModal
 				opened={textModalOpened}
