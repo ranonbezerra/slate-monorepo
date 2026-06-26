@@ -1,4 +1,5 @@
 import { MantineProvider } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { MemoryRouter } from "react-router-dom";
@@ -147,11 +148,27 @@ import { LibraryPage } from "./LibraryPage";
 function renderPage() {
 	return render(
 		<MantineProvider>
-			<MemoryRouter>
-				<LibraryPage />
-			</MemoryRouter>
+			<ModalsProvider>
+				<MemoryRouter>
+					<LibraryPage />
+				</MemoryRouter>
+			</ModalsProvider>
 		</MantineProvider>,
 	);
+}
+
+/**
+ * Clicks the row "Delete" button, then confirms in the resulting modal.
+ * Deletion is guarded by a confirmation dialog, so tests must confirm.
+ */
+async function clickDeleteAndConfirm() {
+	await act(async () => {
+		fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+	});
+	const confirmBtn = await screen.findByRole("button", { name: "Delete entry" });
+	await act(async () => {
+		fireEvent.click(confirmBtn);
+	});
 }
 
 const mutationStub = {
@@ -624,10 +641,7 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		const deleteBtn = screen.getByRole("button", { name: "Delete" });
-		await act(async () => {
-			fireEvent.click(deleteBtn);
-		});
+		await clickDeleteAndConfirm();
 
 		await waitFor(() => {
 			expect(mockDeleteAsync).toHaveBeenCalled();
@@ -734,9 +748,7 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		await act(async () => {
-			fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-		});
+		await clickDeleteAndConfirm();
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
@@ -764,9 +776,7 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		await act(async () => {
-			fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-		});
+		await clickDeleteAndConfirm();
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(

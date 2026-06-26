@@ -12,6 +12,7 @@ import {
 	Textarea,
 	Title,
 } from "@mantine/core";
+import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconHistory } from "@tabler/icons-react";
 import dayjs from "dayjs";
@@ -19,6 +20,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { DataTable } from "mantine-datatable";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ErrorState } from "../components/ErrorState";
 import { QuickAddMenu } from "../components/QuickAddMenu";
 import {
 	useDeleteEntry,
@@ -71,6 +73,8 @@ const PAGE_SIZE = 50;
 export function LibraryPage() {
 	const navigate = useNavigate();
 	const [statusFilter, setStatusFilter] = useState("all");
+	// How many pages (of PAGE_SIZE) to request; bumped by "Load more".
+	const [pageCount, setPageCount] = useState(1);
 	const [expandedIds, setExpandedIds] = useState<string[]>([]);
 	const [manualModalOpened, setManualModalOpened] = useState(false);
 	const [textModalOpened, setTextModalOpened] = useState(false);
@@ -89,16 +93,23 @@ export function LibraryPage() {
 
 	const queryParams = {
 		status: statusFilter === "all" ? undefined : statusFilter,
-		limit: PAGE_SIZE,
+		limit: PAGE_SIZE * pageCount,
 		offset: 0,
 	};
 
-	const { data, isLoading } = useLibrary(queryParams);
+	const { data, isLoading, isError, error, refetch } = useLibrary(queryParams);
 	const { data: activeMission } = useActiveMission();
 	const updateMutation = useUpdateEntry();
 	const deleteMutation = useDeleteEntry();
 
 	const entries = data?.items ?? [];
+	const total = data?.total ?? 0;
+	const hasMore = entries.length < total;
+
+	const selectStatus = (value: string) => {
+		setStatusFilter(value);
+		setPageCount(1);
+	};
 
 	if (isLoading) {
 		return (
@@ -145,7 +156,7 @@ export function LibraryPage() {
 						key={tab.value}
 						variant={statusFilter === tab.value ? "filled" : "default"}
 						size="xs"
-						onClick={() => setStatusFilter(tab.value)}
+						onClick={() => selectStatus(tab.value)}
 					>
 						{tab.label}
 					</Button>
@@ -185,7 +196,9 @@ export function LibraryPage() {
 				</Card>
 			)}
 
-			{entries.length === 0 ? (
+			{isError ? (
+				<ErrorState title="Couldn't load your library" error={error} onRetry={() => refetch()} />
+			) : entries.length === 0 ? (
 				<Text c="dimmed" ta="center" py="xl">
 					Your library is empty. Use Quick Add to add your first game!
 				</Text>
@@ -292,6 +305,14 @@ export function LibraryPage() {
 				/>
 			)}
 
+			{!isError && hasMore && (
+				<Group justify="center">
+					<Button variant="default" loading={isLoading} onClick={() => setPageCount((c) => c + 1)}>
+						Load more ({entries.length} of {total})
+					</Button>
+				</Group>
+			)}
+
 			<AddGameModal opened={manualModalOpened} onClose={() => setManualModalOpened(false)} />
 
 			<ImageSourceModal
@@ -393,6 +414,23 @@ function ExpandedRow({ entry, onUpdate, onDelete, onStartMission, isPending }: E
 		});
 	};
 
+	const confirmDelete = () => {
+		modals.openConfirmModal({
+			title: "Delete library entry",
+			centered: true,
+			children: (
+				<Text size="sm">
+					Permanently remove "{entry.game.title}" from your library? This can't be undone.
+				</Text>
+			),
+			labels: { confirm: "Delete entry", cancel: "Cancel" },
+			confirmProps: { color: "red" },
+			onConfirm: () => {
+				void onDelete();
+			},
+		});
+	};
+
 	return (
 		<Stack p="md" gap="sm">
 			{entry.missionNextAction && (
@@ -431,7 +469,7 @@ function ExpandedRow({ entry, onUpdate, onDelete, onStartMission, isPending }: E
 				<Button size="xs" color="teal" disabled={hasActiveMission} onClick={onStartMission}>
 					{isThisEntryActive ? "Mission active" : "Start Mission"}
 				</Button>
-				<Button size="xs" color="red" variant="light" loading={isPending} onClick={onDelete}>
+				<Button size="xs" color="red" variant="light" loading={isPending} onClick={confirmDelete}>
 					Delete
 				</Button>
 			</Group>
