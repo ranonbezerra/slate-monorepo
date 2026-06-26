@@ -78,6 +78,19 @@ class GameRepository:
         await self._session.flush()
         return game
 
+    async def list_unenriched(self, limit: int | None = None) -> list[Game]:
+        """Return games never enriched from IGDB (``igdb_id IS NULL``).
+
+        These are typically rows created from captures/manual entry before IGDB
+        credentials were configured, so they lack genres/cover/summary. Ordered
+        by ``id`` for stable, resumable backfills.
+        """
+        stmt = select(Game).where(Game.igdb_id.is_(None)).order_by(Game.id)
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())
+
     async def distinct_genres(self) -> list[str]:
         """Return all unique genre strings across all games, sorted."""
         stmt = select(Game.genres).where(Game.genres.is_not(None))
