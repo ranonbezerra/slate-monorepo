@@ -7,6 +7,7 @@ from uuid import UUID
 
 from dailyloadout.core.cache.invalidation import invalidate_user_stats
 from dailyloadout.core.library.backfill import enrich_in_place, reconcile_manual_title
+from dailyloadout.core.library.igdb_budget import igdb_budget_allows
 from dailyloadout.core.library.schemas import (
     GameResponse,
     LibraryGameGroup,
@@ -75,12 +76,19 @@ class LibraryService:
            GLOBAL row.
         3. Else create a manual GLOBAL row, attributed to *user_id*.
         """
+        # Gate outbound IGDB on the per-user/day budget so novel-title spam can't
+        # exhaust the app-wide IGDB quota for everyone. When the budget is spent
+        # (or there's no client) we resolve DB-first without enrichment.
+        igdb_client = self._igdb_client
+        if igdb_client is not None and not await igdb_budget_allows(user_id):
+            igdb_client = None
+
         existing = await self._game_repo.get_by_slug(slug)
         if existing is not None:
             if existing.igdb_id is None:
                 await enrich_in_place(
                     existing,
-                    igdb_client=self._igdb_client,
+                    igdb_client=igdb_client,
                     game_repo=self._game_repo,
                     min_score=self._match_min_score,
                 )
@@ -88,7 +96,7 @@ class LibraryService:
 
         reconciled = await reconcile_manual_title(
             title,
-            igdb_client=self._igdb_client,
+            igdb_client=igdb_client,
             game_repo=self._game_repo,
             min_score=self._match_min_score,
         )

@@ -8,6 +8,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
+from dailyloadout.api.v1._cost_guard import cost_guard
 from dailyloadout.api.v1._mime_helpers import guess_audio_extension
 from dailyloadout.api.v1._rate_limit import rate_limit
 from dailyloadout.config import settings
@@ -24,6 +25,7 @@ from dailyloadout.core.capture.schemas import (
 from dailyloadout.core.library.schemas import LibraryEntryResponse
 from dailyloadout.deps import CaptureServiceDep, CurrentUserDep, RequireVerifiedUserDep
 from dailyloadout.deps.capture import STTClientDep
+from dailyloadout.infrastructure.stt.concurrency import get_stt_semaphore
 
 router = APIRouter(prefix="/v1/captures", tags=["captures"])
 
@@ -36,8 +38,12 @@ _capture_submit_rate_limit = Depends(
         settings.rate_limit_capture_submit_per_minute,
         60,
         by="user",
+        fail_closed=True,
     )
 )
+
+# Aggregate $ cost kill-switch for the LLM/vision/STT capture routes.
+_capture_cost_guard = Depends(cost_guard("capture"))
 
 
 # ---------------------------------------------------------------------------
@@ -49,7 +55,7 @@ _capture_submit_rate_limit = Depends(
     "/text",
     response_model=CaptureResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[_capture_submit_rate_limit],
+    dependencies=[_capture_submit_rate_limit, _capture_cost_guard],
 )
 async def submit_text_capture(
     body: CaptureTextRequest,
@@ -78,7 +84,7 @@ async def submit_text_capture(
     "/photo",
     response_model=CaptureResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[_capture_submit_rate_limit],
+    dependencies=[_capture_submit_rate_limit, _capture_cost_guard],
 )
 async def submit_photo_capture(
     file: UploadFile,
@@ -107,6 +113,7 @@ async def submit_photo_capture(
 @router.post(
     "/transcribe",
     response_model=TranscribeResponse,
+    dependencies=[_capture_submit_rate_limit, _capture_cost_guard],
 )
 async def transcribe_audio(
     file: UploadFile,
@@ -143,7 +150,17 @@ async def transcribe_audio(
         audio_path = tmp.name
 
     try:
-        result = await stt_client.transcribe(audio_path)
+        # Bound concurrent transcriptions (process-wide) so a burst can't thrash
+        # the host, mirroring the Ollama concurrency semaphore.
+        async with get_stt_semaphore():
+            result = await stt_client.transcribe(audio_path)
+        # Enforce the configured audio-length ceiling on the decoded duration.
+        max_seconds = settings.capture_max_audio_seconds
+        if result.duration_seconds is not None and result.duration_seconds > max_seconds:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Audio must be under {max_seconds} seconds.",
+            )
         return TranscribeResponse(
             text=result.text,
             language=result.language,

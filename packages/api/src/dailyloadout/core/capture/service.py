@@ -20,6 +20,7 @@ from dailyloadout.core.capture.ports import (
     CaptureProcessor,
     LibraryImportProcessor,
 )
+from dailyloadout.core.library.igdb_budget import igdb_budget_allows
 from dailyloadout.infrastructure.catalog.base import AbstractCatalogMatcher
 from dailyloadout.infrastructure.db.models import Capture, LibraryEntry
 from dailyloadout.infrastructure.db.repositories.capture import (
@@ -104,6 +105,15 @@ class CaptureService:
     # Submission + processing (orchestration moved out of the routers)
     # ------------------------------------------------------------------
 
+    async def _igdb_for(self, user_id: int) -> IGDBSearchClient | None:
+        """Return the IGDB client, or ``None`` when the user's daily budget is spent.
+
+        Shares the per-user/day outbound-IGDB budget with ``create_game``. Fail-open.
+        """
+        if self._igdb_client is None or not await igdb_budget_allows(user_id):
+            return None
+        return self._igdb_client
+
     async def submit_and_process_text(
         self,
         user_id: int,
@@ -118,7 +128,7 @@ class CaptureService:
             capture_repo=self._capture_repo,
             candidate_repo=self._candidate_repo,
             llm_client=self._llm_client,
-            igdb_client=self._igdb_client,
+            igdb_client=await self._igdb_for(user_id),
         )
         return await self.get_capture(user_id, capture.public_id)
 
@@ -138,7 +148,7 @@ class CaptureService:
                 capture_repo=self._capture_repo,
                 candidate_repo=self._candidate_repo,
                 llm_client=self._llm_client,
-                igdb_client=self._igdb_client,
+                igdb_client=await self._igdb_for(user_id),
             )
             return await self.get_capture(user_id, capture.public_id)
 

@@ -6,6 +6,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
+from dailyloadout.api.v1._cost_guard import cost_guard
 from dailyloadout.api.v1._rate_limit import rate_limit
 from dailyloadout.config import settings
 from dailyloadout.core.loadout.schemas import (
@@ -30,8 +31,12 @@ _loadout_create_rate_limit = Depends(
         settings.rate_limit_loadout_create_per_minute,
         60,
         by="user",
+        fail_closed=True,
     )
 )
+
+# Aggregate $ cost kill-switch for the LLM-pick loadout routes.
+_loadout_cost_guard = Depends(cost_guard("loadout"))
 
 
 # ---------------------------------------------------------------------------
@@ -43,7 +48,7 @@ _loadout_create_rate_limit = Depends(
     "",
     response_model=list[LoadoutResponse],
     status_code=status.HTTP_201_CREATED,
-    dependencies=[_loadout_create_rate_limit],
+    dependencies=[_loadout_create_rate_limit, _loadout_cost_guard],
 )
 async def create_loadout(
     body: LoadoutCreateRequest,
@@ -76,7 +81,7 @@ async def create_loadout(
     "/start",
     response_model=LoadoutResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[_loadout_create_rate_limit],
+    dependencies=[_loadout_create_rate_limit, _loadout_cost_guard],
 )
 async def start_loadout(
     body: LoadoutStartRequest,

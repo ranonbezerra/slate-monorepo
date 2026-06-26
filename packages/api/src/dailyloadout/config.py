@@ -199,6 +199,36 @@ class Settings(BaseSettings):
     rate_limit_loadout_create_per_minute: int = 10
     rate_limit_capture_submit_per_minute: int = 15
     rate_limit_library_import_per_minute: int = 5
+    # Cost-bearing limit on POST /v1/games (LLM/IGDB resolve); generous anti-abuse
+    # backstops on library CRUD writes and read-only catalogue/stats/cache reads.
+    rate_limit_game_create_per_minute: int = 20
+    rate_limit_library_write_per_minute: int = 60
+    rate_limit_read_per_minute: int = 120
+
+    # ── Cost kill-switch (aggregate $ guard, provider-agnostic) ──────────
+    # Counts LLM-bearing requests as a proxy for spend; hard-fails 503 over a
+    # global minute/day/month ceiling plus a per-user/day budget. False =>
+    # cost_guard() is a no-op (tests), independent of rate_limit_enabled. FAIL-
+    # CLOSED: a Redis error denies (503), unlike the rate limiter (fails open).
+    cost_guard_enabled: bool = True
+    cost_global_per_minute: int = 120
+    cost_global_per_day: int = 5000
+    cost_global_per_month: int = 100000
+    cost_user_per_day: int = 200
+    cost_alert_threshold: float = 0.8
+
+    # Generous default per-user limit the middleware applies to every
+    # authenticated request (backstop for routes lacking an explicit limiter).
+    rate_limit_default_per_minute: int = 120
+
+    # Per-user/day outbound-IGDB budget shared by create_game/capture (the app-
+    # wide IGDB quota is 4 req/s for everyone). Fails OPEN (best-effort).
+    igdb_user_budget_per_day: int = 300
+
+    # Process-wide concurrent Whisper transcriptions (mirrors ollama), and the
+    # per-call generated-token cap (Ollama/ChatOllama num_predict) bounding spend.
+    stt_max_concurrency: int = 2
+    llm_max_output_tokens: int = 1024
 
     # ── Request hardening (DoS / security headers) ───────────────────────
     # Coarse backstop: reject any request whose Content-Length exceeds this cap

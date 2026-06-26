@@ -19,6 +19,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
+from dailyloadout.api.v1._cost_guard import cost_guard
 from dailyloadout.api.v1._rate_limit import rate_limit
 from dailyloadout.config import settings
 from dailyloadout.core.concierge.schemas import ChatRequest
@@ -52,8 +53,10 @@ def _sse(payload: dict[str, object]) -> str:
                 settings.rate_limit_concierge_chat_per_minute,
                 60,
                 by="user",
+                fail_closed=True,
             )
-        )
+        ),
+        Depends(cost_guard("concierge")),
     ],
 )
 async def chat(

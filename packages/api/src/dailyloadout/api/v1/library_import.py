@@ -10,6 +10,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 
+from dailyloadout.api.v1._cost_guard import cost_guard
 from dailyloadout.api.v1._rate_limit import rate_limit
 from dailyloadout.config import settings
 from dailyloadout.core.capture.duplicates import find_duplicate_candidate_ids
@@ -38,8 +39,10 @@ router = APIRouter(prefix="/v1/captures", tags=["captures"])
                 settings.rate_limit_library_import_per_minute,
                 60,
                 by="user",
+                fail_closed=True,
             )
-        )
+        ),
+        Depends(cost_guard("library_import")),
     ],
 )
 async def submit_library_import(
