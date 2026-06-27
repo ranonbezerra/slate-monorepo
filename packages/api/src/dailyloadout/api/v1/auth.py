@@ -20,6 +20,7 @@ from dailyloadout.core.auth.schemas import (
     UserResponse,
     VerifyEmailRequest,
 )
+from dailyloadout.core.auth.service import EmailRejectedError
 from dailyloadout.deps import AuthServiceDep, CurrentUserDep
 from dailyloadout.deps.captcha import verify_turnstile
 
@@ -72,6 +73,13 @@ async def register(
             password=body.password,
             display_name=body.display_name,
         )
+    except EmailRejectedError as exc:
+        # Disposable / undeliverable email: a domain-based 422 (invalid input),
+        # not a 409 — and not an account-existence oracle.
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(exc),
+        ) from exc
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -217,6 +225,25 @@ async def logout(
 
     await auth_service.logout(body.refresh_token if body else "")
     return MessageResponse(message="Logged out")
+
+
+@router.post("/logout-all", response_model=MessageResponse)
+async def logout_all(
+    auth_service: AuthServiceDep,
+    current_user: CurrentUserDep,
+    response: Response,
+    request: Request,
+) -> MessageResponse:
+    """Log out everywhere: revoke all refresh tokens and kill all access tokens.
+
+    Bumps the user's ``token_version`` (instantly invalidating every outstanding
+    access token, including the one used for this request) and revokes every
+    refresh token. In cookie mode the local refresh cookie is also cleared.
+    """
+    await auth_service.revoke_all_sessions(current_user.id)
+    if is_cookie_mode(request):
+        clear_refresh_cookie(response)
+    return MessageResponse(message="Logged out everywhere")
 
 
 @router.get("/me", response_model=UserResponse)
