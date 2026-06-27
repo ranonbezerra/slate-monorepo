@@ -336,17 +336,25 @@ a static artifact; the mobile app ships through store review (independent of
 whether it stays Flutter or moves to native Swift/Kotlin — the API contract is
 the same).
 
-#### API deploy: migration-gated, rollback on failure
+#### API deploy: staging on merge, production on release (migration-gated)
 
-`deploy-api.yml` runs on push to `main` (or manual dispatch), from a
-**GitHub-hosted ephemeral runner** that SSHes to the VPS and runs
+Two environments, two **separate VPSs** (full isolation), one reusable deploy
+job (`deploy-api.yml`) invoked by:
+
+- **`deploy-staging.yml`** — on every merge to `main` (path `packages/api`/`infra`)
+  → deploys `main` to the **staging** VPS. *Staging = what's on main now.*
+- **`release-please.yml`** — when a surface's release PR is merged, it cuts the
+  `api/vX.Y.Z` tag and chains a deploy of that tag to **production**. *Production
+  = the last released tag.* See [VERSIONING.md](./VERSIONING.md) for the full
+  release flow.
+
+Both run from a **GitHub-hosted ephemeral runner** that SSHes to the box and runs
 `infra/deploy/deploy.sh`. The rule — *try the migrations first; if they fail,
 abort and keep the previous version live* — is enforced by **step order**:
 backup → fetch → `alembic upgrade head` **(gate)** → restart → health-check →
 rollback. A failed migration restores the old code and exits non-zero **before**
-any service restart, so the new version never takes traffic. Postgres
-transactional DDL means a half-applied migration auto-rolls-back to the prior
-revision.
+any service restart, so the new version never takes traffic; Postgres
+transactional DDL auto-rolls-back a half-applied migration.
 
 > **Why SSH-from-hosted, not a self-hosted runner:** hosted runners are
 > ephemeral/clean — they can't be persistently compromised — and a self-hosted
@@ -354,7 +362,7 @@ revision.
 > deploy key. (On AWS/GCP you'd use OIDC; on a bare VPS, an SSH deploy key is the
 > equivalent.)
 
-**One-time VPS setup:**
+**One-time setup (per environment — repeat for staging and production):**
 
 1. Create a dedicated **deploy SSH key**; put the public key in the deploy user's
    `~/.ssh/authorized_keys`. Harden it with a forced command so the key can
@@ -364,6 +372,9 @@ revision.
    command="/opt/dailyloadout/infra/deploy/deploy.sh",no-port-forwarding,no-pty ssh-ed25519 AAAA... deploy@dailyloadout
    ```
 
+   > The forced command pins the deploy script; the ref (tag vs `origin/main`) is
+   > forwarded via `$SSH_ORIGINAL_COMMAND` (handled by `deploy.sh`).
+
 2. Grant the deploy user **passwordless sudo** for just the restarts
    (`sudo visudo -f /etc/sudoers.d/dailyloadout`):
 
@@ -371,12 +382,19 @@ revision.
    deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart dailyloadout-api, /usr/bin/systemctl restart dailyloadout-worker
    ```
 
-3. Add the repo/Environment: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`
-   (the private key), and ideally `VPS_SSH_KNOWN_HOSTS` (the VPS host key, to pin
-   it instead of trust-on-first-use).
-4. **Require the CI checks on `main`** (branch protection) so only green code
-   reaches the deploy; optionally add a required reviewer on the `production`
-   GitHub Environment for a manual approval gate.
+3. Create the GitHub **Environments** `staging` and `production` (Settings →
+   Environments), each with its own scoped secrets `VPS_HOST`, `VPS_USER`,
+   `VPS_SSH_KEY` (the private key), and ideally `VPS_SSH_KNOWN_HOSTS` (the host
+   key, to pin it instead of trust-on-first-use). Optionally add a required
+   reviewer on `production` for a manual approval gate.
+4. Enable release PRs: Settings → Actions → "Allow GitHub Actions to create and
+   approve pull requests".
+5. **Require the CI checks on `main`** (branch protection) so only green code
+   reaches a deploy.
+6. **Flip the switch:** set the repository **variable** `DEPLOY_ENABLED=true`
+   (Settings → Secrets and variables → Actions → Variables). Until this is set,
+   `release-please.yml` and `deploy-staging.yml` are **skipped** (never failed),
+   so they don't break pushes before the infra exists.
 
 A broken migration is also caught **before merge** by the `ci-api` job (it runs
 `alembic upgrade head` against a fresh Postgres). The deploy-time gate is the

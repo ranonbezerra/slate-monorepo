@@ -25,9 +25,18 @@ set -euo pipefail
 
 REPO_DIR="${DL_REPO_DIR:-/opt/dailyloadout}"
 API_DIR="$REPO_DIR/packages/api"
-BRANCH="${DL_DEPLOY_BRANCH:-main}"
 HEALTH_URL="${DL_HEALTH_URL:-http://127.0.0.1:8100/health}"
 SERVICES="dailyloadout-api dailyloadout-worker"
+
+# What to deploy: a git ref — the tag `api/vX.Y.Z` in production, or
+# `origin/main` in staging. Passed as $1 (or $SSH_ORIGINAL_COMMAND's last token
+# when invoked via an authorized_keys forced command); defaults to origin/main.
+REF="${1:-}"
+if [ -z "$REF" ] && [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
+  _orig_args="${SSH_ORIGINAL_COMMAND#* }"
+  [ "$_orig_args" != "$SSH_ORIGINAL_COMMAND" ] && REF="$_orig_args"
+fi
+REF="${REF:-origin/main}"
 
 log() { echo "[deploy $(date -u +%H:%M:%SZ)] $*"; }
 alembic() { (cd "$API_DIR" && poetry run alembic "$@"); }
@@ -53,10 +62,10 @@ if [ -x "$REPO_DIR/infra/backup/backup-db.sh" ] && [ -f /etc/dailyloadout/backup
   "$REPO_DIR/infra/backup/backup-db.sh" || { log "FATAL: backup failed — aborting deploy"; exit 1; }
 fi
 
-# 3. Fetch + check out the new code.
-log "fetching origin/$BRANCH"
-git fetch --quiet origin "$BRANCH"
-git checkout -f "origin/$BRANCH"
+# 3. Fetch + check out the requested ref (tag in prod, origin/main in staging).
+log "fetching + checking out $REF"
+git fetch --quiet --tags --force origin
+git checkout -f "$REF"
 NEW_SHA="$(git rev-parse HEAD)"
 if [ "$NEW_SHA" = "$PREV_SHA" ]; then
   log "no new commits — nothing to deploy"
