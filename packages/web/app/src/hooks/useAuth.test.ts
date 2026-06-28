@@ -136,7 +136,7 @@ describe("useAuth", () => {
 
 		expect(mockedAuthFetch).toHaveBeenCalledWith("/v1/auth/login", {
 			email: "player@test.com",
-			password: "secret123",
+			password: "secret123", // pragma: allowlist secret
 		});
 		expect(mockedSaveTokens).toHaveBeenCalledWith("acc-123");
 	});
@@ -155,7 +155,7 @@ describe("useAuth", () => {
 			"/v1/auth/register",
 			{
 				email: "player@test.com",
-				password: "secret123",
+				password: "secret123", // pragma: allowlist secret
 				display_name: "Player",
 			},
 			undefined,
@@ -176,7 +176,7 @@ describe("useAuth", () => {
 			"/v1/auth/register",
 			{
 				email: "player@test.com",
-				password: "secret123",
+				password: "secret123", // pragma: allowlist secret
 				display_name: "Player",
 			},
 			{ "cf-turnstile-response": "tok-xyz" },

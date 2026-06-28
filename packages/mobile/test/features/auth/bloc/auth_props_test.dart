@@ -24,18 +24,26 @@ void main() {
       const b = LoginRequested(email: 'a@b.com', password: 'pw');
       expect(a, b);
       expect(a.props, ['a@b.com', 'pw']);
-      expect(a, isNot(const LoginRequested(email: 'x@b.com', password: 'pw')));
+      expect(
+        a,
+        isNot(
+          const LoginRequested(
+            email: 'x@b.com',
+            password: 'pw', // pragma: allowlist secret
+          ),
+        ),
+      );
     });
 
     test('RegisterRequested supports value equality and props', () {
       const a = RegisterRequested(
         email: 'a@b.com',
-        password: 'pw',
+        password: 'pw', // pragma: allowlist secret
         displayName: 'Neo',
       );
       const b = RegisterRequested(
         email: 'a@b.com',
-        password: 'pw',
+        password: 'pw', // pragma: allowlist secret
         displayName: 'Neo',
       );
       expect(a, b);

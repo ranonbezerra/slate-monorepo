@@ -55,7 +55,7 @@ void main() {
 
       final tokens = await repository.register(
         email: 'test@example.com',
-        password: 'pw',
+        password: 'pw', // pragma: allowlist secret
         displayName: 'TestUser',
       );
 
@@ -96,7 +96,7 @@ void main() {
 
       final tokens = await repository.login(
         email: 'test@example.com',
-        password: 'pw',
+        password: 'pw', // pragma: allowlist secret
       );
 
       expect(tokens.refreshToken, 'refresh-def');

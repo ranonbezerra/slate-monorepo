@@ -142,7 +142,7 @@ void main() {
           when(
             () => mockAuthRepository.login(
               email: 'user@example.com',
-              password: 'secret',
+              password: 'secret', // pragma: allowlist secret
             ),
           ).thenAnswer((_) async => testTokens);
           when(
@@ -185,7 +185,10 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const LoginRequested(email: 'bad@e.com', password: 'wrong'),
+          const LoginRequested(
+            email: 'bad@e.com',
+            password: 'wrong', // pragma: allowlist secret
+          ),
         ),
         expect: () => const [
           AuthLoading(),
@@ -269,7 +272,7 @@ void main() {
           when(
             () => mockAuthRepository.register(
               email: 'new@example.com',
-              password: 'pass123',
+              password: 'pass123', // pragma: allowlist secret
               displayName: 'NewUser',
             ),
           ).thenAnswer((_) async => testTokens);
@@ -284,7 +287,7 @@ void main() {
         act: (bloc) => bloc.add(
           const RegisterRequested(
             email: 'new@example.com',
-            password: 'pass123',
+            password: 'pass123', // pragma: allowlist secret
             displayName: 'NewUser',
           ),
         ),
