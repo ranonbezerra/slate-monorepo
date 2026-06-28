@@ -1,0 +1,30 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.1/schema.json",
+	"files": {
+		"includes": [
+			"**",
+			"!dist",
+			"!public",
+			"!coverage",
+			"!playwright-report",
+			"!test-results",
+			"!e2e/screenshots"
+		]
+	},
+	"formatter": {
+		"indentStyle": "tab",
+		"lineWidth": 99
+	},
+	"linter": {
+		"rules": {
+			"preset": "recommended"
+		}
+	},
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
+}
