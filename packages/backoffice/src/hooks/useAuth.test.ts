@@ -36,7 +36,7 @@ describe("useAuth", () => {
 		await result.current.login("a@b.com", "secret123");
 		expect(authFetch).toHaveBeenCalledWith("/v1/auth/login", {
 			email: "a@b.com",
-			password: "secret123",
+			password: "secret123", // pragma: allowlist secret
 		});
 		expect(saveTokens).toHaveBeenCalledWith("tok");
 	});
