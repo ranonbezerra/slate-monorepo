@@ -566,7 +566,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('navigates to /play after a mission is accepted', (
+    testWidgets('navigates to /play after a playSession is accepted', (
       tester,
     ) async {
       whenListen(

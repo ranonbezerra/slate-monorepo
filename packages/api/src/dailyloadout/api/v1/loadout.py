@@ -73,7 +73,7 @@ async def create_loadout(
 
 
 # ---------------------------------------------------------------------------
-# Start: AI-pick a game and start a mission in one step
+# Start: AI-pick a game and start a play_session in one step
 # ---------------------------------------------------------------------------
 
 
@@ -88,10 +88,10 @@ async def start_loadout(
     current_user: RequireVerifiedUserDep,
     loadout_service: LoadoutServiceDep,
 ) -> LoadoutResponse:
-    """AI-pick a game and immediately start a mission for it (one tap).
+    """AI-pick a game and immediately start a play_session for it (one tap).
 
     Optionally include a pre-generated ``briefing_text`` to start briefed.
-    Returns 422 if no eligible games, 409 if a mission is already active.
+    Returns 422 if no eligible games, 409 if a play_session is already active.
     """
     loadout = await loadout_service.create_and_start(
         user_id=current_user.id,
@@ -105,7 +105,7 @@ async def start_loadout(
 
 
 # ---------------------------------------------------------------------------
-# Accept loadout → creates mission
+# Accept loadout → creates play_session
 # ---------------------------------------------------------------------------
 
 
@@ -116,7 +116,7 @@ async def accept_loadout(
     loadout_service: LoadoutServiceDep,
     body: LoadoutAcceptRequest | None = None,
 ) -> LoadoutResponse:
-    """Accept a loadout suggestion and start a mission for the chosen game.
+    """Accept a loadout suggestion and start a play_session for the chosen game.
 
     Optionally include a pre-generated ``briefing_text`` to start with a
     briefing (the briefing stage is skippable — omit the body to start without).

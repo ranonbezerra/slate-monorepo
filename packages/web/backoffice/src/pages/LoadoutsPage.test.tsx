@@ -38,7 +38,7 @@ function detail(over: Partial<AdminLoadoutDetail> = {}): AdminLoadoutDetail {
 		platformLabel: "PC",
 		context: "after work",
 		reasoning: "A calm metroidvania for a focused hour.",
-		ledToMission: false,
+		ledToPlaySession: false,
 		...over,
 	};
 }
@@ -91,16 +91,16 @@ describe("LoadoutsPage", () => {
 		expect(screen.getByText("Failed to load loadouts.")).toBeInTheDocument();
 	});
 
-	it("opens the detail drawer with reasoning and led-to-mission", async () => {
+	it("opens the detail drawer with reasoning and led-to-playSession", async () => {
 		mockUseLoadout.mockReturnValue({
-			data: detail({ ledToMission: true }),
+			data: detail({ ledToPlaySession: true }),
 			isLoading: false,
 		});
 		mockUseLoadouts.mockReturnValue({ data: list([loadout()]), isLoading: false, isError: false });
 		renderPage();
 		fireEvent.click(screen.getByLabelText("View"));
 		expect(await screen.findByText("A calm metroidvania for a focused hour.")).toBeInTheDocument();
-		expect(screen.getByText("led to mission")).toBeInTheDocument();
+		expect(screen.getByText("led to session")).toBeInTheDocument();
 	});
 
 	it("updates the search box on input", () => {

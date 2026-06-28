@@ -1,7 +1,7 @@
 """Caching decorator for the deep-research briefing agent (ROADMAP Epic 18).
 
 Caches the *entire* graph run (~4 LLM calls + web research), addressed by a
-digest of the grounding ``MissionContext``. Because that context includes the
+digest of the grounding ``PlaySessionContext``. Because that context includes the
 session's debriefs, a new debrief changes the digest and yields a fresh key — so
 "bust on new debrief" is structural, no explicit invalidation needed.
 

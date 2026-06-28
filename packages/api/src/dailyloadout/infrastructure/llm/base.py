@@ -20,7 +20,7 @@ class ExtractedGame:
 
 @dataclass
 class ExtractedState:
-    """Structured state extracted from a mission debrief."""
+    """Structured state extracted from a play_session debrief."""
 
     location: str | None = None
     next_action: str | None = None
@@ -37,7 +37,7 @@ class LoadoutPick:
 
 
 class AbstractLLMClient(ABC):
-    """Contract for LLM clients used in capture and mission processing."""
+    """Contract for LLM clients used in capture and play_session processing."""
 
     @abstractmethod
     async def parse_capture_text(self, text: str) -> list[ExtractedGame]:
@@ -57,7 +57,7 @@ class AbstractLLMClient(ABC):
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
-        """Generate a mission briefing from previous debrief context."""
+        """Generate a play_session briefing from previous debrief context."""
         ...
 
     @abstractmethod

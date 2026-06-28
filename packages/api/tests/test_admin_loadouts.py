@@ -140,7 +140,7 @@ class TestLoadoutsDetail:
         assert body["platform_label"] == "PC"
         assert body["reasoning"] == "Quick roguelite run."
         assert body["context"] == "after work"
-        assert body["led_to_mission"] is False
+        assert body["led_to_play_session"] is False
         assert body["action"] == "pending"
 
         missing = await async_client.get(

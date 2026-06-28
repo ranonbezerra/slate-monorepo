@@ -83,11 +83,11 @@ class LoadoutRepository:
             loadout.action = action
             await self._session.flush()
 
-    async def set_mission(self, loadout_id: int, mission_id: int) -> None:
-        """Link a mission to a loadout."""
+    async def set_play_session(self, loadout_id: int, play_session_id: int) -> None:
+        """Link a play_session to a loadout."""
         loadout = await self._session.get(Loadout, loadout_id)
         if loadout is not None:
-            loadout.mission_id = mission_id
+            loadout.play_session_id = play_session_id
             await self._session.flush()
 
     async def list_for_user(

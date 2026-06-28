@@ -72,7 +72,7 @@ class DummyLLMClient(AbstractLLMClient):
         """Return a deterministic briefing for tests."""
         if not previous_debriefs:
             return (
-                f"Welcome to your first mission in {game_title}! "
+                f"Welcome to your first play_session in {game_title}! "
                 "No previous session data available. Enjoy your adventure."
             )
 

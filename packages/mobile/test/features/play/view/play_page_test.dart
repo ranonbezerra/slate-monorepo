@@ -1,7 +1,7 @@
 import 'package:app/core/library/library_models.dart';
-import 'package:app/core/mission/mission_models.dart';
-import 'package:app/features/mission/bloc/mission_bloc.dart';
+import 'package:app/core/play_session/play_session_models.dart';
 import 'package:app/features/play/view/play_page.dart';
+import 'package:app/features/play_session/bloc/play_session_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockMissionBloc extends MockBloc<MissionEvent, MissionState>
-    implements MissionBloc {}
+class MockPlaySessionBloc extends MockBloc<PlaySessionEvent, PlaySessionState>
+    implements PlaySessionBloc {}
 
 final _now = DateTime.utc(2025, 6);
 
@@ -38,38 +38,38 @@ final _entry = LibraryEntry(
   updatedAt: _now,
 );
 
-final _mission = Mission(
-  publicId: 'mission-1',
+final _playSession = PlaySession(
+  publicId: 'playSession-1',
   libraryEntry: _entry,
-  missionType: 'regular',
+  playSessionType: 'regular',
   briefingText: 'Continue exploring Hallownest.',
   startedAt: _now,
   createdAt: _now,
   updatedAt: _now,
 );
 
-final _missionNoBriefing = Mission(
-  publicId: 'mission-2',
+final _playSessionNoBriefing = PlaySession(
+  publicId: 'playSession-2',
   libraryEntry: _entry,
-  missionType: 'regular',
+  playSessionType: 'regular',
   startedAt: _now,
   createdAt: _now,
   updatedAt: _now,
 );
 
 void main() {
-  late MockMissionBloc missionBloc;
+  late MockPlaySessionBloc playSessionBloc;
 
   setUp(() {
-    missionBloc = MockMissionBloc();
+    playSessionBloc = MockPlaySessionBloc();
   });
 
   tearDown(() {
-    missionBloc.close();
+    playSessionBloc.close();
   });
 
   /// Wrapper with a GoRouter so `context.go()` resolves in tests, and
-  /// stub destinations for each door / mission action.
+  /// stub destinations for each door / playSession action.
   Widget buildSubject({bool conciergeEnabled = false}) {
     final router = GoRouter(
       initialLocation: '/play',
@@ -83,8 +83,8 @@ void main() {
           builder: (_, __) => const Scaffold(body: Text('Loadout stub')),
         ),
         GoRoute(
-          path: '/play/missions',
-          builder: (_, __) => const Scaffold(body: Text('Missions stub')),
+          path: '/play/play-sessions',
+          builder: (_, __) => const Scaffold(body: Text('PlaySessions stub')),
         ),
         GoRoute(
           path: '/play/concierge',
@@ -95,33 +95,35 @@ void main() {
           builder: (_, __) => const Scaffold(body: Text('Library stub')),
         ),
         GoRoute(
-          path: '/missions/:id/briefing',
+          path: '/play-sessions/:id/briefing',
           builder: (_, __) => const Scaffold(body: Text('Briefing stub')),
         ),
         GoRoute(
-          path: '/missions/:id/debrief',
+          path: '/play-sessions/:id/debrief',
           builder: (_, __) => const Scaffold(body: Text('Debrief stub')),
         ),
       ],
     );
 
-    return BlocProvider<MissionBloc>.value(
-      value: missionBloc,
+    return BlocProvider<PlaySessionBloc>.value(
+      value: playSessionBloc,
       child: MaterialApp.router(routerConfig: router),
     );
   }
 
   group('PlayPage', () {
-    testWidgets('dispatches LoadActiveMission on init', (tester) async {
-      when(() => missionBloc.state).thenReturn(const MissionInitial());
+    testWidgets('dispatches LoadActivePlaySession on init', (tester) async {
+      when(() => playSessionBloc.state).thenReturn(const PlaySessionInitial());
 
       await tester.pumpWidget(buildSubject());
 
-      verify(() => missionBloc.add(const LoadActiveMission())).called(1);
+      verify(
+        () => playSessionBloc.add(const LoadActivePlaySession()),
+      ).called(1);
     });
 
     testWidgets('shows AppBar with Play title', (tester) async {
-      when(() => missionBloc.state).thenReturn(const MissionInitial());
+      when(() => playSessionBloc.state).thenReturn(const PlaySessionInitial());
 
       await tester.pumpWidget(buildSubject());
 
@@ -131,9 +133,11 @@ void main() {
       );
     });
 
-    testWidgets('shows no-active-mission card when ActiveMissionLoaded '
-        'with null mission', (tester) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+    testWidgets('shows no-active-playSession card when ActivePlaySessionLoaded '
+        'with null playSession', (tester) async {
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
 
@@ -145,20 +149,20 @@ void main() {
       expect(find.byIcon(Icons.rocket_launch_outlined), findsOneWidget);
     });
 
-    testWidgets('shows no-active-mission card for MissionInitial', (
+    testWidgets('shows no-active-playSession card for PlaySessionInitial', (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const MissionInitial());
+      when(() => playSessionBloc.state).thenReturn(const PlaySessionInitial());
 
       await tester.pumpWidget(buildSubject());
 
       expect(find.text('No session running'), findsOneWidget);
     });
 
-    testWidgets('shows loading placeholder when MissionLoading', (
+    testWidgets('shows loading placeholder when PlaySessionLoading', (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const MissionLoading());
+      when(() => playSessionBloc.state).thenReturn(const PlaySessionLoading());
 
       await tester.pumpWidget(buildSubject());
 
@@ -166,21 +170,21 @@ void main() {
       expect(find.text('No session running'), findsNothing);
     });
 
-    testWidgets('shows error card and locks start doors on MissionError', (
+    testWidgets('shows error card and locks start doors on PlaySessionError', (
       tester,
     ) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(const MissionError(message: 'Network down'));
+        () => playSessionBloc.state,
+      ).thenReturn(const PlaySessionError(message: 'Network down'));
 
       await tester.pumpWidget(buildSubject());
 
-      // Genuine error is surfaced (not silently treated as "no mission").
+      // Genuine error is surfaced (not silently treated as "no playSession").
       expect(find.text("Couldn't load your session"), findsOneWidget);
       expect(find.text('Network down'), findsOneWidget);
       expect(find.text('No session running'), findsNothing);
 
-      // Start doors are locked because the active mission is unknown.
+      // Start doors are locked because the active playSession is unknown.
       expect(
         find.text('Could not check your active session'),
         findsNWidgets(2),
@@ -193,41 +197,44 @@ void main() {
     });
 
     testWidgets('tapping Retry on the error card re-dispatches '
-        'LoadActiveMission', (tester) async {
+        'LoadActivePlaySession', (tester) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(const MissionError(message: 'Network down'));
+        () => playSessionBloc.state,
+      ).thenReturn(const PlaySessionError(message: 'Network down'));
 
       await tester.pumpWidget(buildSubject());
-      clearInteractions(missionBloc);
+      clearInteractions(playSessionBloc);
 
       await tester.tap(find.text('Retry'));
       await tester.pump();
 
-      verify(() => missionBloc.add(const LoadActiveMission())).called(1);
+      verify(
+        () => playSessionBloc.add(const LoadActivePlaySession()),
+      ).called(1);
     });
 
-    testWidgets('shows active mission card with title, platform and briefing', (
+    testWidgets(
+      'shows active playSession card with title, platform and briefing',
+      (tester) async {
+        when(
+          () => playSessionBloc.state,
+        ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
+
+        await tester.pumpWidget(buildSubject());
+
+        expect(find.text('Active session'), findsOneWidget);
+        expect(find.text('Hollow Knight'), findsOneWidget);
+        expect(find.text('PlayStation 5'), findsOneWidget);
+        expect(find.text('Continue exploring Hallownest.'), findsOneWidget);
+      },
+    );
+
+    testWidgets('active playSession card shows Recap and Wrap up buttons', (
       tester,
     ) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _mission));
-
-      await tester.pumpWidget(buildSubject());
-
-      expect(find.text('Active session'), findsOneWidget);
-      expect(find.text('Hollow Knight'), findsOneWidget);
-      expect(find.text('PlayStation 5'), findsOneWidget);
-      expect(find.text('Continue exploring Hallownest.'), findsOneWidget);
-    });
-
-    testWidgets('active mission card shows Recap and Wrap up buttons', (
-      tester,
-    ) async {
-      when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _mission));
+        () => playSessionBloc.state,
+      ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
 
       await tester.pumpWidget(buildSubject());
 
@@ -237,12 +244,12 @@ void main() {
       expect(find.widgetWithText(OutlinedButton, 'Wrap up'), findsOneWidget);
     });
 
-    testWidgets('active mission card hides briefing when none present', (
+    testWidgets('active playSession card hides briefing when none present', (
       tester,
     ) async {
-      when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _missionNoBriefing));
+      when(() => playSessionBloc.state).thenReturn(
+        ActivePlaySessionLoaded(playSession: _playSessionNoBriefing),
+      );
 
       await tester.pumpWidget(buildSubject());
 
@@ -250,12 +257,12 @@ void main() {
       expect(find.text('Continue exploring Hallownest.'), findsNothing);
     });
 
-    testWidgets('tapping Recap navigates to the mission briefing', (
+    testWidgets('tapping Recap navigates to the playSession briefing', (
       tester,
     ) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _mission));
+        () => playSessionBloc.state,
+      ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
 
       await tester.pumpWidget(buildSubject());
 
@@ -265,12 +272,12 @@ void main() {
       expect(find.text('Briefing stub'), findsOneWidget);
     });
 
-    testWidgets('tapping Wrap up navigates to the mission debrief', (
+    testWidgets('tapping Wrap up navigates to the playSession debrief', (
       tester,
     ) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _mission));
+        () => playSessionBloc.state,
+      ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
 
       await tester.pumpWidget(buildSubject());
 
@@ -280,12 +287,12 @@ void main() {
       expect(find.text('Debrief stub'), findsOneWidget);
     });
 
-    testWidgets('start doors are disabled while a mission is active', (
+    testWidgets('start doors are disabled while a playSession is active', (
       tester,
     ) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _mission));
+        () => playSessionBloc.state,
+      ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
 
       await tester.pumpWidget(buildSubject());
 
@@ -299,12 +306,12 @@ void main() {
       expect(find.text('Loadout stub'), findsNothing);
     });
 
-    testWidgets('Ask door stays enabled while a mission is active', (
+    testWidgets('Ask door stays enabled while a playSession is active', (
       tester,
     ) async {
       when(
-        () => missionBloc.state,
-      ).thenReturn(ActiveMissionLoaded(mission: _mission));
+        () => playSessionBloc.state,
+      ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
 
       await tester.pumpWidget(buildSubject(conciergeEnabled: true));
 
@@ -314,10 +321,12 @@ void main() {
       expect(find.text('Concierge stub'), findsOneWidget);
     });
 
-    testWidgets('start doors are enabled when there is no active mission', (
+    testWidgets('start doors are enabled when there is no active playSession', (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
 
@@ -332,7 +341,9 @@ void main() {
     testWidgets("shows What's next section with the two default doors", (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
 
@@ -344,7 +355,9 @@ void main() {
     testWidgets('does NOT show concierge door when conciergeEnabled is false', (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
 
@@ -355,7 +368,9 @@ void main() {
     testWidgets('shows concierge door when conciergeEnabled is true', (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject(conciergeEnabled: true));
 
@@ -367,7 +382,9 @@ void main() {
     testWidgets("tapping What's the move? navigates to /play/loadout", (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
 
@@ -378,7 +395,9 @@ void main() {
     });
 
     testWidgets("tapping I'll choose navigates to /library", (tester) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
 
@@ -389,7 +408,9 @@ void main() {
     });
 
     testWidgets('tapping Ask navigates to /play/concierge', (tester) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject(conciergeEnabled: true));
 
@@ -399,19 +420,23 @@ void main() {
       expect(find.text('Concierge stub'), findsOneWidget);
     });
 
-    testWidgets('pull to refresh re-dispatches LoadActiveMission', (
+    testWidgets('pull to refresh re-dispatches LoadActivePlaySession', (
       tester,
     ) async {
-      when(() => missionBloc.state).thenReturn(const ActiveMissionLoaded());
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(const ActivePlaySessionLoaded());
 
       await tester.pumpWidget(buildSubject());
       // Init dispatch counts as one.
-      clearInteractions(missionBloc);
+      clearInteractions(playSessionBloc);
 
       await tester.fling(find.byType(ListView), const Offset(0, 400), 1000);
       await tester.pumpAndSettle();
 
-      verify(() => missionBloc.add(const LoadActiveMission())).called(1);
+      verify(
+        () => playSessionBloc.add(const LoadActivePlaySession()),
+      ).called(1);
     });
   });
 }

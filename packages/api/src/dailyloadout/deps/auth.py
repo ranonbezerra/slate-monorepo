@@ -12,7 +12,6 @@ from dailyloadout.core.admin.captures_service import AdminCaptureService
 from dailyloadout.core.admin.config_service import AdminConfigService
 from dailyloadout.core.admin.dashboard_service import AdminDashboardService
 from dailyloadout.core.admin.games_service import AdminGameService
-from dailyloadout.core.admin.missions_service import AdminMissionService
 from dailyloadout.core.admin.service import AdminUserService
 from dailyloadout.core.auth.security import decode_access_token
 from dailyloadout.core.auth.service import AuthService
@@ -28,8 +27,8 @@ from dailyloadout.infrastructure.db.repositories.capture import (
     CaptureRepository,
 )
 from dailyloadout.infrastructure.db.repositories.game import GameRepository
-from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
 from dailyloadout.infrastructure.db.repositories.oauth import OAuthIdentityRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 from dailyloadout.infrastructure.db.repositories.refresh_token import (
     RefreshTokenRepository,
 )
@@ -249,7 +248,7 @@ def get_admin_dashboard_service(db: DbSession) -> AdminDashboardService:
         AdminRepository(db),
         AdminAuditRepository(db),
         AppConfigRepository(db),
-        MissionRepository(db),
+        PlaySessionRepository(db),
         GameRepository(db),
     )
 
@@ -287,11 +286,3 @@ def get_admin_capture_service(
 
 
 AdminCaptureServiceDep = Annotated[AdminCaptureService, Depends(get_admin_capture_service)]
-
-
-def get_admin_mission_service(db: DbSession) -> AdminMissionService:
-    """Provide an ``AdminMissionService`` wired to the mission + user repos."""
-    return AdminMissionService(MissionRepository(db), UserRepository(db), AdminAuditRepository(db))
-
-
-AdminMissionServiceDep = Annotated[AdminMissionService, Depends(get_admin_mission_service)]

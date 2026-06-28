@@ -80,7 +80,7 @@ class AdminLoadoutService:
             ),
             context=loadout.context,
             reasoning=loadout.reasoning,
-            led_to_mission=loadout.mission_id is not None,
+            led_to_play_session=loadout.play_session_id is not None,
         )
 
 

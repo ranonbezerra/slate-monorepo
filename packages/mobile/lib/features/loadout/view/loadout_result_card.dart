@@ -28,7 +28,7 @@ class LoadoutResultCard extends StatelessWidget {
   /// Requests a briefing for this game in the given mode ('quick' | 'deep').
   final void Function(String mode) onGetBriefing;
 
-  /// Starts the mission carrying the generated [briefingText].
+  /// Starts the playSession carrying the generated [briefingText].
   final VoidCallback onStartWithBriefing;
   final bool isActioning;
 

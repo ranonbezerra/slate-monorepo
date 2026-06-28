@@ -8,7 +8,7 @@ import 'package:app/core/concierge/concierge_repository.dart';
 import 'package:app/core/config/feature_flags.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/loadout/loadout_repository.dart';
-import 'package:app/core/mission/mission_repository.dart';
+import 'package:app/core/play_session/play_session_repository.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
@@ -16,7 +16,7 @@ import 'package:app/features/concierge/bloc/concierge_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/library_import/bloc/library_import_bloc.dart';
 import 'package:app/features/loadout/bloc/loadout_bloc.dart';
-import 'package:app/features/mission/bloc/mission_bloc.dart';
+import 'package:app/features/play_session/bloc/play_session_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -48,7 +48,7 @@ Future<void> main() async {
 
   final libraryRepository = LibraryRepository(apiClient: apiClient);
   final captureRepository = CaptureRepository(apiClient: apiClient);
-  final missionRepository = MissionRepository(apiClient: apiClient);
+  final playSessionRepository = PlaySessionRepository(apiClient: apiClient);
   final loadoutRepository = LoadoutRepository(apiClient: apiClient);
   final analyticsRepository = AnalyticsRepository(apiClient: apiClient);
   final conciergeRepository = ConciergeRepository(apiClient: apiClient);
@@ -64,10 +64,12 @@ Future<void> main() async {
   final libraryImportBloc = LibraryImportBloc(
     captureRepository: captureRepository,
   );
-  final missionBloc = MissionBloc(missionRepository: missionRepository);
+  final playSessionBloc = PlaySessionBloc(
+    playSessionRepository: playSessionRepository,
+  );
   final loadoutBloc = LoadoutBloc(
     loadoutRepository: loadoutRepository,
-    missionRepository: missionRepository,
+    playSessionRepository: playSessionRepository,
   );
   final analyticsBloc = AnalyticsBloc(analyticsRepository: analyticsRepository);
   final conciergeBloc = ConciergeBloc(conciergeRepository: conciergeRepository);
@@ -78,7 +80,7 @@ Future<void> main() async {
       libraryBloc: libraryBloc,
       captureBloc: captureBloc,
       libraryImportBloc: libraryImportBloc,
-      missionBloc: missionBloc,
+      playSessionBloc: playSessionBloc,
       loadoutBloc: loadoutBloc,
       analyticsBloc: analyticsBloc,
       conciergeBloc: conciergeBloc,

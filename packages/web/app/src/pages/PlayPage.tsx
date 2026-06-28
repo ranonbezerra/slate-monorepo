@@ -19,10 +19,10 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useActiveMission } from "../hooks/useMission";
+import { useActivePlaySession } from "../hooks/usePlaySession";
 import { FEATURES } from "../lib/features";
-import { MissionBriefingModal } from "./MissionBriefingModal";
-import { MissionDebriefModal } from "./MissionDebriefModal";
+import { PlaySessionBriefingModal } from "./PlaySessionBriefingModal";
+import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
 
 interface DoorCardProps {
 	title: string;
@@ -85,10 +85,10 @@ function DoorCard({ title, subtitle, icon, accent, disabled, onClick }: DoorCard
 
 export function PlayPage() {
 	const navigate = useNavigate();
-	const { data: activeMission } = useActiveMission();
+	const { data: activePlaySession } = useActivePlaySession();
 	const [showBriefing, setShowBriefing] = useState(false);
 	const [showDebrief, setShowDebrief] = useState(false);
-	const hasActiveMission = Boolean(activeMission);
+	const hasActivePlaySession = Boolean(activePlaySession);
 
 	return (
 		<Stack maw={720} mx="auto" mt="md">
@@ -97,20 +97,20 @@ export function PlayPage() {
 				Pick how you want to start your session.
 			</Text>
 
-			{activeMission ? (
+			{activePlaySession ? (
 				<Card withBorder p="lg" radius="md">
 					<Stack gap="md">
 						<Group gap="sm">
 							<Badge color="teal" variant="dot" size="lg">
 								Session active
 							</Badge>
-							<Title order={3}>{activeMission.libraryEntry.game.title}</Title>
+							<Title order={3}>{activePlaySession.libraryEntry.game.title}</Title>
 						</Group>
 
-						{activeMission.briefingText && (
+						{activePlaySession.briefingText && (
 							<Card withBorder p="sm" radius="sm">
 								<Text size="sm" c="dimmed" lineClamp={3}>
-									{activeMission.briefingText}
+									{activePlaySession.briefingText}
 								</Text>
 							</Card>
 						)}
@@ -147,14 +147,14 @@ export function PlayPage() {
 					subtitle="One tap — we pick, you play."
 					icon={<IconDice3 size={28} />}
 					accent
-					disabled={hasActiveMission}
+					disabled={hasActivePlaySession}
 					onClick={() => navigate("/play/loadout")}
 				/>
 				<DoorCard
 					title="I'll choose"
 					subtitle="Pick a game yourself."
 					icon={<IconHandClick size={28} />}
-					disabled={hasActiveMission}
+					disabled={hasActivePlaySession}
 					onClick={() => navigate("/library")}
 				/>
 				{FEATURES.backlogConcierge && (
@@ -167,15 +167,15 @@ export function PlayPage() {
 				)}
 			</SimpleGrid>
 
-			{showBriefing && activeMission && (
-				<MissionBriefingModal
+			{showBriefing && activePlaySession && (
+				<PlaySessionBriefingModal
 					mode="view"
-					mission={activeMission}
+					playSession={activePlaySession}
 					onClose={() => setShowBriefing(false)}
 				/>
 			)}
-			<MissionDebriefModal
-				mission={showDebrief ? (activeMission ?? null) : null}
+			<PlaySessionDebriefModal
+				playSession={showDebrief ? (activePlaySession ?? null) : null}
 				onClose={() => setShowDebrief(false)}
 			/>
 		</Stack>

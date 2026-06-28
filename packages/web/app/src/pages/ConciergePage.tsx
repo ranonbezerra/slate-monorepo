@@ -23,17 +23,17 @@ import { useNavigate } from "react-router-dom";
 import { useConcierge } from "../hooks/useConcierge";
 import { useLibraryEntry } from "../hooks/useLibrary";
 import type { ChatMessage } from "../types/concierge";
-import { MissionBriefingModal } from "./MissionBriefingModal";
+import { PlaySessionBriefingModal } from "./PlaySessionBriefingModal";
 
 const TYPING_DOTS = ["dot-0", "dot-1", "dot-2"];
 
 // Friendly labels for the tool affordance shown while the agent works.
 const TOOL_LABELS: Record<string, string> = {
 	search_library: "searching your library",
-	get_mission_history: "recalling your last session",
+	get_play_session_history: "recalling your last session",
 	get_play_stats: "checking your stats",
 	estimate_session_fit: "sizing up the session",
-	start_mission: "starting your session",
+	start_play_session: "starting your session",
 	generate_briefing: "writing a recap",
 	submit_retroactive_debrief: "logging your session",
 	set_status: "updating your library",
@@ -196,13 +196,13 @@ export function ConciergePage() {
 			</Box>
 
 			{playEntryId && playEntry && (
-				<MissionBriefingModal
+				<PlaySessionBriefingModal
 					mode="preview"
 					libraryEntry={playEntry}
 					libraryEntryPublicId={playEntryId}
 					onConfirm={() => {
 						setPlayEntryId(null);
-						navigate("/play"); // land on the now-active mission
+						navigate("/play"); // land on the now-active playSession
 					}}
 					onClose={() => setPlayEntryId(null)}
 				/>

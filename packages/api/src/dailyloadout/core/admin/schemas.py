@@ -222,41 +222,41 @@ class AdminCaptureDetail(AdminCaptureSummary):
     candidates: list[AdminCaptureCandidate]
 
 
-# ── Missions (moderation) ───────────────────────────────────────────────
+# ── PlaySessions (moderation) ───────────────────────────────────────────────
 
 
-class AdminMissionSummary(BaseModel):
-    """A mission as shown in the backoffice moderation table."""
+class AdminPlaySessionSummary(BaseModel):
+    """A play_session as shown in the backoffice moderation table."""
 
     public_id: UUID
     user_email: str | None
     game_title: str | None
     status: str
-    mission_type: str
+    play_session_type: str
     ended_via: str | None
     started_at: datetime
     ended_at: datetime | None
 
 
-class MissionStatusCount(BaseModel):
-    """A single ``(status, count)`` tally for the missions overview."""
+class PlaySessionStatusCount(BaseModel):
+    """A single ``(status, count)`` tally for the play_sessions overview."""
 
     status: str
     count: int
 
 
-class AdminMissionList(BaseModel):
-    """A page of missions plus the total count and per-status tallies."""
+class AdminPlaySessionList(BaseModel):
+    """A page of play_sessions plus the total count and per-status tallies."""
 
-    items: list[AdminMissionSummary]
+    items: list[AdminPlaySessionSummary]
     total: int
     limit: int
     offset: int
-    status_counts: list[MissionStatusCount]
+    status_counts: list[PlaySessionStatusCount]
 
 
-class AdminMissionDetail(AdminMissionSummary):
-    """The full backoffice view of one mission.
+class AdminPlaySessionDetail(AdminPlaySessionSummary):
+    """The full backoffice view of one play_session.
 
     ``has_extracted_state`` reports whether the debrief LLM extraction ran
     (the raw JSON is omitted — it is untrusted model output, not moderation
@@ -276,7 +276,7 @@ class DashboardSummary(BaseModel):
     users_banned: int
     users_unverified: int
     admins: int
-    missions_active: int
+    play_sessions_active: int
     catalogue_size: int
     config_overrides: int
     recent_actions: list[AdminAuditEntry]

@@ -35,7 +35,7 @@ class AbstractCache(ABC):
         """Drop every key starting with *prefix*. Best-effort (never raises).
 
         The unit of invalidation: a user's stats live under ``stats:<id>:`` and
-        are busted as a group on a mission event. Implementations must scope the
+        are busted as a group on a play_session event. Implementations must scope the
         scan to *prefix* so one user's bust never touches another's keys.
         """
         ...

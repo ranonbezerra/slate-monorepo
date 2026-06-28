@@ -147,10 +147,15 @@ class _OverviewGrid extends StatelessWidget {
       runSpacing: 8,
       children: [
         _KpiCard(label: 'Total Games', value: '${overview.totalGames}'),
-        _KpiCard(label: 'Sessions (30d)', value: '${overview.missionsLast30d}'),
+        _KpiCard(
+          label: 'Sessions (30d)',
+          value: '${overview.playSessionsLast30d}',
+        ),
         _KpiCard(
           label: 'Avg Session',
-          value: _formatDuration(overview.avgMissionDurationMinutes?.round()),
+          value: _formatDuration(
+            overview.avgPlaySessionDurationMinutes?.round(),
+          ),
         ),
         _LibraryStatusCard(statusCounts: overview.statusCounts),
       ],
@@ -627,7 +632,7 @@ class _PlatformRow extends StatelessWidget {
               children: [
                 _MetricBadge(label: '${platform.gameCount} games'),
                 _MetricBadge(
-                  label: '${platform.missionCount} sessions',
+                  label: '${platform.playSessionCount} sessions',
                   color: DLColors.green,
                 ),
                 _MetricBadge(label: _formatDuration(platform.totalMinutes)),
@@ -799,7 +804,7 @@ class _TimelineCard extends StatelessWidget {
               runSpacing: 4,
               children: [
                 Chip(label: Text(entry.platformLabel)),
-                Chip(label: Text(entry.missionType)),
+                Chip(label: Text(entry.playSessionType)),
               ],
             ),
             const SizedBox(height: 6),

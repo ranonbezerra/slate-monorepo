@@ -17,8 +17,8 @@ import { IconBolt, IconCheck, IconDice3, IconSearch, IconX } from "@tabler/icons
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAcceptLoadout, useCreateLoadout, useRejectLoadout } from "../hooks/useLoadout";
-import { usePreviewBriefing } from "../hooks/useMission";
-import type { BriefingMode } from "../lib/mission-api";
+import { usePreviewBriefing } from "../hooks/usePlaySession";
+import type { BriefingMode } from "../lib/play-session-api";
 import { safeImageUrl } from "../lib/safe-image";
 import type { Loadout, LoadoutMood, MentalEnergy } from "../types/loadout";
 

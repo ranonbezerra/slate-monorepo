@@ -60,7 +60,7 @@ CONFIG_REGISTRY: dict[str, ConfigKeySpec] = dict(
                 "bool",
                 "concierge_write_tools_enabled",
                 "kill_switch",
-                "Allow the Concierge to call write tools (create missions, etc.).",
+                "Allow the Concierge to call write tools (create play_sessions, etc.).",
             )
         ),
         # ── Incident-tunable caps ──

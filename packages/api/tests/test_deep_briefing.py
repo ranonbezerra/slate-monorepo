@@ -12,7 +12,7 @@ from dailyloadout.infrastructure.agent.dummy import DummyBriefingAgent
 from dailyloadout.infrastructure.agent.factory import get_briefing_agent
 from dailyloadout.infrastructure.agent.graph import nodes
 from dailyloadout.infrastructure.agent.graph.builder import build_graph, route_after_grade
-from dailyloadout.infrastructure.agent.graph.state import MissionContext
+from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
 from dailyloadout.infrastructure.agent.langgraph_agent import LangGraphBriefingAgent
 from dailyloadout.infrastructure.llm.dummy import DummyLLMClient
 from dailyloadout.infrastructure.research.base import AbstractResearchClient
@@ -21,7 +21,7 @@ from dailyloadout.infrastructure.research.dummy import DummyResearchClient, Empt
 FUTURE = float("inf")
 
 
-def _ctx(**overrides: object) -> MissionContext:
+def _ctx(**overrides: object) -> PlaySessionContext:
     base: dict[str, object] = {
         "game_title": "Hollow Knight",
         "location": "Greenpath",

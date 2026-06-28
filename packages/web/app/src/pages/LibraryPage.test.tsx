@@ -42,11 +42,11 @@ vi.mock("./CaptureTextModal", () => ({ CaptureTextModal: () => null }));
 vi.mock("./CaptureVoiceModal", () => ({ CaptureVoiceModal: () => null }));
 vi.mock("./CapturePhotoModal", () => ({ CapturePhotoModal: () => null }));
 vi.mock("./CaptureReviewModal", () => ({ CaptureReviewModal: () => null }));
-vi.mock("./MissionBriefingModal", () => ({
-	MissionBriefingModal: ({ mode }: { mode: string }) =>
+vi.mock("./PlaySessionBriefingModal", () => ({
+	PlaySessionBriefingModal: ({ mode }: { mode: string }) =>
 		mode === "preview" ? <div data-testid="briefing-preview-modal" /> : null,
 }));
-vi.mock("./MissionDebriefModal", () => ({ MissionDebriefModal: () => null }));
+vi.mock("./PlaySessionDebriefModal", () => ({ PlaySessionDebriefModal: () => null }));
 vi.mock("../components/QuickAddMenu", () => ({
 	QuickAddMenu: () => <button type="button">Quick Add</button>,
 }));
@@ -99,8 +99,8 @@ vi.mock("../hooks/useLibrary", () => ({
 	usePlatforms: vi.fn(),
 }));
 
-vi.mock("../hooks/useMission", () => ({
-	useActiveMission: vi.fn(),
+vi.mock("../hooks/usePlaySession", () => ({
+	useActivePlaySession: vi.fn(),
 	usePreviewBriefing: vi.fn(),
 }));
 
@@ -115,9 +115,9 @@ import {
 	usePlatforms,
 	useUpdateEntry,
 } from "../hooks/useLibrary";
-import { useActiveMission, usePreviewBriefing } from "../hooks/useMission";
+import { useActivePlaySession, usePreviewBriefing } from "../hooks/usePlaySession";
 import type { Game, LibraryGameGroup, LibraryPlatformState } from "../types/library";
-import type { Mission } from "../types/mission";
+import type { PlaySession } from "../types/play-session";
 import { LibraryPage } from "./LibraryPage";
 
 // ---------------------------------------------------------------------------
@@ -158,7 +158,7 @@ function makeState(overrides: Partial<LibraryPlatformState> = {}): LibraryPlatfo
 		publicId: "entry-1",
 		platform: PC,
 		status: "playing",
-		missionNextAction: null,
+		playSessionNextAction: null,
 		notes: "Great game",
 		createdAt: "2024-06-01T00:00:00Z",
 		updatedAt: "2024-06-02T00:00:00Z",
@@ -174,20 +174,20 @@ function makeGroup(overrides: Partial<LibraryGameGroup> = {}): LibraryGameGroup 
 	};
 }
 
-function makeMission(overrides: Partial<Mission> = {}): Mission {
+function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 	return {
-		publicId: "mission-1",
+		publicId: "playSession-1",
 		libraryEntry: {
 			publicId: "entry-1",
 			game: makeGame(),
 			platform: PC,
 			status: "playing",
-			missionNextAction: null,
+			playSessionNextAction: null,
 			notes: null,
 			createdAt: "2024-06-01T00:00:00Z",
 			updatedAt: "2024-06-02T00:00:00Z",
 		},
-		missionType: "regular",
+		playSessionType: "regular",
 		briefingText: "Your next adventure awaits",
 		debriefText: null,
 		extractedState: null,
@@ -237,7 +237,7 @@ beforeEach(() => {
 	(useAddToLibrary as Mock).mockReturnValue(mutationStub);
 	(usePlatforms as Mock).mockReturnValue({ data: [PC, SWITCH] });
 
-	(useActiveMission as Mock).mockReturnValue({ data: null });
+	(useActivePlaySession as Mock).mockReturnValue({ data: null });
 	(usePreviewBriefing as Mock).mockReturnValue(mutationStub);
 });
 
@@ -408,10 +408,12 @@ describe("LibraryPage", () => {
 		expect(screen.getByRole("textbox", { name: "Notes" })).toHaveValue("");
 	});
 
-	it('shows "Next objective:" when a platform has a missionNextAction', () => {
+	it('shows "Next objective:" when a platform has a playSessionNextAction', () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: {
-				items: [makeGroup({ platforms: [makeState({ missionNextAction: "Beat Soul Master" })] })],
+				items: [
+					makeGroup({ platforms: [makeState({ playSessionNextAction: "Beat Soul Master" })] }),
+				],
 				total: 1,
 				limit: 50,
 				offset: 0,
@@ -448,10 +450,10 @@ describe("LibraryPage", () => {
 	});
 
 	// -----------------------------------------------------------------------
-	// Start session per platform (one-active-mission rule)
+	// Start session per platform (one-active-playSession rule)
 	// -----------------------------------------------------------------------
 
-	it("disables Start session for every platform when a mission is active", () => {
+	it("disables Start session for every platform when a playSession is active", () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: {
 				items: [makeGroup({ platforms: [makeState({ publicId: "entry-1" })] })],
@@ -461,16 +463,16 @@ describe("LibraryPage", () => {
 			},
 			isLoading: false,
 		});
-		// Active mission is on a DIFFERENT entry, so this platform shows the
+		// Active playSession is on a DIFFERENT entry, so this platform shows the
 		// disabled "Start session" label rather than "Session active".
-		(useActiveMission as Mock).mockReturnValue({
-			data: makeMission({
+		(useActivePlaySession as Mock).mockReturnValue({
+			data: makePlaySession({
 				libraryEntry: {
 					publicId: "entry-other",
 					game: makeGame(),
 					platform: PC,
 					status: "playing",
-					missionNextAction: null,
+					playSessionNextAction: null,
 					notes: null,
 					createdAt: "2024-06-01T00:00:00Z",
 					updatedAt: "2024-06-02T00:00:00Z",
@@ -493,8 +495,8 @@ describe("LibraryPage", () => {
 			},
 			isLoading: false,
 		});
-		(useActiveMission as Mock).mockReturnValue({
-			data: makeMission(), // libraryEntry.publicId === "entry-1"
+		(useActivePlaySession as Mock).mockReturnValue({
+			data: makePlaySession(), // libraryEntry.publicId === "entry-1"
 		});
 
 		renderPage();
@@ -503,12 +505,12 @@ describe("LibraryPage", () => {
 		expect(btn).toBeDisabled();
 	});
 
-	it("enables Start session when no mission is active", () => {
+	it("enables Start session when no playSession is active", () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: { items: [makeGroup()], total: 1, limit: 50, offset: 0 },
 			isLoading: false,
 		});
-		(useActiveMission as Mock).mockReturnValue({ data: null });
+		(useActivePlaySession as Mock).mockReturnValue({ data: null });
 
 		renderPage();
 
@@ -520,7 +522,7 @@ describe("LibraryPage", () => {
 			data: { items: [makeGroup()], total: 1, limit: 50, offset: 0 },
 			isLoading: false,
 		});
-		(useActiveMission as Mock).mockReturnValue({ data: null });
+		(useActivePlaySession as Mock).mockReturnValue({ data: null });
 
 		renderPage();
 
@@ -743,27 +745,31 @@ describe("LibraryPage", () => {
 	});
 
 	// -----------------------------------------------------------------------
-	// Active mission card
+	// Active playSession card
 	// -----------------------------------------------------------------------
 
-	it("shows the active mission card when a mission is active", () => {
-		(useActiveMission as Mock).mockReturnValue({ data: makeMission() });
+	it("shows the active playSession card when a playSession is active", () => {
+		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
 
 		renderPage();
 
 		expect(screen.getByText("Session active")).toBeInTheDocument();
 		expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "End mission" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "End session" })).toBeInTheDocument();
 	});
 
-	it('shows "View briefing" only when the active mission has briefing text', () => {
-		(useActiveMission as Mock).mockReturnValue({ data: makeMission({ briefingText: null }) });
+	it('shows "View briefing" only when the active playSession has briefing text', () => {
+		(useActivePlaySession as Mock).mockReturnValue({
+			data: makePlaySession({ briefingText: null }),
+		});
 
 		const { unmount } = renderPage();
 		expect(screen.queryByRole("button", { name: "View briefing" })).not.toBeInTheDocument();
 		unmount();
 
-		(useActiveMission as Mock).mockReturnValue({ data: makeMission({ briefingText: "go" }) });
+		(useActivePlaySession as Mock).mockReturnValue({
+			data: makePlaySession({ briefingText: "go" }),
+		});
 		renderPage();
 		expect(screen.getByRole("button", { name: "View briefing" })).toBeInTheDocument();
 	});

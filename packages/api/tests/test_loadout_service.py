@@ -51,7 +51,9 @@ class TestPickOneFailurePaths:
         async with _TestSessionFactory() as session:
             from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
             from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepository
-            from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+            from dailyloadout.infrastructure.db.repositories.play_session import (
+                PlaySessionRepository,
+            )
 
             llm = AsyncMock()
             llm.pick_loadout_game = AsyncMock(side_effect=RuntimeError("LLM down"))
@@ -59,7 +61,7 @@ class TestPickOneFailurePaths:
             service = LoadoutService(
                 loadout_repo=LoadoutRepository(session),
                 library_repo=LibraryRepository(session),
-                mission_repo=MissionRepository(session),
+                play_session_repo=PlaySessionRepository(session),
                 llm_client=llm,
             )
 
@@ -81,7 +83,9 @@ class TestPickOneFailurePaths:
         async with _TestSessionFactory() as session:
             from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
             from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepository
-            from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+            from dailyloadout.infrastructure.db.repositories.play_session import (
+                PlaySessionRepository,
+            )
 
             llm = AsyncMock()
             llm.pick_loadout_game = AsyncMock(
@@ -94,7 +98,7 @@ class TestPickOneFailurePaths:
             service = LoadoutService(
                 loadout_repo=LoadoutRepository(session),
                 library_repo=LibraryRepository(session),
-                mission_repo=MissionRepository(session),
+                play_session_repo=PlaySessionRepository(session),
                 llm_client=llm,
             )
 
@@ -107,16 +111,16 @@ class TestPickOneFailurePaths:
                 )
             assert exc_info.value.status_code == 422
 
-    async def test_accept_with_active_mission_returns_409(self) -> None:
-        """Accepting a loadout when a mission is already active returns 409."""
+    async def test_accept_with_active_play_session_returns_409(self) -> None:
+        """Accepting a loadout when a play_session is already active returns 409."""
 
         async with _TestSessionFactory() as session:
             user_id, entry_id = await _setup_user_and_entry(session)
 
-            from dailyloadout.infrastructure.db.models import Loadout, Mission
+            from dailyloadout.infrastructure.db.models import Loadout, PlaySession
 
-            mission = Mission(user_id=user_id, library_entry_id=entry_id)
-            session.add(mission)
+            play_session = PlaySession(user_id=user_id, library_entry_id=entry_id)
+            session.add(play_session)
             await session.flush()
 
             loadout = Loadout(
@@ -135,13 +139,15 @@ class TestPickOneFailurePaths:
         async with _TestSessionFactory() as session:
             from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
             from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepository
-            from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+            from dailyloadout.infrastructure.db.repositories.play_session import (
+                PlaySessionRepository,
+            )
 
             llm = AsyncMock()
             service = LoadoutService(
                 loadout_repo=LoadoutRepository(session),
                 library_repo=LibraryRepository(session),
-                mission_repo=MissionRepository(session),
+                play_session_repo=PlaySessionRepository(session),
                 llm_client=llm,
             )
 

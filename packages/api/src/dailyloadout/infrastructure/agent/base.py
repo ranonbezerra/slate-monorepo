@@ -5,14 +5,14 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from .graph.state import MissionContext
+from .graph.state import PlaySessionContext
 
 
 @dataclass
 class DeepBriefRequest:
     """Input to a deep briefing run."""
 
-    context: MissionContext
+    context: PlaySessionContext
     thread_id: str
 
 
@@ -26,7 +26,7 @@ class BriefResult:
 
 
 class AbstractBriefingAgent(ABC):
-    """Contract for agents that produce a web-grounded mission briefing."""
+    """Contract for agents that produce a web-grounded play_session briefing."""
 
     @abstractmethod
     async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:

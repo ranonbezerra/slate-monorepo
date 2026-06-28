@@ -19,7 +19,7 @@ from dailyloadout.api.middleware import (
 from dailyloadout.api.v1.admin import router as admin_router
 from dailyloadout.api.v1.admin_captures import router as admin_captures_router
 from dailyloadout.api.v1.admin_loadouts import router as admin_loadouts_router
-from dailyloadout.api.v1.admin_missions import router as admin_missions_router
+from dailyloadout.api.v1.admin_play_sessions import router as admin_play_sessions_router
 from dailyloadout.api.v1.auth import router as auth_router
 from dailyloadout.api.v1.auth_oauth import router as auth_oauth_router
 from dailyloadout.api.v1.cache import router as cache_router
@@ -28,7 +28,7 @@ from dailyloadout.api.v1.concierge import router as concierge_router
 from dailyloadout.api.v1.library import router as library_router
 from dailyloadout.api.v1.library_import import router as library_import_router
 from dailyloadout.api.v1.loadout import router as loadout_router
-from dailyloadout.api.v1.mission import router as mission_router
+from dailyloadout.api.v1.play_session import router as play_session_router
 from dailyloadout.api.v1.stats import router as stats_router
 from dailyloadout.config import settings
 
@@ -70,19 +70,19 @@ async def _ensure_single_user() -> None:
 
 
 async def _auto_clamp_loop() -> None:
-    """Periodically close stale missions that exceed the configured timeout."""
-    from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+    """Periodically close stale play_sessions that exceed the configured timeout."""
+    from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
     from dailyloadout.infrastructure.db.session import async_session_factory
-    from dailyloadout.workers.mission_auto_clamp import auto_clamp_stale_missions
+    from dailyloadout.workers.play_session_auto_clamp import auto_clamp_stale_play_sessions
 
     while True:
         await asyncio.sleep(AUTO_CLAMP_INTERVAL_SECONDS)
         try:
             async with async_session_factory() as session:
-                repo = MissionRepository(session)
-                clamped = await auto_clamp_stale_missions(
+                repo = PlaySessionRepository(session)
+                clamped = await auto_clamp_stale_play_sessions(
                     repo,
-                    max_hours=settings.mission_auto_clamp_hours,
+                    max_hours=settings.play_session_auto_clamp_hours,
                 )
                 await session.commit()
                 if clamped:
@@ -210,7 +210,7 @@ def create_app() -> FastAPI:
     # Routers
     application.include_router(admin_router)
     application.include_router(admin_captures_router)
-    application.include_router(admin_missions_router)
+    application.include_router(admin_play_sessions_router)
     application.include_router(admin_loadouts_router)
     application.include_router(auth_router)
     application.include_router(auth_oauth_router)
@@ -218,7 +218,7 @@ def create_app() -> FastAPI:
     application.include_router(capture_router)
     application.include_router(library_import_router)
     application.include_router(library_router)
-    application.include_router(mission_router)
+    application.include_router(play_session_router)
     application.include_router(loadout_router)
     application.include_router(stats_router)
     application.include_router(concierge_router)

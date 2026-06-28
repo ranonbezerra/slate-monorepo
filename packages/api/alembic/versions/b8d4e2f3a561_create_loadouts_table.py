@@ -38,7 +38,7 @@ def upgrade() -> None:
         sa.Column("context", sa.String(120), nullable=True),
         sa.Column("reasoning", sa.Text(), nullable=True),
         sa.Column("action", sa.String(), nullable=True),
-        sa.Column("mission_id", sa.BigInteger(), nullable=True),
+        sa.Column("play_session_id", sa.BigInteger(), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -62,8 +62,8 @@ def upgrade() -> None:
             ondelete="SET NULL",
         ),
         sa.ForeignKeyConstraint(
-            ["mission_id"],
-            ["missions.id"],
+            ["play_session_id"],
+            ["play_sessions.id"],
             ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint("id"),

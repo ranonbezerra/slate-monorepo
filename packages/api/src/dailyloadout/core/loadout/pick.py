@@ -1,7 +1,7 @@
 """Loadout game-pick helper: one LLM call with a reroll + UUID-existence guard.
 
 Extracted from the service so the pick can back any DECIDE=AI entrance to the
-mission pipeline (ROADMAP Epic 12), not only the loadout-suggestion flow.
+play_session pipeline (ROADMAP Epic 12), not only the loadout-suggestion flow.
 """
 
 from __future__ import annotations

@@ -48,8 +48,8 @@ const LibraryPage = lazy(() =>
 const LoadoutPage = lazy(() =>
 	import("./pages/LoadoutPage").then((m) => ({ default: m.LoadoutPage })),
 );
-const MissionsPage = lazy(() =>
-	import("./pages/MissionsPage").then((m) => ({ default: m.MissionsPage })),
+const PlaySessionsPage = lazy(() =>
+	import("./pages/PlaySessionsPage").then((m) => ({ default: m.PlaySessionsPage })),
 );
 const PlayPage = lazy(() => import("./pages/PlayPage").then((m) => ({ default: m.PlayPage })));
 
@@ -159,13 +159,13 @@ function AppLayout() {
 						)}
 						<Route path="/library" element={<LibraryPage />} />
 						<Route path="/library/import" element={<LibraryImportPage />} />
-						<Route path="/history" element={<MissionsPage />} />
+						<Route path="/history" element={<PlaySessionsPage />} />
 						<Route path="/captures" element={<CapturesPage />} />
 						<Route path="/analytics" element={<AnalyticsPage />} />
 						{/* Backward-compatible redirects from the old flat / nested routes. */}
 						<Route path="/loadout" element={<Navigate to="/play/loadout" replace />} />
-						<Route path="/missions" element={<Navigate to="/history" replace />} />
-						<Route path="/play/missions" element={<Navigate to="/history" replace />} />
+						<Route path="/play-sessions" element={<Navigate to="/history" replace />} />
+						<Route path="/play/play-sessions" element={<Navigate to="/history" replace />} />
 						<Route path="/concierge" element={<Navigate to="/play/concierge" replace />} />
 						<Route path="*" element={<Navigate to="/play" replace />} />
 					</Routes>

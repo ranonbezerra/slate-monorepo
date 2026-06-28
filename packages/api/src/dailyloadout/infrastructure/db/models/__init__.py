@@ -15,7 +15,7 @@ from dailyloadout.infrastructure.db.models.capture import Capture, CaptureCandid
 from dailyloadout.infrastructure.db.models.config import AppConfig
 from dailyloadout.infrastructure.db.models.library import Game, LibraryEntry, Platform
 from dailyloadout.infrastructure.db.models.loadout import Loadout
-from dailyloadout.infrastructure.db.models.mission import Mission
+from dailyloadout.infrastructure.db.models.play_session import PlaySession
 from dailyloadout.infrastructure.db.models.usage import UsageCounter
 
 __all__ = [
@@ -27,9 +27,9 @@ __all__ = [
     "Game",
     "LibraryEntry",
     "Loadout",
-    "Mission",
     "OAuthIdentity",
     "Platform",
+    "PlaySession",
     "RefreshToken",
     "UsageCounter",
     "User",

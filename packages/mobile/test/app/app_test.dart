@@ -6,7 +6,7 @@ import 'package:app/core/concierge/concierge_repository.dart';
 import 'package:app/core/config/feature_flags.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/loadout/loadout_repository.dart';
-import 'package:app/core/mission/mission_repository.dart';
+import 'package:app/core/play_session/play_session_repository.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
@@ -14,7 +14,7 @@ import 'package:app/features/concierge/bloc/concierge_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/library_import/bloc/library_import_bloc.dart';
 import 'package:app/features/loadout/bloc/loadout_bloc.dart';
-import 'package:app/features/mission/bloc/mission_bloc.dart';
+import 'package:app/features/play_session/bloc/play_session_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,7 +26,7 @@ class MockLibraryRepository extends Mock implements LibraryRepository {}
 
 class MockCaptureRepository extends Mock implements CaptureRepository {}
 
-class MockMissionRepository extends Mock implements MissionRepository {}
+class MockPlaySessionRepository extends Mock implements PlaySessionRepository {}
 
 class MockLoadoutRepository extends Mock implements LoadoutRepository {}
 
@@ -38,7 +38,7 @@ void main() {
   late MockAuthRepository mockAuthRepository;
   late MockLibraryRepository mockLibraryRepository;
   late MockCaptureRepository mockCaptureRepository;
-  late MockMissionRepository mockMissionRepository;
+  late MockPlaySessionRepository mockPlaySessionRepository;
   late MockLoadoutRepository mockLoadoutRepository;
   late MockAnalyticsRepository mockAnalyticsRepository;
   late MockConciergeRepository mockConciergeRepository;
@@ -46,7 +46,7 @@ void main() {
   late LibraryBloc libraryBloc;
   late CaptureBloc captureBloc;
   late LibraryImportBloc libraryImportBloc;
-  late MissionBloc missionBloc;
+  late PlaySessionBloc playSessionBloc;
   late LoadoutBloc loadoutBloc;
   late AnalyticsBloc analyticsBloc;
   late ConciergeBloc conciergeBloc;
@@ -55,7 +55,7 @@ void main() {
     mockAuthRepository = MockAuthRepository();
     mockLibraryRepository = MockLibraryRepository();
     mockCaptureRepository = MockCaptureRepository();
-    mockMissionRepository = MockMissionRepository();
+    mockPlaySessionRepository = MockPlaySessionRepository();
     mockLoadoutRepository = MockLoadoutRepository();
     mockAnalyticsRepository = MockAnalyticsRepository();
     mockConciergeRepository = MockConciergeRepository();
@@ -69,10 +69,12 @@ void main() {
     libraryImportBloc = LibraryImportBloc(
       captureRepository: mockCaptureRepository,
     );
-    missionBloc = MissionBloc(missionRepository: mockMissionRepository);
+    playSessionBloc = PlaySessionBloc(
+      playSessionRepository: mockPlaySessionRepository,
+    );
     loadoutBloc = LoadoutBloc(
       loadoutRepository: mockLoadoutRepository,
-      missionRepository: mockMissionRepository,
+      playSessionRepository: mockPlaySessionRepository,
     );
     analyticsBloc = AnalyticsBloc(analyticsRepository: mockAnalyticsRepository);
     conciergeBloc = ConciergeBloc(conciergeRepository: mockConciergeRepository);
@@ -83,7 +85,7 @@ void main() {
     libraryBloc.close();
     captureBloc.close();
     libraryImportBloc.close();
-    missionBloc.close();
+    playSessionBloc.close();
     loadoutBloc.close();
     analyticsBloc.close();
     conciergeBloc.close();
@@ -95,7 +97,7 @@ void main() {
       libraryBloc: libraryBloc,
       captureBloc: captureBloc,
       libraryImportBloc: libraryImportBloc,
-      missionBloc: missionBloc,
+      playSessionBloc: playSessionBloc,
       loadoutBloc: loadoutBloc,
       analyticsBloc: analyticsBloc,
       conciergeBloc: conciergeBloc,

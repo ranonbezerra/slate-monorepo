@@ -12,7 +12,10 @@ from typing import Annotated
 from fastapi import Depends
 
 from dailyloadout.core.admin.loadouts_service import AdminLoadoutService
+from dailyloadout.core.admin.play_sessions_service import AdminPlaySessionService
+from dailyloadout.infrastructure.db.repositories.admin import AdminAuditRepository
 from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 from dailyloadout.infrastructure.db.repositories.user import UserRepository
 
 from .db import DbSession
@@ -24,3 +27,15 @@ def get_admin_loadout_service(db: DbSession) -> AdminLoadoutService:
 
 
 AdminLoadoutServiceDep = Annotated[AdminLoadoutService, Depends(get_admin_loadout_service)]
+
+
+def get_admin_play_session_service(db: DbSession) -> AdminPlaySessionService:
+    """Provide an ``AdminPlaySessionService`` wired to the play-session + user repos."""
+    return AdminPlaySessionService(
+        PlaySessionRepository(db), UserRepository(db), AdminAuditRepository(db)
+    )
+
+
+AdminPlaySessionServiceDep = Annotated[
+    AdminPlaySessionService, Depends(get_admin_play_session_service)
+]

@@ -224,9 +224,9 @@ function LoadoutDrawer({ publicId, onClose }: { publicId: string | null; onClose
 				<Stack gap="md">
 					<Group justify="space-between">
 						<ActionBadge action={data.action} />
-						{data.ledToMission && (
+						{data.ledToPlaySession && (
 							<Badge color="violet" variant="light" radius="sm" size="sm">
-								led to mission
+								led to session
 							</Badge>
 						)}
 					</Group>

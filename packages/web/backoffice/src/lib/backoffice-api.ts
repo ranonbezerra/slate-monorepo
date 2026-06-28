@@ -15,8 +15,8 @@ import type {
 	AdminLoadoutDetail,
 	AdminLoadoutList,
 	AdminMe,
-	AdminMissionDetail,
-	AdminMissionList,
+	AdminPlaySessionDetail,
+	AdminPlaySessionList,
 	AdminUserDetail,
 	AdminUserList,
 	AuditList,
@@ -27,7 +27,7 @@ import type {
 	GameEdit,
 	GameListParams,
 	LoadoutListParams,
-	MissionListParams,
+	PlaySessionListParams,
 	UserListParams,
 } from "../types/backoffice";
 
@@ -159,25 +159,29 @@ export async function purgeCapture(publicId: string): Promise<void> {
 	await apiFetch<void>(`${BASE}/captures/${publicId}`, { method: "DELETE" });
 }
 
-export async function fetchMissions(params: MissionListParams = {}): Promise<AdminMissionList> {
+export async function fetchPlaySessions(
+	params: PlaySessionListParams = {},
+): Promise<AdminPlaySessionList> {
 	const sp = new URLSearchParams();
 	if (params.q) sp.set("q", params.q);
 	if (params.status) sp.set("status", params.status);
 	if (params.limit !== undefined) sp.set("limit", String(params.limit));
 	if (params.offset !== undefined) sp.set("offset", String(params.offset));
 	const qs = sp.toString();
-	return snakeToCamel<AdminMissionList>(
-		await apiFetch<unknown>(`${BASE}/missions${qs ? `?${qs}` : ""}`),
+	return snakeToCamel<AdminPlaySessionList>(
+		await apiFetch<unknown>(`${BASE}/play-sessions${qs ? `?${qs}` : ""}`),
 	);
 }
 
-export async function fetchMission(publicId: string): Promise<AdminMissionDetail> {
-	return snakeToCamel<AdminMissionDetail>(await apiFetch<unknown>(`${BASE}/missions/${publicId}`));
+export async function fetchPlaySession(publicId: string): Promise<AdminPlaySessionDetail> {
+	return snakeToCamel<AdminPlaySessionDetail>(
+		await apiFetch<unknown>(`${BASE}/play-sessions/${publicId}`),
+	);
 }
 
-export async function clampMission(publicId: string): Promise<AdminMissionDetail> {
-	return snakeToCamel<AdminMissionDetail>(
-		await apiFetch<unknown>(`${BASE}/missions/${publicId}/clamp`, { method: "POST" }),
+export async function clampPlaySession(publicId: string): Promise<AdminPlaySessionDetail> {
+	return snakeToCamel<AdminPlaySessionDetail>(
+		await apiFetch<unknown>(`${BASE}/play-sessions/${publicId}/clamp`, { method: "POST" }),
 	);
 }
 

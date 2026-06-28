@@ -14,7 +14,7 @@ class SearchResultDict(TypedDict):
     snippet: str
 
 
-class MissionContext(TypedDict, total=False):
+class PlaySessionContext(TypedDict, total=False):
     """Grounding context for a briefing — the same data the quick path uses."""
 
     game_title: str
@@ -33,7 +33,7 @@ class ResearchBriefingState(TypedDict, total=False):
     """Working state threaded through the briefing graph."""
 
     # --- inputs (set once at invocation) ---
-    context: MissionContext
+    context: PlaySessionContext
     deadline_ts: float  # time.monotonic() deadline; routers compare against it
 
     # --- research loop working state ---

@@ -1,7 +1,7 @@
 """Unit tests for the Backlog Concierge write tool functions (Epic 12).
 
 These exercise the same guard rails the REST surface enforces — UUID-existence
-on every pick and one active mission per user — driving the tools directly so no
+on every pick and one active play_session per user — driving the tools directly so no
 model is required.
 """
 
@@ -15,11 +15,11 @@ from dailyloadout.infrastructure.agent.concierge.tools_write import (
     build_concierge_write_tools,
     generate_briefing,
     set_status,
-    start_mission,
+    start_play_session,
     submit_retroactive_debrief,
 )
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
-from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 from dailyloadout.infrastructure.llm.dummy import DummyLLMClient
 from tests.conftest import _TestSessionFactory
 
@@ -46,42 +46,42 @@ async def _seed(session: Any, *, status: str = "playing") -> tuple[int, str, int
     return user.id, str(entry.public_id), entry.id
 
 
-# -- start_mission --------------------------------------------------------------
+# -- start_play_session --------------------------------------------------------------
 
 
-async def test_start_mission_creates_active_mission() -> None:
+async def test_start_play_session_creates_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await start_mission(
+        out = await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
             user_id,
             library_entry_public_id=public_id,
         )
-        assert "Started a mission for Hollow Knight" in out
+        assert "Started a play_session for Hollow Knight" in out
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        active = await MissionRepository(session).get_active_for_user(user_id)
+        active = await PlaySessionRepository(session).get_active_for_user(user_id)
         assert active is not None
         assert active.briefing_text is None
 
 
-async def test_start_mission_with_quick_briefing() -> None:
+async def test_start_play_session_with_quick_briefing() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await start_mission(
+        out = await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
@@ -93,20 +93,20 @@ async def test_start_mission_with_quick_briefing() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        active = await MissionRepository(session).get_active_for_user(user_id)
+        active = await PlaySessionRepository(session).get_active_for_user(user_id)
         assert active is not None
         assert active.briefing_text
 
 
-async def test_start_mission_unknown_game() -> None:
+async def test_start_play_session_unknown_game() -> None:
     async with _TestSessionFactory() as session:
         user_id, _, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await start_mission(
+        out = await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
@@ -116,15 +116,15 @@ async def test_start_mission_unknown_game() -> None:
         assert "not in the library" in out
 
 
-async def test_start_mission_rejects_second_active() -> None:
+async def test_start_play_session_rejects_second_active() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        await start_mission(
+        await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
@@ -134,22 +134,22 @@ async def test_start_mission_rejects_second_active() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await start_mission(
+        out = await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
             user_id,
             library_entry_public_id=public_id,
         )
-        assert "already an active mission" in out
+        assert "already an active play_session" in out
 
 
 # -- generate_briefing ----------------------------------------------------------
 
 
-async def test_generate_briefing_needs_active_mission() -> None:
+async def test_generate_briefing_needs_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         user_id, _, _ = await _seed(session)
         await session.commit()
@@ -157,24 +157,24 @@ async def test_generate_briefing_needs_active_mission() -> None:
     async with _TestSessionFactory() as session:
         out = await generate_briefing(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
             user_id,
         )
-        assert "no active mission" in out.lower()
+        assert "no active play_session" in out.lower()
 
 
-async def test_generate_briefing_persists_on_active_mission() -> None:
+async def test_generate_briefing_persists_on_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        await start_mission(
+        await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
@@ -186,7 +186,7 @@ async def test_generate_briefing_persists_on_active_mission() -> None:
     async with _TestSessionFactory() as session:
         out = await generate_briefing(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
@@ -196,7 +196,7 @@ async def test_generate_briefing_persists_on_active_mission() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        active = await MissionRepository(session).get_active_for_user(user_id)
+        active = await PlaySessionRepository(session).get_active_for_user(user_id)
         assert active is not None
         assert active.briefing_text
 
@@ -213,9 +213,9 @@ async def test_generate_briefing_clamps_deep_to_quick() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        await start_mission(
+        await start_play_session(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             None,
             settings,
@@ -229,7 +229,7 @@ async def test_generate_briefing_clamps_deep_to_quick() -> None:
         # path runs — the agent is never called.
         out = await generate_briefing(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             _ExplodingAgent(),  # type: ignore[arg-type]
             settings,
@@ -250,7 +250,7 @@ async def test_retroactive_debrief_logs_session() -> None:
     async with _TestSessionFactory() as session:
         out = await submit_retroactive_debrief(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             user_id,
             library_entry_public_id=public_id,
@@ -260,9 +260,11 @@ async def test_retroactive_debrief_logs_session() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        missions = await MissionRepository(session).get_recent_for_entry(entry_id, limit=5)
-        assert len(missions) == 1
-        assert missions[0].mission_type == "retroactive"
+        play_sessions = await PlaySessionRepository(session).get_recent_for_entry(
+            entry_id, limit=5
+        )
+        assert len(play_sessions) == 1
+        assert play_sessions[0].play_session_type == "retroactive"
 
 
 async def test_retroactive_debrief_unknown_game() -> None:
@@ -273,7 +275,7 @@ async def test_retroactive_debrief_unknown_game() -> None:
     async with _TestSessionFactory() as session:
         out = await submit_retroactive_debrief(
             LibraryRepository(session),
-            MissionRepository(session),
+            PlaySessionRepository(session),
             DummyLLMClient(),
             user_id,
             library_entry_public_id=str(uuid4()),
@@ -350,14 +352,14 @@ async def test_build_concierge_write_tools_shapes() -> None:
         tools = build_concierge_write_tools(
             user_id=user_id,
             library_repo=LibraryRepository(session),
-            mission_repo=MissionRepository(session),
+            play_session_repo=PlaySessionRepository(session),
             llm_client=DummyLLMClient(),
             agent=None,
             settings=settings,
         )
         names = {t.name for t in tools}
         assert names == {
-            "start_mission",
+            "start_play_session",
             "generate_briefing",
             "submit_retroactive_debrief",
             "set_status",

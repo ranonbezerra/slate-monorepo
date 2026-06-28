@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 Map<String, dynamic> _statsOverviewJson({
   int totalGames = 42,
   Map<String, dynamic>? statusCounts,
-  int missionsLast30d = 15,
-  double? avgMissionDurationMinutes = 90.5,
+  int playSessionsLast30d = 15,
+  double? avgPlaySessionDurationMinutes = 90.5,
   String userCreatedAt = '2024-01-15T00:00:00Z',
 }) => <String, dynamic>{
   'total_games': totalGames,
@@ -22,8 +22,8 @@ Map<String, dynamic> _statsOverviewJson({
         'dropped': 3,
         'paused': 4,
       },
-  'missions_last_30d': missionsLast30d,
-  'avg_mission_duration_minutes': avgMissionDurationMinutes,
+  'play_sessions_last_30d': playSessionsLast30d,
+  'avg_play_session_duration_minutes': avgPlaySessionDurationMinutes,
   'user_created_at': userCreatedAt,
 };
 
@@ -43,11 +43,11 @@ Map<String, dynamic> _playHeatmapJson({List<Map<String, dynamic>>? days}) =>
 Map<String, dynamic> _genreStatJson({
   String genre = 'RPG',
   int totalMinutes = 600,
-  int missionCount = 10,
+  int playSessionCount = 10,
 }) => <String, dynamic>{
   'genre': genre,
   'total_minutes': totalMinutes,
-  'mission_count': missionCount,
+  'play_session_count': playSessionCount,
 };
 
 Map<String, dynamic> _genreStatsJson({List<Map<String, dynamic>>? genres}) =>
@@ -57,13 +57,13 @@ Map<String, dynamic> _platformStatJson({
   String platformSlug = 'ps5',
   String platformLabel = 'PlayStation 5',
   int gameCount = 12,
-  int missionCount = 8,
+  int playSessionCount = 8,
   int totalMinutes = 480,
 }) => <String, dynamic>{
   'platform_slug': platformSlug,
   'platform_label': platformLabel,
   'game_count': gameCount,
-  'mission_count': missionCount,
+  'play_session_count': playSessionCount,
   'total_minutes': totalMinutes,
 };
 
@@ -75,7 +75,7 @@ Map<String, dynamic> _timelineEntryJson({
   String publicId = 'timeline-001',
   String gameTitle = 'Elden Ring',
   String platformLabel = 'PlayStation 5',
-  String missionType = 'regular',
+  String playSessionType = 'regular',
   String? briefingText = 'Time to explore!',
   String? debriefText = 'Great session.',
   String? endedVia = 'debrief',
@@ -86,7 +86,7 @@ Map<String, dynamic> _timelineEntryJson({
   'public_id': publicId,
   'game_title': gameTitle,
   'platform_label': platformLabel,
-  'mission_type': missionType,
+  'play_session_type': playSessionType,
   'briefing_text': briefingText,
   'debrief_text': debriefText,
   'ended_via': endedVia,
@@ -124,18 +124,18 @@ void main() {
           'dropped': 3,
           'paused': 4,
         });
-        expect(overview.missionsLast30d, 15);
-        expect(overview.avgMissionDurationMinutes, 90.5);
+        expect(overview.playSessionsLast30d, 15);
+        expect(overview.avgPlaySessionDurationMinutes, 90.5);
         expect(overview.userCreatedAt, DateTime.utc(2024, 1, 15));
       });
 
-      test('parses JSON with null avgMissionDurationMinutes', () {
-        final json = _statsOverviewJson(avgMissionDurationMinutes: null);
+      test('parses JSON with null avgPlaySessionDurationMinutes', () {
+        final json = _statsOverviewJson(avgPlaySessionDurationMinutes: null);
         final overview = StatsOverview.fromJson(json);
 
-        expect(overview.avgMissionDurationMinutes, isNull);
+        expect(overview.avgPlaySessionDurationMinutes, isNull);
         expect(overview.totalGames, 42);
-        expect(overview.missionsLast30d, 15);
+        expect(overview.playSessionsLast30d, 15);
       });
     });
 
@@ -166,21 +166,21 @@ void main() {
         expect(a, isNot(equals(b)));
       });
 
-      test('instances with different missionsLast30d '
+      test('instances with different playSessionsLast30d '
           'are not equal', () {
         final a = StatsOverview.fromJson(_statsOverviewJson());
         final b = StatsOverview.fromJson(
-          _statsOverviewJson(missionsLast30d: 0),
+          _statsOverviewJson(playSessionsLast30d: 0),
         );
 
         expect(a, isNot(equals(b)));
       });
 
       test('instances with different '
-          'avgMissionDurationMinutes are not equal', () {
+          'avgPlaySessionDurationMinutes are not equal', () {
         final a = StatsOverview.fromJson(_statsOverviewJson());
         final b = StatsOverview.fromJson(
-          _statsOverviewJson(avgMissionDurationMinutes: 30),
+          _statsOverviewJson(avgPlaySessionDurationMinutes: 30),
         );
 
         expect(a, isNot(equals(b)));
@@ -331,7 +331,7 @@ void main() {
 
         expect(stat.genre, 'RPG');
         expect(stat.totalMinutes, 600);
-        expect(stat.missionCount, 10);
+        expect(stat.playSessionCount, 10);
       });
     });
 
@@ -360,10 +360,10 @@ void main() {
         expect(a, isNot(equals(b)));
       });
 
-      test('instances with different missionCount '
+      test('instances with different playSessionCount '
           'are not equal', () {
         final a = GenreStat.fromJson(_genreStatJson());
-        final b = GenreStat.fromJson(_genreStatJson(missionCount: 1));
+        final b = GenreStat.fromJson(_genreStatJson(playSessionCount: 1));
 
         expect(a, isNot(equals(b)));
       });
@@ -393,7 +393,11 @@ void main() {
         final json = _genreStatsJson(
           genres: [
             _genreStatJson(),
-            _genreStatJson(genre: 'Action', totalMinutes: 300, missionCount: 5),
+            _genreStatJson(
+              genre: 'Action',
+              totalMinutes: 300,
+              playSessionCount: 5,
+            ),
           ],
         );
         final stats = GenreStats.fromJson(json);
@@ -445,7 +449,7 @@ void main() {
         expect(stat.platformSlug, 'ps5');
         expect(stat.platformLabel, 'PlayStation 5');
         expect(stat.gameCount, 12);
-        expect(stat.missionCount, 8);
+        expect(stat.playSessionCount, 8);
         expect(stat.totalMinutes, 480);
       });
     });
@@ -483,10 +487,10 @@ void main() {
         expect(a, isNot(equals(b)));
       });
 
-      test('instances with different missionCount '
+      test('instances with different playSessionCount '
           'are not equal', () {
         final a = PlatformStat.fromJson(_platformStatJson());
-        final b = PlatformStat.fromJson(_platformStatJson(missionCount: 1));
+        final b = PlatformStat.fromJson(_platformStatJson(playSessionCount: 1));
 
         expect(a, isNot(equals(b)));
       });
@@ -528,7 +532,7 @@ void main() {
               platformSlug: 'pc',
               platformLabel: 'PC',
               gameCount: 30,
-              missionCount: 20,
+              playSessionCount: 20,
               totalMinutes: 1200,
             ),
           ],
@@ -582,7 +586,7 @@ void main() {
         expect(entry.publicId, 'timeline-001');
         expect(entry.gameTitle, 'Elden Ring');
         expect(entry.platformLabel, 'PlayStation 5');
-        expect(entry.missionType, 'regular');
+        expect(entry.playSessionType, 'regular');
         expect(entry.briefingText, 'Time to explore!');
         expect(entry.debriefText, 'Great session.');
         expect(entry.endedVia, 'debrief');
@@ -604,7 +608,7 @@ void main() {
         expect(entry.publicId, 'timeline-001');
         expect(entry.gameTitle, 'Elden Ring');
         expect(entry.platformLabel, 'PlayStation 5');
-        expect(entry.missionType, 'regular');
+        expect(entry.playSessionType, 'regular');
         expect(entry.briefingText, isNull);
         expect(entry.debriefText, isNull);
         expect(entry.endedVia, isNull);
@@ -651,11 +655,11 @@ void main() {
         expect(a, isNot(equals(b)));
       });
 
-      test('instances with different missionType '
+      test('instances with different playSessionType '
           'are not equal', () {
         final a = TimelineEntry.fromJson(_timelineEntryJson());
         final b = TimelineEntry.fromJson(
-          _timelineEntryJson(missionType: 'retroactive'),
+          _timelineEntryJson(playSessionType: 'retroactive'),
         );
 
         expect(a, isNot(equals(b)));

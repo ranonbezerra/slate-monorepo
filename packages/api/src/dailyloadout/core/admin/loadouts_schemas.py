@@ -46,11 +46,11 @@ class AdminLoadoutList(BaseModel):
 class AdminLoadoutDetail(AdminLoadoutSummary):
     """The full backoffice view of one loadout suggestion.
 
-    ``led_to_mission`` reports whether the user accepted the pick into a mission
-    (the loadout's ``mission_id`` is set).
+    ``led_to_play_session`` reports whether the user accepted the pick into a play_session
+    (the loadout's ``play_session_id`` is set).
     """
 
     platform_label: str | None
     context: str | None
     reasoning: str | None
-    led_to_mission: bool
+    led_to_play_session: bool

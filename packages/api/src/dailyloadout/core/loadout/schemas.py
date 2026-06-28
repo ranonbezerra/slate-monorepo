@@ -31,8 +31,8 @@ class LoadoutCreateRequest(BaseModel):
 class LoadoutAcceptRequest(BaseModel):
     """Optional body for ``POST /v1/loadouts/{id}/accept``.
 
-    Mirrors the mission-start briefing stage: pass a pre-generated
-    *briefing_text* (e.g. from the preview flow) to start the mission with a
+    Mirrors the play_session-start briefing stage: pass a pre-generated
+    *briefing_text* (e.g. from the preview flow) to start the play_session with a
     briefing, or omit it to start without one.
     """
 
@@ -41,7 +41,7 @@ class LoadoutAcceptRequest(BaseModel):
 
 class LoadoutStartRequest(BaseModel):
     """Body for ``POST /v1/loadouts/start`` — AI-pick a game and start a
-    mission in one step (the DECIDE=AI entrance to the mission pipeline)."""
+    play_session in one step (the DECIDE=AI entrance to the play_session pipeline)."""
 
     mood: LoadoutMood
     available_minutes: int = Field(ge=10, le=480)

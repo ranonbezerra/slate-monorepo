@@ -19,10 +19,10 @@ import 'package:app/features/library/view/library_detail_page.dart';
 import 'package:app/features/library/view/library_list_page.dart';
 import 'package:app/features/library_import/view/library_import_page.dart';
 import 'package:app/features/loadout/view/loadout_page.dart';
-import 'package:app/features/mission/view/mission_briefing_page.dart';
-import 'package:app/features/mission/view/mission_debrief_page.dart';
-import 'package:app/features/mission/view/missions_list_page.dart';
 import 'package:app/features/play/view/play_page.dart';
+import 'package:app/features/play_session/view/play_session_briefing_page.dart';
+import 'package:app/features/play_session/view/play_session_debrief_page.dart';
+import 'package:app/features/play_session/view/play_sessions_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -71,7 +71,7 @@ GoRouter createRouter(
 
       // ---- Legacy path redirects (keep old deep links working) ----
       GoRoute(path: '/loadout', redirect: (context, state) => '/play/loadout'),
-      GoRoute(path: '/missions', redirect: (context, state) => '/history'),
+      GoRoute(path: '/play-sessions', redirect: (context, state) => '/history'),
       GoRoute(
         path: '/concierge',
         redirect: (context, state) => '/play/concierge',
@@ -91,9 +91,9 @@ GoRouter createRouter(
                 path: 'loadout',
                 builder: (context, state) => const LoadoutPage(),
               ),
-              // Legacy nested path — the mission log now lives at /history.
+              // Legacy nested path — the playSession log now lives at /history.
               GoRoute(
-                path: 'missions',
+                path: 'play-sessions',
                 redirect: (context, state) => '/history',
               ),
               // Backlog Concierge — hidden unless the feature flag is enabled.
@@ -110,7 +110,7 @@ GoRouter createRouter(
           ),
           GoRoute(
             path: '/history',
-            builder: (context, state) => const MissionsListPage(),
+            builder: (context, state) => const PlaySessionsListPage(),
           ),
           GoRoute(
             path: '/analytics',
@@ -159,21 +159,23 @@ GoRouter createRouter(
         ),
       ),
       GoRoute(
-        path: '/missions/briefing',
+        path: '/play-sessions/briefing',
         builder: (context, state) {
           final entryId = state.uri.queryParameters['entry'];
-          return MissionBriefingPage(libraryEntryPublicId: entryId);
+          return PlaySessionBriefingPage(libraryEntryPublicId: entryId);
         },
       ),
       GoRoute(
-        path: '/missions/:id/briefing',
-        builder: (context, state) =>
-            MissionBriefingPage(missionPublicId: state.pathParameters['id']),
+        path: '/play-sessions/:id/briefing',
+        builder: (context, state) => PlaySessionBriefingPage(
+          playSessionPublicId: state.pathParameters['id'],
+        ),
       ),
       GoRoute(
-        path: '/missions/:id/debrief',
-        builder: (context, state) =>
-            MissionDebriefPage(missionPublicId: state.pathParameters['id']!),
+        path: '/play-sessions/:id/debrief',
+        builder: (context, state) => PlaySessionDebriefPage(
+          playSessionPublicId: state.pathParameters['id']!,
+        ),
       ),
     ],
   );

@@ -136,7 +136,7 @@ class LibraryEntryResponse(BaseModel):
     status: str
     acquired_at: date | None = None
     last_played_at: datetime | None = None
-    mission_next_action: str | None = None
+    play_session_next_action: str | None = None
     notes: str | None = None
     created_at: datetime
     updated_at: datetime
@@ -158,7 +158,7 @@ class LibraryPlatformState(BaseModel):
     """A single per-platform play state for one game.
 
     ``public_id`` is the underlying :class:`LibraryEntry`'s public id, so the
-    client can target this exact platform row for update / delete / mission
+    client can target this exact platform row for update / delete / play_session
     start while still seeing the game as one grouped item.
     """
 
@@ -167,7 +167,7 @@ class LibraryPlatformState(BaseModel):
     status: str
     acquired_at: date | None = None
     last_played_at: datetime | None = None
-    mission_next_action: str | None = None
+    play_session_next_action: str | None = None
     notes: str | None = None
     created_at: datetime
     updated_at: datetime

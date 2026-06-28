@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from dailyloadout.infrastructure.db.models.auth import User
     from dailyloadout.infrastructure.db.models.library import LibraryEntry
-    from dailyloadout.infrastructure.db.models.mission import Mission
+    from dailyloadout.infrastructure.db.models.play_session import PlaySession
 
 from sqlalchemy import (
     BigInteger,
@@ -49,14 +49,14 @@ class Loadout(TimestampMixin, Base):
     reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
     # Action tracking: null=pending, "accepted", "rejected", "ignored"
     action: Mapped[str | None] = mapped_column(String, nullable=True)
-    mission_id: Mapped[int | None] = mapped_column(
-        BigInteger, ForeignKey("missions.id", ondelete="SET NULL"), nullable=True
+    play_session_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("play_sessions.id", ondelete="SET NULL"), nullable=True
     )
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="loadouts")
     library_entry: Mapped["LibraryEntry | None"] = relationship(back_populates="loadouts")
-    mission: Mapped["Mission | None"] = relationship()
+    play_session: Mapped["PlaySession | None"] = relationship()
 
     __table_args__ = (
         Index("idx_loadouts_user_action", "user_id", "action"),

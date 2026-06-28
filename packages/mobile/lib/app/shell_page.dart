@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 /// Shell scaffold that wraps the main authenticated pages with a
 /// [BottomNavigationBar] for tab-based navigation. The nav has four tabs: Play,
 /// Library, History, and Stats. The Loadout and Concierge surfaces live under
-/// the Play hub at `/play/*`; History is the mission log at `/history`.
+/// the Play hub at `/play/*`; History is the playSession log at `/history`.
 class ShellPage extends StatelessWidget {
   const ShellPage({required this.child, super.key});
 

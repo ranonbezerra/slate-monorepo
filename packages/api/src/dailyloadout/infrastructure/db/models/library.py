@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from dailyloadout.infrastructure.db.models.auth import User
     from dailyloadout.infrastructure.db.models.loadout import Loadout
-    from dailyloadout.infrastructure.db.models.mission import Mission
+    from dailyloadout.infrastructure.db.models.play_session import PlaySession
 
 from sqlalchemy import (
     BigInteger,
@@ -116,14 +116,14 @@ class LibraryEntry(TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String, nullable=False, default="backlog")
     acquired_at: Mapped[date | None] = mapped_column(Date, nullable=True)
     last_played_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    mission_next_action: Mapped[str | None] = mapped_column(String, nullable=True)
+    play_session_next_action: Mapped[str | None] = mapped_column(String, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="library_entries")
     game: Mapped["Game"] = relationship(back_populates="library_entries")
     platform: Mapped["Platform"] = relationship(back_populates="library_entries")
-    missions: Mapped[list["Mission"]] = relationship(back_populates="library_entry")
+    play_sessions: Mapped[list["PlaySession"]] = relationship(back_populates="library_entry")
     loadouts: Mapped[list["Loadout"]] = relationship(back_populates="library_entry")
 
     __table_args__ = (

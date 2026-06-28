@@ -32,7 +32,7 @@ export interface DashboardSummary {
 	usersBanned: number;
 	usersUnverified: number;
 	admins: number;
-	missionsActive: number;
+	playSessionsActive: number;
 	catalogueSize: number;
 	configOverrides: number;
 	recentActions: AuditEntry[];
@@ -189,44 +189,44 @@ export interface CaptureListParams {
 	offset?: number;
 }
 
-// ── Missions (moderation) ──────────────────────────────────────────────
+// ── PlaySessions (moderation) ──────────────────────────────────────────────
 
-export type MissionStatus = "active" | "ended";
+export type PlaySessionStatus = "active" | "ended";
 
-export interface AdminMissionSummary {
+export interface AdminPlaySessionSummary {
 	publicId: string;
 	userEmail: string | null;
 	gameTitle: string | null;
-	status: MissionStatus;
-	missionType: string;
+	status: PlaySessionStatus;
+	playSessionType: string;
 	endedVia: string | null;
 	startedAt: string;
 	endedAt: string | null;
 }
 
-export interface MissionStatusCount {
+export interface PlaySessionStatusCount {
 	status: string;
 	count: number;
 }
 
-export interface AdminMissionList {
-	items: AdminMissionSummary[];
+export interface AdminPlaySessionList {
+	items: AdminPlaySessionSummary[];
 	total: number;
 	limit: number;
 	offset: number;
-	statusCounts: MissionStatusCount[];
+	statusCounts: PlaySessionStatusCount[];
 }
 
-export interface AdminMissionDetail extends AdminMissionSummary {
+export interface AdminPlaySessionDetail extends AdminPlaySessionSummary {
 	platformLabel: string | null;
 	briefingText: string | null;
 	debriefText: string | null;
 	hasExtractedState: boolean;
 }
 
-export interface MissionListParams {
+export interface PlaySessionListParams {
 	q?: string;
-	status?: MissionStatus;
+	status?: PlaySessionStatus;
 	limit?: number;
 	offset?: number;
 }
@@ -263,7 +263,7 @@ export interface AdminLoadoutDetail extends AdminLoadoutSummary {
 	platformLabel: string | null;
 	context: string | null;
 	reasoning: string | null;
-	ledToMission: boolean;
+	ledToPlaySession: boolean;
 }
 
 export interface LoadoutListParams {

@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { useAcceptLoadout, useCreateLoadout, useRejectLoadout } from "../hooks/useLoadout";
-import { usePreviewBriefing } from "../hooks/useMission";
+import { usePreviewBriefing } from "../hooks/usePlaySession";
 import type { Loadout } from "../types/loadout";
 import { LoadoutPage } from "./LoadoutPage";
 
@@ -28,7 +28,7 @@ vi.mock("../hooks/useLoadout", () => ({
 	useLatestLoadout: vi.fn(() => ({ data: null, isLoading: false })),
 }));
 
-vi.mock("../hooks/useMission", () => ({
+vi.mock("../hooks/usePlaySession", () => ({
 	usePreviewBriefing: vi.fn(),
 }));
 

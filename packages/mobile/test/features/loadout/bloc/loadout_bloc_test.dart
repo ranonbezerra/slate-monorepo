@@ -1,8 +1,8 @@
 import 'package:app/core/library/library_models.dart';
 import 'package:app/core/loadout/loadout_models.dart';
 import 'package:app/core/loadout/loadout_repository.dart';
-import 'package:app/core/mission/mission_models.dart';
-import 'package:app/core/mission/mission_repository.dart';
+import 'package:app/core/play_session/play_session_models.dart';
+import 'package:app/core/play_session/play_session_repository.dart';
 import 'package:app/features/loadout/bloc/loadout_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dio/dio.dart';
@@ -11,7 +11,7 @@ import 'package:mocktail/mocktail.dart';
 
 class MockLoadoutRepository extends Mock implements LoadoutRepository {}
 
-class MockMissionRepository extends Mock implements MissionRepository {}
+class MockPlaySessionRepository extends Mock implements PlaySessionRepository {}
 
 // -----------------------------------------------------------------
 // Test fixtures
@@ -74,16 +74,16 @@ final _briefingPreview = BriefingPreview(
 
 void main() {
   late MockLoadoutRepository mockLoadoutRepository;
-  late MockMissionRepository mockMissionRepository;
+  late MockPlaySessionRepository mockPlaySessionRepository;
 
   setUp(() {
     mockLoadoutRepository = MockLoadoutRepository();
-    mockMissionRepository = MockMissionRepository();
+    mockPlaySessionRepository = MockPlaySessionRepository();
   });
 
   LoadoutBloc buildBloc() => LoadoutBloc(
     loadoutRepository: mockLoadoutRepository,
-    missionRepository: mockMissionRepository,
+    playSessionRepository: mockPlaySessionRepository,
   );
 
   group('LoadoutBloc', () {
@@ -391,7 +391,7 @@ void main() {
         'on success',
         setUp: () {
           when(
-            () => mockMissionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewBriefing(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
@@ -415,7 +415,7 @@ void main() {
         ],
         verify: (_) {
           verify(
-            () => mockMissionRepository.previewBriefing('lib-001'),
+            () => mockPlaySessionRepository.previewBriefing('lib-001'),
           ).called(1);
         },
       );
@@ -424,7 +424,7 @@ void main() {
         'emits empty briefing text when preview has none',
         setUp: () {
           when(
-            () => mockMissionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewBriefing(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
@@ -450,7 +450,7 @@ void main() {
         'on DioException',
         setUp: () {
           when(
-            () => mockMissionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewBriefing(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
@@ -485,7 +485,7 @@ void main() {
         'on generic Exception',
         setUp: () {
           when(
-            () => mockMissionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewBriefing(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),

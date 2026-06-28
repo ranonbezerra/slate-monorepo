@@ -3,7 +3,7 @@
 Maps domain events to the cache keys they invalidate. Keeping this here — rather
 than scattering ``cache.delete*`` calls across services — means the event →
 busted-keys map lives in one auditable place, and callers express intent
-("a mission changed for this user") instead of poking key strings.
+("a play_session changed for this user") instead of poking key strings.
 
 Invalidation is **ambient**, like ``structlog``'s logger: callers just say
 ``await invalidate_user_stats(user_id)`` and this module resolves the process
@@ -23,7 +23,7 @@ from dailyloadout.infrastructure.cache.keys import stats_namespace
 async def invalidate_user_stats(user_id: int, cache: AbstractCache | None = None) -> None:
     """Bust every cached stats view for *user_id*.
 
-    Called whenever a mission starts, ends, or is debriefed, or the library
+    Called whenever a play_session starts, ends, or is debriefed, or the library
     changes — any of which shifts the overview / heatmap / genre / platform /
     timeline aggregates. Best-effort: a no-op cache (tests, caching disabled)
     simply does nothing.

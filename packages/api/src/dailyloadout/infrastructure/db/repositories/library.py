@@ -9,7 +9,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from dailyloadout.infrastructure.db.models import LibraryEntry, Mission
+from dailyloadout.infrastructure.db.models import LibraryEntry, PlaySession
 
 
 class LibraryRepository:
@@ -202,16 +202,16 @@ class LibraryRepository:
 
         An entry is eligible when:
         - ``status`` is ``backlog``, ``playing``, or ``paused``
-        - No mission on that entry ended within the last *cooldown_hours*
+        - No play_session on that entry ended within the last *cooldown_hours*
         """
         recent_cutoff = datetime.now(UTC) - timedelta(hours=cooldown_hours)
 
-        # Subquery: entry IDs with a mission ended within the cooldown window.
+        # Subquery: entry IDs with a play_session ended within the cooldown window.
         recently_ended = (
-            select(Mission.library_entry_id)
+            select(PlaySession.library_entry_id)
             .where(
-                Mission.ended_at.is_not(None),
-                Mission.ended_at > recent_cutoff,
+                PlaySession.ended_at.is_not(None),
+                PlaySession.ended_at > recent_cutoff,
             )
             .subquery()
         )

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from dailyloadout.infrastructure.db.models.capture import Capture
     from dailyloadout.infrastructure.db.models.library import LibraryEntry
     from dailyloadout.infrastructure.db.models.loadout import Loadout
-    from dailyloadout.infrastructure.db.models.mission import Mission
+    from dailyloadout.infrastructure.db.models.play_session import PlaySession
 
 from sqlalchemy import (
     BigInteger,
@@ -60,7 +60,7 @@ class User(SoftDeleteMixin, TimestampMixin, Base):
     refresh_tokens: Mapped[list["RefreshToken"]] = relationship(back_populates="user")
     library_entries: Mapped[list["LibraryEntry"]] = relationship(back_populates="user")
     captures: Mapped[list["Capture"]] = relationship(back_populates="user")
-    missions: Mapped[list["Mission"]] = relationship(back_populates="user")
+    play_sessions: Mapped[list["PlaySession"]] = relationship(back_populates="user")
     loadouts: Mapped[list["Loadout"]] = relationship(back_populates="user")
 
     __table_args__ = (

@@ -20,7 +20,7 @@ from dailyloadout.core.stats.service import StatsService
 from dailyloadout.infrastructure.agent.concierge.base import ConciergeTool
 from dailyloadout.infrastructure.db.models import LibraryEntry
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
-from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 
 # Status weights for the session-fit heuristic (higher = readier to resume).
 _STATUS_FIT = {"playing": 40, "paused": 30, "backlog": 15, "completed": 0, "dropped": 0}
@@ -37,8 +37,8 @@ def _entry_line(entry: LibraryEntry) -> str:
     """
     title = wrap_user_data(entry.game.title)
     parts = [f"{title} — {entry.platform.label} [{entry.status}]"]
-    if entry.mission_next_action:
-        parts.append(f"next: {wrap_user_data(entry.mission_next_action)}")
+    if entry.play_session_next_action:
+        parts.append(f"next: {wrap_user_data(entry.play_session_next_action)}")
     parts.append(f"(id: {entry.public_id})")
     return "- " + " | ".join(parts)
 
@@ -71,9 +71,9 @@ async def search_library(
     return "\n".join(_entry_line(e) for e in entries)
 
 
-async def get_mission_history(
+async def get_play_session_history(
     library_repo: LibraryRepository,
-    mission_repo: MissionRepository,
+    play_session_repo: PlaySessionRepository,
     user_id: int,
     *,
     library_entry_public_id: str,
@@ -84,19 +84,21 @@ async def get_mission_history(
     if entry is None:
         return "That game is not in the library."
 
-    missions = await mission_repo.get_recent_for_entry(entry.id, limit=max(1, min(limit, 5)))
+    play_sessions = await play_session_repo.get_recent_for_entry(
+        entry.id, limit=max(1, min(limit, 5))
+    )
     lines = [f"Game: {wrap_user_data(entry.game.title)}"]
-    if entry.mission_next_action:
-        lines.append(f"Saved next action: {wrap_user_data(entry.mission_next_action)}")
-    if not missions:
+    if entry.play_session_next_action:
+        lines.append(f"Saved next action: {wrap_user_data(entry.play_session_next_action)}")
+    if not play_sessions:
         lines.append("No recorded sessions yet.")
         return "\n".join(lines)
 
-    for m in missions:
+    for m in play_sessions:
         state = m.extracted_state or {}
         bits = [str(v) for v in (state.get("location"), state.get("current_quest")) if v]
         summary = "; ".join(bits) if bits else (m.debrief_text or "").strip()[:160]
-        # Mission state and debrief text are the player's own words — fence them.
+        # PlaySession state and debrief text are the player's own words — fence them.
         lines.append(f"- {wrap_user_data(summary or 'session recorded')}")
     return "\n".join(lines)
 
@@ -113,10 +115,10 @@ async def get_play_stats(
 
     lines = [
         f"Total games: {overview.total_games}",
-        f"Missions in the last 30 days: {overview.missions_last_30d}",
+        f"PlaySessions in the last 30 days: {overview.play_sessions_last_30d}",
     ]
-    if overview.avg_mission_duration_minutes is not None:
-        lines.append(f"Average session: {round(overview.avg_mission_duration_minutes)} min")
+    if overview.avg_play_session_duration_minutes is not None:
+        lines.append(f"Average session: {round(overview.avg_play_session_duration_minutes)} min")
     top_genres = sorted(genres.genres, key=lambda g: g.total_minutes, reverse=True)[:3]
     if top_genres:
         lines.append("Most-played genres: " + ", ".join(g.genre for g in top_genres))
@@ -142,7 +144,7 @@ async def estimate_session_fit(
     score = _STATUS_FIT.get(entry.status, 10)
     reasons: list[str] = [f"status is '{entry.status}'"]
 
-    if entry.mission_next_action:
+    if entry.play_session_next_action:
         score += 20
         reasons.append("has a saved next step (quick to resume)")
 
@@ -156,7 +158,7 @@ async def estimate_session_fit(
             reasons.append("not touched in a while (more re-orientation needed)")
 
     # Short sessions favour games you can drop into; long sessions suit anything.
-    if minutes < 20 and not entry.mission_next_action:
+    if minutes < 20 and not entry.play_session_next_action:
         score -= 15
         reasons.append("short session with no clear resume point")
     elif minutes >= 60:
@@ -205,7 +207,7 @@ class SearchLibraryArgs(BaseModel):
     limit: int = Field(20, description="Max games to return (1-50).")
 
 
-class MissionHistoryArgs(BaseModel):
+class PlaySessionHistoryArgs(BaseModel):
     library_entry_public_id: str = Field(..., description="The game's id (from search_library).")
     limit: int = Field(3, description="How many recent sessions to summarise (1-5).")
 
@@ -224,7 +226,7 @@ def build_concierge_tools(
     user_id: int,
     user_created_at: datetime,
     library_repo: LibraryRepository,
-    mission_repo: MissionRepository,
+    play_session_repo: PlaySessionRepository,
     stats_service: StatsService,
 ) -> list[ConciergeTool]:
     """Build the per-request tool set, each bound to *user_id* and the repos."""
@@ -240,9 +242,9 @@ def build_concierge_tools(
         )
 
     async def _history(library_entry_public_id: str, limit: int = 3) -> str:
-        return await get_mission_history(
+        return await get_play_session_history(
             library_repo,
-            mission_repo,
+            play_session_repo,
             user_id,
             library_entry_public_id=library_entry_public_id,
             limit=limit,
@@ -266,10 +268,10 @@ def build_concierge_tools(
             coroutine=_search,
         ),
         ConciergeTool(
-            name="get_mission_history",
+            name="get_play_session_history",
             description="Recent session notes for one game: where the player left off and their "
             "saved next action.",
-            args_schema=MissionHistoryArgs,
+            args_schema=PlaySessionHistoryArgs,
             coroutine=_history,
         ),
         ConciergeTool(

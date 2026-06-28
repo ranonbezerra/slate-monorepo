@@ -11,7 +11,7 @@ from typing import Any
 
 from dailyloadout.infrastructure.agent.base import BriefResult, DeepBriefRequest
 from dailyloadout.infrastructure.agent.cached import CachedBriefingAgent
-from dailyloadout.infrastructure.agent.graph.state import MissionContext
+from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
 from dailyloadout.infrastructure.cache.keys import briefing_key, llm_key, research_key
 from dailyloadout.infrastructure.llm.cached import CachedLLMClient
 from dailyloadout.infrastructure.research.base import SearchResult
@@ -31,12 +31,12 @@ class _FakeAgent:
         return self._result
 
 
-_CTX: MissionContext = {"game_title": "Hollow Knight", "next_action": "find the cloak"}
+_CTX: PlaySessionContext = {"game_title": "Hollow Knight", "next_action": "find the cloak"}
 _REQ = DeepBriefRequest(context=_CTX, thread_id="t1")
 
 
 def test_briefing_key_changes_when_context_changes() -> None:
-    other: MissionContext = {**_CTX, "next_action": "beat the boss"}
+    other: PlaySessionContext = {**_CTX, "next_action": "beat the boss"}
     assert briefing_key("deep", _CTX) != briefing_key("deep", other)
 
 

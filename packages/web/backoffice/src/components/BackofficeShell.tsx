@@ -22,7 +22,7 @@ const NAV = [
 	{ path: "/users", label: "Users", icon: IconUsers },
 	{ path: "/games", label: "Catalogue", icon: IconDeviceGamepad2 },
 	{ path: "/captures", label: "Captures", icon: IconCamera },
-	{ path: "/missions", label: "Missions", icon: IconTargetArrow },
+	{ path: "/play-sessions", label: "Sessions", icon: IconTargetArrow },
 	{ path: "/loadouts", label: "Loadouts", icon: IconBolt },
 	{ path: "/config", label: "Config", icon: IconSettings },
 	{ path: "/audit", label: "Audit log", icon: IconHistory },

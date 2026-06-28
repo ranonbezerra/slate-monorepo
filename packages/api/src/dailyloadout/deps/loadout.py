@@ -10,7 +10,7 @@ from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepositor
 from .capture import LLMClientDep
 from .db import DbSession
 from .library import LibraryRepoDep
-from .mission import MissionRepoDep
+from .play_session import PlaySessionRepoDep
 
 # ── Repository ────────────────────────────────────────────────────────
 
@@ -29,11 +29,11 @@ LoadoutRepoDep = Annotated[LoadoutRepository, Depends(get_loadout_repo)]
 def get_loadout_service(
     loadout_repo: LoadoutRepoDep,
     library_repo: LibraryRepoDep,
-    mission_repo: MissionRepoDep,
+    play_session_repo: PlaySessionRepoDep,
     llm_client: LLMClientDep,
 ) -> LoadoutService:
     """Provide a ``LoadoutService`` wired to the current dependencies."""
-    return LoadoutService(loadout_repo, library_repo, mission_repo, llm_client)
+    return LoadoutService(loadout_repo, library_repo, play_session_repo, llm_client)
 
 
 LoadoutServiceDep = Annotated[LoadoutService, Depends(get_loadout_service)]

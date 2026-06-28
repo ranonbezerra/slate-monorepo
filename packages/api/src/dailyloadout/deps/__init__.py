@@ -24,11 +24,11 @@ from .loadout import (
     LoadoutRepoDep,
     LoadoutServiceDep,
 )
-from .mission import (
-    MissionRepoDep,
-    MissionServiceDep,
-)
 from .ocr import CaptureServiceDep
+from .play_session import (
+    PlaySessionRepoDep,
+    PlaySessionServiceDep,
+)
 from .stats import StatsRepoDep, StatsServiceDep
 
 __all__ = [
@@ -45,9 +45,9 @@ __all__ = [
     "LibraryServiceDep",
     "LoadoutRepoDep",
     "LoadoutServiceDep",
-    "MissionRepoDep",
-    "MissionServiceDep",
     "PlatformRepoDep",
+    "PlaySessionRepoDep",
+    "PlaySessionServiceDep",
     "RequireVerifiedUserDep",
     "STTClientDep",
     "StatsRepoDep",

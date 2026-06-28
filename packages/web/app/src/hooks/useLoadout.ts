@@ -13,7 +13,7 @@ import type { LoadoutMood, MentalEnergy } from "../types/loadout";
 // ---------------------------------------------------------------------------
 
 const LOADOUTS_KEY = ["loadouts"] as const;
-const MISSIONS_KEY = ["missions"] as const;
+const MISSIONS_KEY = ["playSessions"] as const;
 const STATS_KEY = ["stats"] as const;
 
 // ---------------------------------------------------------------------------

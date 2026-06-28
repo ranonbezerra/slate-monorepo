@@ -18,8 +18,8 @@ vi.mock("@dl/shared/api", () => ({
 const mockOverview = {
 	totalGames: 42,
 	statusCounts: { backlog: 20, playing: 5, completed: 15, paused: 2, dropped: 0 },
-	missionsLast30d: 12,
-	avgMissionDurationMinutes: 95.5,
+	playSessionsLast30d: 12,
+	avgPlaySessionDurationMinutes: 95.5,
 	userCreatedAt: "2023-01-01T00:00:00Z",
 };
 
@@ -33,9 +33,9 @@ const mockHeatmap = {
 
 const mockGenreStats = {
 	genres: [
-		{ genre: "Action", totalMinutes: 5400, missionCount: 30 },
-		{ genre: "RPG", totalMinutes: 3600, missionCount: 20 },
-		{ genre: "Puzzle", totalMinutes: 1200, missionCount: 10 },
+		{ genre: "Action", totalMinutes: 5400, playSessionCount: 30 },
+		{ genre: "RPG", totalMinutes: 3600, playSessionCount: 20 },
+		{ genre: "Puzzle", totalMinutes: 1200, playSessionCount: 10 },
 	],
 };
 
@@ -45,14 +45,14 @@ const mockPlatformStats = {
 			platformSlug: "pc",
 			platformLabel: "PC",
 			gameCount: 25,
-			missionCount: 40,
+			playSessionCount: 40,
 			totalMinutes: 6000,
 		},
 		{
 			platformSlug: "ps5",
 			platformLabel: "PlayStation 5",
 			gameCount: 10,
-			missionCount: 15,
+			playSessionCount: 15,
 			totalMinutes: 2400,
 		},
 	],
@@ -61,10 +61,10 @@ const mockPlatformStats = {
 const mockTimeline = {
 	items: [
 		{
-			publicId: "mission-1",
+			publicId: "playSession-1",
 			gameTitle: "Elden Ring",
 			platformLabel: "PC",
-			missionType: "regular",
+			playSessionType: "regular",
 			briefingText: "Continue Stormveil.",
 			debriefText: "Defeated Godrick.",
 			endedVia: "debrief_completed",
@@ -73,10 +73,10 @@ const mockTimeline = {
 			durationMinutes: 120,
 		},
 		{
-			publicId: "mission-2",
+			publicId: "playSession-2",
 			gameTitle: "Hades",
 			platformLabel: "PC",
-			missionType: "regular",
+			playSessionType: "regular",
 			briefingText: null,
 			debriefText: null,
 			endedVia: "paused_app",

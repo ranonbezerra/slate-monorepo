@@ -176,7 +176,7 @@ class TestStartLoadout:
             headers=headers,
         )
 
-    async def test_start_picks_and_starts_mission(
+    async def test_start_picks_and_starts_play_session(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -188,7 +188,7 @@ class TestStartLoadout:
         assert resp.status_code == 201, resp.text
         assert resp.json()["action"] == "accepted"
 
-        active = (await async_client.get("/v1/missions/active", headers=auth_headers)).json()
+        active = (await async_client.get("/v1/play-sessions/active", headers=auth_headers)).json()
         assert active is not None
         assert active["briefing_text"] is None
 
@@ -203,7 +203,7 @@ class TestStartLoadout:
         resp = await self._start(async_client, auth_headers, briefing_text="Resume at the gate.")
         assert resp.status_code == 201, resp.text
 
-        active = (await async_client.get("/v1/missions/active", headers=auth_headers)).json()
+        active = (await async_client.get("/v1/play-sessions/active", headers=auth_headers)).json()
         assert active["briefing_text"] == "Resume at the gate."
 
     async def test_start_no_eligible_games_returns_422(
@@ -214,7 +214,7 @@ class TestStartLoadout:
         resp = await self._start(async_client, auth_headers)
         assert resp.status_code == 422
 
-    async def test_start_with_active_mission_returns_409(
+    async def test_start_with_active_play_session_returns_409(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -223,12 +223,12 @@ class TestStartLoadout:
         await _create_library_entry(async_client, auth_headers, seed_platforms)
         assert (await self._start(async_client, auth_headers)).status_code == 201
 
-        # A mission is now active; a second start must be rejected.
+        # A play_session is now active; a second start must be rejected.
         assert (await self._start(async_client, auth_headers)).status_code == 409
 
 
 class TestAcceptLoadout:
-    async def test_accept_creates_mission(
+    async def test_accept_creates_play_session(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -245,14 +245,14 @@ class TestAcceptLoadout:
         accepted = resp.json()
         assert accepted["action"] == "accepted"
 
-        # Verify a mission was created.
-        resp = await async_client.get("/v1/missions/active", headers=auth_headers)
+        # Verify a play_session was created.
+        resp = await async_client.get("/v1/play-sessions/active", headers=auth_headers)
         assert resp.status_code == 200
-        mission = resp.json()
-        assert mission is not None
-        assert mission["library_entry"]["public_id"] == loadout["library_entry"]["public_id"]
+        play_session = resp.json()
+        assert play_session is not None
+        assert play_session["library_entry"]["public_id"] == loadout["library_entry"]["public_id"]
 
-    async def test_accept_with_briefing_starts_mission_with_briefing(
+    async def test_accept_with_briefing_starts_play_session_with_briefing(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -270,9 +270,9 @@ class TestAcceptLoadout:
         assert resp.status_code == 200
         assert resp.json()["action"] == "accepted"
 
-        resp = await async_client.get("/v1/missions/active", headers=auth_headers)
-        mission = resp.json()
-        assert mission["briefing_text"] == "Previously on your game: you reached the gate."
+        resp = await async_client.get("/v1/play-sessions/active", headers=auth_headers)
+        play_session = resp.json()
+        assert play_session["briefing_text"] == "Previously on your game: you reached the gate."
 
     async def test_accept_already_actioned(
         self,

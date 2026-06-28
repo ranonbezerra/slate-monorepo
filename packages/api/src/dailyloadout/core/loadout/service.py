@@ -8,16 +8,16 @@ import structlog
 from fastapi import HTTPException, status
 
 from dailyloadout.core.loadout.pick import pick_one
-from dailyloadout.core.mission.start import create_mission_for_entry
+from dailyloadout.core.play_session.start import create_play_session_for_entry
 from dailyloadout.infrastructure.db.models import Loadout
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
 from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepository
-from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 from dailyloadout.infrastructure.llm.base import AbstractLLMClient
 
 logger = structlog.get_logger()
 
-_ACTIVE_MISSION_DETAIL = "You already have an active mission. End it first."
+_ACTIVE_MISSION_DETAIL = "You already have an active play_session. End it first."
 
 
 class LoadoutService:
@@ -27,12 +27,12 @@ class LoadoutService:
         self,
         loadout_repo: LoadoutRepository,
         library_repo: LibraryRepository,
-        mission_repo: MissionRepository,
+        play_session_repo: PlaySessionRepository,
         llm_client: AbstractLLMClient,
     ) -> None:
         self._loadout_repo = loadout_repo
         self._library_repo = library_repo
-        self._mission_repo = mission_repo
+        self._play_session_repo = play_session_repo
         self._llm_client = llm_client
 
     async def create_loadout(
@@ -97,7 +97,7 @@ class LoadoutService:
                     "last_played_at": (
                         str(entry.last_played_at) if entry.last_played_at else None
                     ),
-                    "mission_next_action": entry.mission_next_action,
+                    "play_session_next_action": entry.play_session_next_action,
                     "genres": entry.game.genres or [],
                     "summary": entry.game.summary,
                 }
@@ -169,14 +169,14 @@ class LoadoutService:
         briefing_text: str | None = None,
         cooldown_hours: int = 12,
     ) -> Loadout:
-        """AI-pick one game and start a mission for it in a single step.
+        """AI-pick one game and start a play_session for it in a single step.
 
         The DECIDE=AI entrance to the unified pipeline (ROADMAP Epic 12):
         records the Loadout decision, then accepts it through the shared
         orchestrator (optionally with a pre-generated *briefing_text*).
         """
-        # Fail fast before spending an LLM pick if a mission is already active.
-        if await self._mission_repo.get_active_for_user(user_id) is not None:
+        # Fail fast before spending an LLM pick if a play_session is already active.
+        if await self._play_session_repo.get_active_for_user(user_id) is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=_ACTIVE_MISSION_DETAIL,
@@ -192,7 +192,7 @@ class LoadoutService:
         loadout_public_id: UUID,
         briefing_text: str | None = None,
     ) -> Loadout:
-        """Accept a loadout and start a mission via the shared orchestrator
+        """Accept a loadout and start a play_session via the shared orchestrator
         (ROADMAP Epic 12), optionally with a pre-generated *briefing_text*."""
         loadout = await self._loadout_repo.get_by_public_id(loadout_public_id, user_id=user_id)
         if loadout is None:
@@ -214,16 +214,16 @@ class LoadoutService:
                 detail="The suggested game is no longer in your library.",
             )
 
-        # Early active-mission check for a clean 409 (orchestrator maps the DB
+        # Early active-play_session check for a clean 409 (orchestrator maps the DB
         # constraint as a backstop).
-        if await self._mission_repo.get_active_for_user(user_id) is not None:
+        if await self._play_session_repo.get_active_for_user(user_id) is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=_ACTIVE_MISSION_DETAIL,
             )
 
-        mission = await create_mission_for_entry(
-            mission_repo=self._mission_repo,
+        play_session = await create_play_session_for_entry(
+            play_session_repo=self._play_session_repo,
             library_repo=self._library_repo,
             user_id=user_id,
             entry=entry,
@@ -231,7 +231,7 @@ class LoadoutService:
         )
 
         await self._loadout_repo.set_action(loadout.id, "accepted")
-        await self._loadout_repo.set_mission(loadout.id, mission.id)
+        await self._loadout_repo.set_play_session(loadout.id, play_session.id)
 
         return await self._get_loadout(user_id, loadout_public_id)
 

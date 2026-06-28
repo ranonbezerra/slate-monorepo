@@ -7,28 +7,28 @@ from unittest.mock import patch
 
 from httpx import AsyncClient
 
-from tests.test_mission import _create_library_entry, _start_mission
+from tests.test_play_session import _create_library_entry, _start_play_session
 
 
-async def _setup_ended_mission(
+async def _setup_ended_play_session(
     client: AsyncClient,
     headers: dict[str, str],
     seed_platforms: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Create a library entry, start a mission, submit a debrief, return both."""
+    """Create a library entry, start a play_session, submit a debrief, return both."""
     entry = await _create_library_entry(client, headers, seed_platforms)
-    mission = await _start_mission(client, headers, entry["public_id"])
+    play_session = await _start_play_session(client, headers, entry["public_id"])
 
     resp = await client.patch(
-        f"/v1/missions/{mission['public_id']}/debrief",
+        f"/v1/play-sessions/{play_session['public_id']}/debrief",
         json={"debrief_text": "Found the Mantis Claw. Heading to City of Tears."},
         headers=headers,
     )
     assert resp.status_code == 200
-    mission = resp.json()
-    assert mission["extracted_state"] is None  # async — not yet extracted
+    play_session = resp.json()
+    assert play_session["extracted_state"] is None  # async — not yet extracted
 
-    return entry, mission
+    return entry, play_session
 
 
 class TestDebriefExtractionTask:
@@ -39,7 +39,7 @@ class TestDebriefExtractionTask:
         seed_platforms: list[dict[str, Any]],
     ) -> None:
         """Calling the task function directly extracts state and saves it."""
-        await _setup_ended_mission(async_client, auth_headers, seed_platforms)
+        await _setup_ended_play_session(async_client, auth_headers, seed_platforms)
 
         from tests.conftest import _TestSessionFactory
 
@@ -55,16 +55,16 @@ class TestDebriefExtractionTask:
 
             # Call the underlying coroutine directly (not via .kiq()).
             await extract_debrief_state_task.original_func(
-                mission_id=1,
+                play_session_id=1,
                 game_title="Hollow Knight",
                 debrief_text="Found the Mantis Claw. Heading to City of Tears.",
             )
 
         # Verify the extracted state is persisted.
-        from dailyloadout.infrastructure.db.models import Mission
+        from dailyloadout.infrastructure.db.models import PlaySession
 
         async with _TestSessionFactory() as session:
-            row = await session.get(Mission, 1)
+            row = await session.get(PlaySession, 1)
             assert row is not None
             assert row.extracted_state is not None
             state = row.extracted_state
@@ -76,8 +76,8 @@ class TestDebriefExtractionTask:
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Task updates the denormalized mission_next_action on library entry."""
-        await _setup_ended_mission(async_client, auth_headers, seed_platforms)
+        """Task updates the denormalized play_session_next_action on library entry."""
+        await _setup_ended_play_session(async_client, auth_headers, seed_platforms)
 
         from tests.conftest import _TestSessionFactory
 
@@ -90,13 +90,13 @@ class TestDebriefExtractionTask:
             )
 
             await extract_debrief_state_task.original_func(
-                mission_id=1,
+                play_session_id=1,
                 game_title="Hollow Knight",
                 debrief_text="Found the Mantis Claw. Heading to City of Tears.",
             )
 
-        # Check library entry's mission_next_action is updated.
+        # Check library entry's play_session_next_action is updated.
         resp = await async_client.get("/v1/library", headers=auth_headers)
         items = resp.json()["items"]
         assert len(items) == 1
-        assert items[0]["platforms"][0]["mission_next_action"] is not None
+        assert items[0]["platforms"][0]["play_session_next_action"] is not None

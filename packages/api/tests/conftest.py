@@ -30,8 +30,8 @@ from dailyloadout.infrastructure.db.models import (  # noqa: F401  — ensure mo
     Game,
     LibraryEntry,
     Loadout,
-    Mission,
     Platform,
+    PlaySession,
     User,
 )
 
@@ -75,7 +75,7 @@ Game.__table__.c.genres.type = _JSONEncodedList()
 CaptureCandidate.__table__.c.igdb_genres.type = _JSONEncodedList()
 
 # Swap JSONB → JSON-encoded TEXT for SQLite (round-trips scalars too: bool/int).
-Mission.__table__.c.extracted_state.type = _JSONEncodedList()
+PlaySession.__table__.c.extracted_state.type = _JSONEncodedList()
 AppConfig.__table__.c.value.type = _JSONEncodedList()
 
 
@@ -144,8 +144,8 @@ _SQLITE_INCOMPATIBLE_INDEXES = {
     "idx_games_title_trgm",  # GIN + pg_trgm
     "idx_library_user_last_played",  # NULLS LAST
     "idx_captures_created",  # created_at DESC expression
-    "idx_missions_user_active",  # partial unique (WHERE ended_at IS NULL)
-    "idx_missions_entry_ended",  # DESC expression
+    "idx_play_sessions_user_active",  # partial unique (WHERE ended_at IS NULL)
+    "idx_play_sessions_entry_ended",  # DESC expression
     "idx_loadouts_user_created",  # DESC expression
     "idx_users_email_active",  # partial (WHERE deleted_at IS NULL)
     "idx_refresh_user_active",  # partial (WHERE revoked_at IS NULL)

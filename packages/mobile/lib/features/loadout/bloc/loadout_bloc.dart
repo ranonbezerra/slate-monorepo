@@ -1,7 +1,7 @@
 import 'package:app/core/auth/email_verification.dart';
 import 'package:app/core/loadout/loadout_models.dart';
 import 'package:app/core/loadout/loadout_repository.dart';
-import 'package:app/core/mission/mission_repository.dart';
+import 'package:app/core/play_session/play_session_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
@@ -12,9 +12,9 @@ part 'loadout_state.dart';
 class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
   LoadoutBloc({
     required LoadoutRepository loadoutRepository,
-    required MissionRepository missionRepository,
+    required PlaySessionRepository playSessionRepository,
   }) : _loadoutRepository = loadoutRepository,
-       _missionRepository = missionRepository,
+       _playSessionRepository = playSessionRepository,
        super(const LoadoutInitial()) {
     on<CreateLoadout>(_onCreateLoadout);
     on<AcceptLoadout>(_onAcceptLoadout);
@@ -25,7 +25,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
   }
 
   final LoadoutRepository _loadoutRepository;
-  final MissionRepository _missionRepository;
+  final PlaySessionRepository _playSessionRepository;
 
   Future<void> _onCreateLoadout(
     CreateLoadout event,
@@ -76,7 +76,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     emit(LoadoutBriefingLoading(publicId: event.publicId));
 
     try {
-      final preview = await _missionRepository.previewBriefing(
+      final preview = await _playSessionRepository.previewBriefing(
         event.libraryEntryPublicId,
         mode: event.mode,
       );

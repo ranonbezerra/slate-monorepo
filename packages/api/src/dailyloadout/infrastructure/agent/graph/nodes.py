@@ -13,20 +13,20 @@ import typing
 
 import structlog
 
-from dailyloadout.core.mission.anti_hallucination import validate_briefing
+from dailyloadout.core.play_session.anti_hallucination import validate_briefing
 from dailyloadout.infrastructure.llm.base import AbstractLLMClient
 from dailyloadout.infrastructure.research.base import AbstractResearchClient
 
 from .render import render
-from .state import Grade, MissionContext, ResearchBriefingState
+from .state import Grade, PlaySessionContext, ResearchBriefingState
 
 logger = structlog.get_logger()
 
 _VALID_GRADES: tuple[Grade, ...] = ("sufficient", "insufficient", "empty")
 
 
-def _context_text(ctx: MissionContext) -> str:
-    """Flatten the mission context into a single grounding string."""
+def _context_text(ctx: PlaySessionContext) -> str:
+    """Flatten the play_session context into a single grounding string."""
     parts: list[str] = [ctx.get("game_title", "")]
     for key in ("location", "current_quest", "next_action", "level"):
         value = ctx.get(key)
@@ -38,7 +38,7 @@ def _context_text(ctx: MissionContext) -> str:
 
 
 async def build_query(state: ResearchBriefingState) -> dict[str, object]:
-    """Build the initial search query from the mission context. Deterministic."""
+    """Build the initial search query from the play_session context. Deterministic."""
     ctx = state["context"]
     base = (
         f"{ctx.get('game_title', '')} after {ctx.get('location') or ''} "

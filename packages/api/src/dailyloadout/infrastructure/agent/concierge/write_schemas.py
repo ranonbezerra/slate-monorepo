@@ -9,7 +9,7 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
-class StartMissionArgs(BaseModel):
+class StartPlaySessionArgs(BaseModel):
     library_entry_public_id: str = Field(..., description="The game's id (from search_library).")
     briefing: str = Field(
         "none",

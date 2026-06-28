@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6380/0"
     # Best-effort caching (IGDB lookups, etc.); off => NullCache (Epic 17).
     cache_enabled: bool = True
-    # Per-user stats cached briefly, bust on mission start/end/debrief (Epic 18).
+    # Per-user stats cached briefly, bust on play_session start/end/debrief (Epic 18).
     stats_cache_ttl_seconds: int = 300
     # Deep briefings are content-addressed on the session context (Epic 18). 7d.
     briefing_cache_ttl_seconds: int = 7 * 24 * 3600
@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     # Thread checkpoint store (Epic 16): 'postgres' survives restarts, 'memory'
     # is in-process. Falls back to memory if Postgres init fails. Langgraph only.
     concierge_checkpointer: str = "postgres"
-    # Concierge write tools (start_mission/set_status/…) so it drives the mission
+    # Concierge write tools (start_play_session/set_status/…) so it drives the play_session
     # pipeline, not just recommends (Epic 12).
     concierge_write_tools_enabled: bool = True
 
@@ -168,7 +168,7 @@ class Settings(BaseSettings):
     capture_max_image_mb: int = 10
     capture_max_audio_mb: int = 5
     capture_max_games_per_shelf: int = 12
-    mission_auto_clamp_hours: int = 24
+    play_session_auto_clamp_hours: int = 24
     loadout_auto_ignore_hours: int = 24
     loadout_cooldown_hours: int = 12
 
@@ -183,7 +183,7 @@ class Settings(BaseSettings):
     # conservatively for COST (each call is a paid Vertex/Bedrock request, and
     # the concierge fans out to several model calls per turn), not just abuse.
     rate_limit_concierge_chat_per_minute: int = 6
-    rate_limit_mission_briefing_per_minute: int = 4
+    rate_limit_play_session_briefing_per_minute: int = 4
     rate_limit_loadout_create_per_minute: int = 10
     rate_limit_capture_submit_per_minute: int = 15
     rate_limit_library_import_per_minute: int = 5

@@ -1,7 +1,7 @@
 """Backoffice dashboard service (Epic 21, Phase 4).
 
 Aggregates the at-a-glance metrics the admin landing screen shows: user
-counts (total / banned / unverified / admins), active missions, catalogue size,
+counts (total / banned / unverified / admins), active play_sessions, catalogue size,
 how many config knobs are currently overridden, and the most recent admin
 actions. Read-only; orchestrates repositories only.
 """
@@ -12,7 +12,7 @@ from dailyloadout.core.admin.schemas import AdminAuditEntry, DashboardSummary
 from dailyloadout.infrastructure.db.repositories.admin import AdminAuditRepository, AdminRepository
 from dailyloadout.infrastructure.db.repositories.app_config import AppConfigRepository
 from dailyloadout.infrastructure.db.repositories.game import GameRepository
-from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 from dailyloadout.infrastructure.db.repositories.user import UserRepository
 
 _RECENT_ACTIONS = 8
@@ -27,14 +27,14 @@ class AdminDashboardService:
         admin_repo: AdminRepository,
         audit_repo: AdminAuditRepository,
         config_repo: AppConfigRepository,
-        mission_repo: MissionRepository,
+        play_session_repo: PlaySessionRepository,
         game_repo: GameRepository,
     ) -> None:
         self._users = user_repo
         self._admins = admin_repo
         self._audit = audit_repo
         self._config = config_repo
-        self._missions = mission_repo
+        self._play_sessions = play_session_repo
         self._games = game_repo
 
     async def summary(self) -> DashboardSummary:
@@ -43,7 +43,7 @@ class AdminDashboardService:
         _, banned = await self._users.search(is_banned=True, limit=1)
         _, unverified = await self._users.search(email_verified=False, limit=1)
         admins = await self._admins.count()
-        missions_active = await self._missions.count_active()
+        play_sessions_active = await self._play_sessions.count_active()
         catalogue_size = await self._games.count_catalogue()
         overrides = await self._config.list_with_updater()
         rows, _ = await self._audit.list_recent(limit=_RECENT_ACTIONS)
@@ -53,7 +53,7 @@ class AdminDashboardService:
             users_banned=banned,
             users_unverified=unverified,
             admins=admins,
-            missions_active=missions_active,
+            play_sessions_active=play_sessions_active,
             catalogue_size=catalogue_size,
             config_overrides=len(overrides),
             recent_actions=[

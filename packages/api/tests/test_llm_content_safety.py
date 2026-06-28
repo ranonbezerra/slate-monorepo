@@ -164,7 +164,7 @@ class _StubEntry:
         self.game = _StubGame(title)
         self.platform = _StubPlatform()
         self.status = "playing"
-        self.mission_next_action = next_action
+        self.play_session_next_action = next_action
         self.public_id = "22222222-2222-4222-8222-222222222222"
 
 

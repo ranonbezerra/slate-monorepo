@@ -35,7 +35,7 @@ from dailyloadout.infrastructure.agent.concierge.tools import (
 from dailyloadout.infrastructure.agent.concierge.tools_write import build_concierge_write_tools
 from dailyloadout.infrastructure.config.dynamic import dynamic_config
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
-from dailyloadout.infrastructure.db.repositories.mission import MissionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
 from dailyloadout.infrastructure.llm.base import AbstractLLMClient
 
 SYSTEM_PROMPT = (
@@ -75,7 +75,7 @@ SYSTEM_PROMPT = (
     "- Be ECONOMICAL with tools — call the fewest needed, since each call is slow. For "
     "a 'what should I play' question, search_library is usually enough; add "
     "estimate_session_fit only when they mention how much time they have, and "
-    "get_mission_history only to recall where they left off in a specific game. Call "
+    "get_play_session_history only to recall where they left off in a specific game. Call "
     "get_play_stats ONLY when the user explicitly asks about their stats, habits, or "
     "history — never just to pick a game.\n"
     "- Keep replies short and conversational — a sentence or two, not an essay.\n"
@@ -87,9 +87,9 @@ SYSTEM_PROMPT = (
     "\n"
     "You can also ACT on the player's library, but only when they clearly ask you to — never "
     "start, brief, or change anything just because you recommended it:\n"
-    "- start_mission: begin a play session for a game (optionally briefing='quick'). Only one "
-    "mission can be active at a time.\n"
-    "- generate_briefing: write a catch-up briefing for the active mission.\n"
+    "- start_play_session: begin a play session for a game (optionally briefing='quick'). "
+    "Only one play_session can be active at a time.\n"
+    "- generate_briefing: write a catch-up briefing for the active play_session.\n"
     "- submit_retroactive_debrief: log a past session the player didn't track live.\n"
     "- set_status: move a game between backlog/playing/paused/completed/dropped.\n"
     "After acting, confirm what you did in one short sentence."
@@ -124,7 +124,7 @@ class ConciergeService:
         self,
         *,
         library_repo: LibraryRepository,
-        mission_repo: MissionRepository,
+        play_session_repo: PlaySessionRepository,
         stats_service: StatsService,
         agent: AbstractConciergeAgent,
         llm_client: AbstractLLMClient,
@@ -132,7 +132,7 @@ class ConciergeService:
         settings: Settings | None = None,
     ) -> None:
         self._library_repo = library_repo
-        self._mission_repo = mission_repo
+        self._play_session_repo = play_session_repo
         self._stats_service = stats_service
         self._agent = agent
         self._llm_client = llm_client
@@ -146,14 +146,14 @@ class ConciergeService:
             user_id=user_id,
             user_created_at=user_created_at,
             library_repo=self._library_repo,
-            mission_repo=self._mission_repo,
+            play_session_repo=self._play_session_repo,
             stats_service=self._stats_service,
         )
         if write_tools_enabled:
             tools += build_concierge_write_tools(
                 user_id=user_id,
                 library_repo=self._library_repo,
-                mission_repo=self._mission_repo,
+                play_session_repo=self._play_session_repo,
                 llm_client=self._llm_client,
                 agent=self._briefing_agent,
                 settings=self._settings,

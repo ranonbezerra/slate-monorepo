@@ -10,13 +10,13 @@ from dailyloadout.infrastructure.agent.concierge.factory import get_concierge_ag
 
 from .capture import LLMClientDep
 from .library import LibraryRepoDep
-from .mission import BriefingAgentDep, MissionRepoDep
+from .play_session import BriefingAgentDep, PlaySessionRepoDep
 from .stats import StatsServiceDep
 
 
 def get_concierge_service(
     library_repo: LibraryRepoDep,
-    mission_repo: MissionRepoDep,
+    play_session_repo: PlaySessionRepoDep,
     stats_service: StatsServiceDep,
     llm_client: LLMClientDep,
     briefing_agent: BriefingAgentDep,
@@ -24,7 +24,7 @@ def get_concierge_service(
     """Provide a ``ConciergeService`` wired to the configured agent provider."""
     return ConciergeService(
         library_repo=library_repo,
-        mission_repo=mission_repo,
+        play_session_repo=play_session_repo,
         stats_service=stats_service,
         agent=get_concierge_agent(settings),
         llm_client=llm_client,

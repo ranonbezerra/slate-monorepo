@@ -8,10 +8,10 @@ import 'package:go_router/go_router.dart';
 /// Friendly labels for the tool affordance shown while the agent works.
 const _toolLabels = {
   'search_library': 'searching your library',
-  'get_mission_history': 'recalling your last session',
+  'get_play_session_history': 'recalling your last session',
   'get_play_stats': 'checking your stats',
   'estimate_session_fit': 'sizing up the session',
-  'start_mission': 'starting your session',
+  'start_play_session': 'starting your session',
   'generate_briefing': 'writing a recap',
   'submit_retroactive_debrief': 'logging your session',
   'set_status': 'updating your library',
@@ -182,7 +182,7 @@ class _MessageBubble extends StatelessWidget {
                 // Open the briefing-choice flow for the recommended game,
                 // mirroring the library "Start session" entry point.
                 onPressed: () => context.push(
-                  '/missions/briefing?entry=${message.recommendation!.id}',
+                  '/play-sessions/briefing?entry=${message.recommendation!.id}',
                 ),
                 icon: const Icon(Icons.play_arrow, size: 18),
                 label: Text('Play ${message.recommendation!.title}'),

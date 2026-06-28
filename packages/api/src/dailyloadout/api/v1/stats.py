@@ -62,7 +62,7 @@ async def platform_stats(
 
 
 @router.get("/timeline", response_model=TimelineResponse, dependencies=[_stats_rate_limit])
-async def mission_timeline(
+async def play_session_timeline(
     current_user: CurrentUserDep,
     stats_service: StatsServiceDep,
     limit: int = Query(default=20, ge=1, le=100),

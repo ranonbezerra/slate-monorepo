@@ -282,7 +282,7 @@ export function AnalyticsPage() {
 						Sessions (30d)
 					</Text>
 					<Text size="xl" fw={700}>
-						{overview?.missionsLast30d ?? 0}
+						{overview?.playSessionsLast30d ?? 0}
 					</Text>
 				</Card>
 				<Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -290,8 +290,8 @@ export function AnalyticsPage() {
 						Avg Session
 					</Text>
 					<Text size="xl" fw={700}>
-						{overview?.avgMissionDurationMinutes
-							? formatMinutes(Math.round(overview.avgMissionDurationMinutes))
+						{overview?.avgPlaySessionDurationMinutes
+							? formatMinutes(Math.round(overview.avgPlaySessionDurationMinutes))
 							: "\u2014"}
 					</Text>
 				</Card>
@@ -361,7 +361,7 @@ export function AnalyticsPage() {
 										{p.gameCount} games
 									</Badge>
 									<Badge size="xs" variant="light" color="green">
-										{p.missionCount} sessions
+										{p.playSessionCount} sessions
 									</Badge>
 								</Group>
 							</Group>
@@ -436,7 +436,7 @@ export function AnalyticsPage() {
 										</Table.Td>
 										<Table.Td>
 											<Badge size="sm" variant="light">
-												{item.missionType}
+												{item.playSessionType}
 											</Badge>
 										</Table.Td>
 										<Table.Td>

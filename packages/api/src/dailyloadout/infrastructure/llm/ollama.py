@@ -175,7 +175,7 @@ class OllamaClient(AbstractLLMClient):
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
-        """Generate a mission briefing using the smart LLM model."""
+        """Generate a play_session briefing using the smart LLM model."""
         prompt = _jinja_env.from_string(_BRIEFING_SRC).render(
             game_title=game_title,
             previous_debriefs=previous_debriefs,

@@ -250,7 +250,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                     width: double.infinity,
                     child: FilledButton.icon(
                       onPressed: () => context.push(
-                        '/missions/briefing?entry=${resolvedEntry.publicId}',
+                        '/play-sessions/briefing?entry=${resolvedEntry.publicId}',
                       ),
                       icon: const Icon(Icons.play_arrow),
                       label: const Text('Start session'),

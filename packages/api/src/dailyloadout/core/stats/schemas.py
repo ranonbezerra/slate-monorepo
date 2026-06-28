@@ -11,8 +11,8 @@ from pydantic import BaseModel
 class StatsOverviewResponse(BaseModel):
     total_games: int
     status_counts: dict[str, int]
-    missions_last_30d: int
-    avg_mission_duration_minutes: float | None
+    play_sessions_last_30d: int
+    avg_play_session_duration_minutes: float | None
     user_created_at: datetime
 
 
@@ -29,7 +29,7 @@ class PlayHeatmapResponse(BaseModel):
 class GenreStat(BaseModel):
     genre: str
     total_minutes: int
-    mission_count: int
+    play_session_count: int
 
 
 class GenreStatsResponse(BaseModel):
@@ -40,7 +40,7 @@ class PlatformStat(BaseModel):
     platform_slug: str
     platform_label: str
     game_count: int
-    mission_count: int
+    play_session_count: int
     total_minutes: int
 
 
@@ -52,7 +52,7 @@ class TimelineEntry(BaseModel):
     public_id: UUID
     game_title: str
     platform_label: str
-    mission_type: str
+    play_session_type: str
     briefing_text: str | None = None
     debrief_text: str | None = None
     ended_via: str | None = None
