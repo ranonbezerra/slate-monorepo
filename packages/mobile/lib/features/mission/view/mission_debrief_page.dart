@@ -54,7 +54,7 @@ class _MissionDebriefPageState extends State<MissionDebriefPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mission Debrief')),
+      appBar: AppBar(title: const Text('Wrap up')),
       body: BlocConsumer<MissionBloc, MissionState>(
         listener: (context, state) {
           if (state is MissionEnded) {
@@ -141,7 +141,7 @@ class _MissionDebriefPageState extends State<MissionDebriefPage> {
                     height: 48,
                     child: FilledButton(
                       onPressed: _onSubmitDebrief,
-                      child: const Text('Submit debrief'),
+                      child: const Text('Save note'),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -151,7 +151,7 @@ class _MissionDebriefPageState extends State<MissionDebriefPage> {
                     width: double.infinity,
                     child: TextButton(
                       onPressed: _onSkipDebrief,
-                      child: const Text('Skip debrief'),
+                      child: const Text('Skip note'),
                     ),
                   ),
                 ],

@@ -110,8 +110,8 @@ describe("ConciergePage", () => {
 
 		// The briefing-choice dialog opens for the recommended game.
 		await waitFor(() => expect(fetchLibraryEntry).toHaveBeenCalledWith("entry-1"));
-		await waitFor(() => expect(screen.getByText("Mission Briefing: Hades")).toBeInTheDocument());
-		expect(screen.getByText(/Quick briefing/)).toBeInTheDocument();
+		await waitFor(() => expect(screen.getByText("Recap: Hades")).toBeInTheDocument());
+		expect(screen.getByText(/Quick recap/)).toBeInTheDocument();
 	});
 
 	it("shows the typing indicator while the reply is pending", async () => {

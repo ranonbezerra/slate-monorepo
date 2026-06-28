@@ -244,7 +244,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Start Mission for this platform entry (only when playing).
+                // Start session for this platform entry (only when playing).
                 if (resolvedEntry.status == 'playing') ...[
                   SizedBox(
                     width: double.infinity,
@@ -253,7 +253,7 @@ class _LibraryDetailPageState extends State<LibraryDetailPage> {
                         '/missions/briefing?entry=${resolvedEntry.publicId}',
                       ),
                       icon: const Icon(Icons.play_arrow),
-                      label: const Text('Start Mission'),
+                      label: const Text('Start session'),
                     ),
                   ),
                   const SizedBox(height: 12),

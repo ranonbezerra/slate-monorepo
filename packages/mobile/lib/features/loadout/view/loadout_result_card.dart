@@ -139,7 +139,7 @@ class LoadoutResultCard extends StatelessWidget {
           const Icon(Icons.check_circle, color: DLColors.green, size: 20),
           const SizedBox(width: 8),
           Text(
-            'Mission started!',
+            'Session started!',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: DLColors.green,
               fontWeight: FontWeight.w600,
@@ -183,7 +183,7 @@ class LoadoutResultCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Briefing',
+                      'Recap',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: DLColors.violet,
                         fontWeight: FontWeight.w700,
@@ -207,7 +207,7 @@ class LoadoutResultCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : () => onGetBriefing('quick'),
                   icon: const Icon(Icons.bolt, size: 18),
-                  label: const Text('Quick briefing'),
+                  label: const Text('Quick recap'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -221,7 +221,7 @@ class LoadoutResultCard extends StatelessWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.travel_explore, size: 18),
-                  label: const Text('Deep briefing'),
+                  label: const Text('Deep recap'),
                 ),
               ),
             ],
@@ -268,7 +268,7 @@ class LoadoutResultCard extends StatelessWidget {
               isActioning
                   ? 'Starting...'
                   : hasBriefing
-                  ? 'Start with briefing'
+                  ? 'Start with recap'
                   : 'Just play',
             ),
           ),

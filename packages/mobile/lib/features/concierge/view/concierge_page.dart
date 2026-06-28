@@ -11,8 +11,8 @@ const _toolLabels = {
   'get_mission_history': 'recalling your last session',
   'get_play_stats': 'checking your stats',
   'estimate_session_fit': 'sizing up the session',
-  'start_mission': 'starting your mission',
-  'generate_briefing': 'writing a briefing',
+  'start_mission': 'starting your session',
+  'generate_briefing': 'writing a recap',
   'submit_retroactive_debrief': 'logging your session',
   'set_status': 'updating your library',
 };
@@ -180,7 +180,7 @@ class _MessageBubble extends StatelessWidget {
               const SizedBox(height: 8),
               FilledButton.icon(
                 // Open the briefing-choice flow for the recommended game,
-                // mirroring the library "Start Mission" entry point.
+                // mirroring the library "Start session" entry point.
                 onPressed: () => context.push(
                   '/missions/briefing?entry=${message.recommendation!.id}',
                 ),

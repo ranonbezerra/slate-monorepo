@@ -9,7 +9,7 @@ import type { MissionListItem } from "../types/mission";
 dayjs.extend(relativeTime);
 
 const ENDED_VIA_LABELS: Record<string, { label: string; color: string }> = {
-	debrief_completed: { label: "Debriefed", color: "green" },
+	debrief_completed: { label: "Wrapped", color: "green" },
 	paused_app: { label: "Paused", color: "yellow" },
 	auto_clamp: { label: "Auto-closed", color: "gray" },
 	retroactive: { label: "Retroactive", color: "grape" },
@@ -41,20 +41,20 @@ export function MissionsPage() {
 	return (
 		<Stack>
 			<Group justify="space-between">
-				<Title order={2}>Mission History</Title>
+				<Title order={2}>Session history</Title>
 				{data && (
 					<Text c="dimmed" size="sm">
-						{data.total} mission{data.total !== 1 ? "s" : ""} total
+						{data.total} session{data.total !== 1 ? "s" : ""} total
 					</Text>
 				)}
 			</Group>
 
 			{isError ? (
-				<ErrorState title="Couldn't load missions" error={error} onRetry={() => refetch()} />
+				<ErrorState title="Couldn't load sessions" error={error} onRetry={() => refetch()} />
 			) : !isLoading && missions.length === 0 ? (
 				<Card withBorder p="xl">
 					<Text c="dimmed" ta="center">
-						No missions yet. Start one from the Play page.
+						No sessions yet. Start one from the Play page.
 					</Text>
 				</Card>
 			) : (

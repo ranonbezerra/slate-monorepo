@@ -203,13 +203,13 @@ function renderViewMode(mission: Mission = makeMission(), overrides: ViewOverrid
 // Render preview mode and choose Quick → lands on the briefing step.
 async function renderPreviewBriefing(libraryEntry?: LibraryEntry, overrides?: PreviewOverrides) {
 	const result = renderPreviewMode(libraryEntry, overrides);
-	fireEvent.click(screen.getByText("⚡ Quick briefing"));
+	fireEvent.click(screen.getByText("⚡ Quick recap"));
 	await screen.findByText(QUICK_TEXT);
 	return result;
 }
 
 function openUpdate() {
-	fireEvent.click(screen.getByRole("button", { name: "Update this briefing" }));
+	fireEvent.click(screen.getByRole("button", { name: "Update this recap" }));
 }
 function openCorrection() {
 	openUpdate();
@@ -260,8 +260,8 @@ describe("MissionBriefingModal", () => {
 	describe("preview mode — choose briefing", () => {
 		it("shows the two briefing-mode buttons and a skip option on open", () => {
 			renderPreviewMode();
-			expect(screen.getByText("⚡ Quick briefing")).toBeInTheDocument();
-			expect(screen.getByText("🔎 Deep briefing (web)")).toBeInTheDocument();
+			expect(screen.getByText("⚡ Quick recap")).toBeInTheDocument();
+			expect(screen.getByText("🔎 Deep recap (web)")).toBeInTheDocument();
 			expect(screen.getByText("▶️ Just play")).toBeInTheDocument();
 		});
 
@@ -282,7 +282,7 @@ describe("MissionBriefingModal", () => {
 
 		it("shows the game title and platform", () => {
 			renderPreviewMode();
-			expect(screen.getByText(/Mission Briefing: Hollow Knight/)).toBeInTheDocument();
+			expect(screen.getByText(/Recap: Hollow Knight/)).toBeInTheDocument();
 			expect(screen.getByText("PC")).toBeInTheDocument();
 		});
 
@@ -293,7 +293,7 @@ describe("MissionBriefingModal", () => {
 
 		it("choosing Quick fetches and shows the quick briefing", async () => {
 			renderPreviewMode();
-			fireEvent.click(screen.getByText("⚡ Quick briefing"));
+			fireEvent.click(screen.getByText("⚡ Quick recap"));
 
 			await waitFor(() => {
 				expect(mockPreviewMutateAsync).toHaveBeenCalledWith(
@@ -308,7 +308,7 @@ describe("MissionBriefingModal", () => {
 				makePreview({ briefingText: "Web-researched: head north to the next area." }),
 			);
 			renderPreviewMode();
-			fireEvent.click(screen.getByText("🔎 Deep briefing (web)"));
+			fireEvent.click(screen.getByText("🔎 Deep recap (web)"));
 
 			await waitFor(() => {
 				expect(mockPreviewMutateAsync).toHaveBeenCalledWith(
@@ -323,21 +323,21 @@ describe("MissionBriefingModal", () => {
 		it("shows the no-briefing message when the fetched briefing is empty", async () => {
 			mockPreviewMutateAsync.mockResolvedValueOnce(makePreview({ briefingText: null }));
 			renderPreviewMode();
-			fireEvent.click(screen.getByText("⚡ Quick briefing"));
+			fireEvent.click(screen.getByText("⚡ Quick recap"));
 
-			expect(await screen.findByText(/No briefing available/)).toBeInTheDocument();
+			expect(await screen.findByText(/No recap available/)).toBeInTheDocument();
 		});
 	});
 
 	describe("preview mode — briefing actions", () => {
-		it("shows 'Got it' and 'Update this briefing', and no Cancel", async () => {
+		it("shows 'Got it' and 'Update this recap', and no Cancel", async () => {
 			await renderPreviewBriefing();
 			expect(screen.getByRole("button", { name: "Got it, let's go" })).toBeInTheDocument();
-			expect(screen.getByRole("button", { name: "Update this briefing" })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: "Update this recap" })).toBeInTheDocument();
 			expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
 		});
 
-		it("'Update this briefing' opens the fix menu with both options", async () => {
+		it("'Update this recap' opens the fix menu with both options", async () => {
 			await renderPreviewBriefing();
 			openUpdate();
 			expect(
@@ -359,13 +359,13 @@ describe("MissionBriefingModal", () => {
 
 		it("shows the game title", () => {
 			renderViewMode();
-			expect(screen.getByText(/Mission Briefing: Hollow Knight/)).toBeInTheDocument();
+			expect(screen.getByText(/Recap: Hollow Knight/)).toBeInTheDocument();
 		});
 
 		it("does NOT show the mode-choice buttons", () => {
 			renderViewMode();
-			expect(screen.queryByText("⚡ Quick briefing")).not.toBeInTheDocument();
-			expect(screen.queryByText("🔎 Deep briefing (web)")).not.toBeInTheDocument();
+			expect(screen.queryByText("⚡ Quick recap")).not.toBeInTheDocument();
+			expect(screen.queryByText("🔎 Deep recap (web)")).not.toBeInTheDocument();
 		});
 
 		it("shows 'That's not right' and 'Got it', no Cancel", () => {
@@ -377,14 +377,14 @@ describe("MissionBriefingModal", () => {
 
 		it("shows no briefing message when briefingText is null", () => {
 			renderViewMode(makeMission({ briefingText: null }));
-			expect(screen.getByText(/No briefing available/)).toBeInTheDocument();
+			expect(screen.getByText(/No recap available/)).toBeInTheDocument();
 		});
 
 		it("'That's not right' opens the correction form", () => {
 			renderViewMode();
 			fireEvent.click(screen.getByRole("button", { name: "That's not right" }));
 			expect(
-				screen.getByText("Tell us where you actually are so we can adjust the briefing:"),
+				screen.getByText("Tell us where you actually are so we can adjust the recap:"),
 			).toBeInTheDocument();
 			expect(screen.getByRole("button", { name: "Update & regenerate" })).toBeInTheDocument();
 		});
@@ -456,7 +456,7 @@ describe("MissionBriefingModal", () => {
 				expect(notifications.show).toHaveBeenCalledWith(
 					expect.objectContaining({
 						title: "Regeneration failed",
-						message: "Could not regenerate briefing",
+						message: "Couldn't regenerate recap",
 						color: "red",
 					}),
 				);
@@ -491,9 +491,7 @@ describe("MissionBriefingModal", () => {
 		it("record button is disabled when retroactive text is empty", async () => {
 			await renderPreviewBriefing();
 			openRetroactive();
-			expect(
-				screen.getByRole("button", { name: "Record session & update briefing" }),
-			).toBeDisabled();
+			expect(screen.getByRole("button", { name: "Record session & update recap" })).toBeDisabled();
 		});
 
 		it("preview: retroactive submit calls retroactiveMutation", async () => {
@@ -505,7 +503,7 @@ describe("MissionBriefingModal", () => {
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master and got the Desolate Dive" },
 			});
-			fireEvent.click(screen.getByRole("button", { name: "Record session & update briefing" }));
+			fireEvent.click(screen.getByRole("button", { name: "Record session & update recap" }));
 
 			await waitFor(() => {
 				expect(mockRetroactiveMutateAsync).toHaveBeenCalledWith({
@@ -524,7 +522,7 @@ describe("MissionBriefingModal", () => {
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master" },
 			});
-			fireEvent.click(screen.getByRole("button", { name: "Record session & update briefing" }));
+			fireEvent.click(screen.getByRole("button", { name: "Record session & update recap" }));
 
 			await waitFor(() => {
 				expect(notifications.show).toHaveBeenCalledWith(
@@ -543,7 +541,7 @@ describe("MissionBriefingModal", () => {
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master" },
 			});
-			fireEvent.click(screen.getByRole("button", { name: "Record session & update briefing" }));
+			fireEvent.click(screen.getByRole("button", { name: "Record session & update recap" }));
 
 			await waitFor(() => {
 				expect(notifications.show).toHaveBeenCalledWith(
@@ -563,7 +561,7 @@ describe("MissionBriefingModal", () => {
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master" },
 			});
-			fireEvent.click(screen.getByRole("button", { name: "Record session & update briefing" }));
+			fireEvent.click(screen.getByRole("button", { name: "Record session & update recap" }));
 
 			await waitFor(() => {
 				expect(notifications.show).toHaveBeenCalledWith(
@@ -605,7 +603,7 @@ describe("MissionBriefingModal", () => {
 			await waitFor(() => {
 				expect(notifications.show).toHaveBeenCalledWith(
 					expect.objectContaining({
-						title: "Cannot start mission",
+						title: "Couldn't start session",
 						message: "Server error",
 						color: "red",
 					}),
@@ -621,7 +619,7 @@ describe("MissionBriefingModal", () => {
 			await waitFor(() => {
 				expect(notifications.show).toHaveBeenCalledWith(
 					expect.objectContaining({
-						title: "Cannot start mission",
+						title: "Couldn't start session",
 						message: "An unexpected error occurred",
 						color: "red",
 					}),
@@ -632,8 +630,8 @@ describe("MissionBriefingModal", () => {
 		it("preview: null briefing passes undefined to startMission", async () => {
 			mockPreviewMutateAsync.mockResolvedValueOnce(makePreview({ briefingText: null }));
 			renderPreviewMode();
-			fireEvent.click(screen.getByText("⚡ Quick briefing"));
-			await screen.findByText(/No briefing available/);
+			fireEvent.click(screen.getByText("⚡ Quick recap"));
+			await screen.findByText(/No recap available/);
 
 			fireEvent.click(screen.getByRole("button", { name: "Got it, let's go" }));
 			await waitFor(() => {
@@ -661,7 +659,7 @@ describe("MissionBriefingModal", () => {
 				</MantineProvider>,
 			);
 
-			fireEvent.click(screen.getByText("⚡ Quick briefing"));
+			fireEvent.click(screen.getByText("⚡ Quick recap"));
 			await screen.findByText(QUICK_TEXT);
 			openCorrection();
 			expect(screen.getByRole("button", { name: "Update & regenerate" })).toBeInTheDocument();
@@ -681,7 +679,7 @@ describe("MissionBriefingModal", () => {
 			);
 
 			// Back at the mode-choice step; the correction form is gone.
-			expect(screen.getByText("⚡ Quick briefing")).toBeInTheDocument();
+			expect(screen.getByText("⚡ Quick recap")).toBeInTheDocument();
 			expect(
 				screen.queryByRole("button", { name: "Update & regenerate" }),
 			).not.toBeInTheDocument();

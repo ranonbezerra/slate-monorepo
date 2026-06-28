@@ -57,7 +57,7 @@ void main() {
   }
 
   group('MissionDebriefPage', () {
-    testWidgets('shows AppBar with Mission Debrief title', (tester) async {
+    testWidgets('shows AppBar with Wrap up title', (tester) async {
       when(() => missionBloc.state).thenReturn(const MissionInitial());
 
       await tester.pumpWidget(buildSubject());
@@ -65,7 +65,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(AppBar),
-          matching: find.text('Mission Debrief'),
+          matching: find.text('Wrap up'),
         ),
         findsOneWidget,
       );
@@ -132,20 +132,15 @@ void main() {
       expect(find.byType(TextFormField), findsOneWidget);
     });
 
-    testWidgets('shows Submit debrief and Skip debrief buttons', (
-      tester,
-    ) async {
+    testWidgets('shows Save note and Skip note buttons', (tester) async {
       when(
         () => missionBloc.state,
       ).thenReturn(ActiveMissionLoaded(mission: _sampleMission));
 
       await tester.pumpWidget(buildSubject());
 
-      expect(
-        find.widgetWithText(FilledButton, 'Submit debrief'),
-        findsOneWidget,
-      );
-      expect(find.widgetWithText(TextButton, 'Skip debrief'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Save note'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Skip note'), findsOneWidget);
     });
 
     testWidgets('validation shows error when input is empty', (tester) async {
@@ -156,7 +151,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       // Tap Submit without entering text.
-      await tester.tap(find.widgetWithText(FilledButton, 'Submit debrief'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save note'));
       await tester.pumpAndSettle();
 
       expect(find.text('Please enter at least 3 characters'), findsOneWidget);
@@ -173,7 +168,7 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField), 'ab');
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Submit debrief'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save note'));
       await tester.pumpAndSettle();
 
       expect(find.text('Please enter at least 3 characters'), findsOneWidget);
@@ -193,7 +188,7 @@ void main() {
         'Beat the Soul Master boss',
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Submit debrief'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save note'));
       await tester.pumpAndSettle();
 
       verify(
@@ -206,7 +201,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('dispatches EndMission when Skip debrief is tapped', (
+    testWidgets('dispatches EndMission when Skip note is tapped', (
       tester,
     ) async {
       when(
@@ -215,7 +210,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      await tester.tap(find.widgetWithText(TextButton, 'Skip debrief'));
+      await tester.tap(find.widgetWithText(TextButton, 'Skip note'));
       await tester.pumpAndSettle();
 
       verify(

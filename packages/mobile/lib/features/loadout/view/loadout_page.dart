@@ -171,7 +171,7 @@ class _LoadoutPageState extends State<LoadoutPage> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           const SnackBar(
-            content: Text('Mission started!'),
+            content: Text('Session started!'),
             backgroundColor: DLColors.green,
           ),
         );

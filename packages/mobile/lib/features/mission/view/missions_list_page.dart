@@ -56,7 +56,7 @@ class _MissionsListPageState extends State<MissionsListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mission History')),
+      appBar: AppBar(title: const Text('Session history')),
       body: BlocConsumer<MissionBloc, MissionState>(
         listenWhen: (previous, current) =>
             current is MissionListLoaded && current.loadMoreError != null,
@@ -178,7 +178,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'No missions yet.',
+              'No sessions yet.',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -208,7 +208,7 @@ class _MissionCard extends StatelessWidget {
   String get _statusLabel {
     if (_isActive) return 'Active';
     return switch (mission.endedVia) {
-      'debrief' => 'Debriefed',
+      'debrief' => 'Wrapped',
       'paused_app' => 'Paused',
       'auto_clamp' => 'Auto-closed',
       'retroactive' => 'Retroactive',

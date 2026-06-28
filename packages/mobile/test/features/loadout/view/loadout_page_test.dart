@@ -363,7 +363,7 @@ void main() {
       expect(find.byType(LoadoutResultCard), findsNothing);
     });
 
-    testWidgets('shows SnackBar with "Mission started!" '
+    testWidgets('shows SnackBar with "Session started!" '
         'on LoadoutAccepted via listener', (tester) async {
       whenListen(
         mockLoadoutBloc,
@@ -382,7 +382,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(SnackBar),
-          matching: find.text('Mission started!'),
+          matching: find.text('Session started!'),
         ),
         findsOneWidget,
       );
@@ -459,7 +459,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('Quick briefing dispatches GenerateLoadoutBriefing (quick)', (
+    testWidgets('Quick recap dispatches GenerateLoadoutBriefing (quick)', (
       tester,
     ) async {
       whenListen(
@@ -473,7 +473,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      await tester.tap(find.text('Quick briefing'));
+      await tester.tap(find.text('Quick recap'));
       await tester.pump();
 
       verify(
@@ -487,7 +487,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('Deep briefing dispatches GenerateLoadoutBriefing (deep)', (
+    testWidgets('Deep recap dispatches GenerateLoadoutBriefing (deep)', (
       tester,
     ) async {
       whenListen(
@@ -501,7 +501,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      await tester.tap(find.text('Deep briefing'));
+      await tester.tap(find.text('Deep recap'));
       await tester.pump();
 
       verify(
@@ -515,7 +515,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('renders briefing and "Start with briefing" '
+    testWidgets('renders briefing and "Start with recap" '
         'after LoadoutBriefingReady', (tester) async {
       whenListen(
         mockLoadoutBloc,
@@ -533,10 +533,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('Push toward the next checkpoint.'), findsOneWidget);
-      expect(find.text('Start with briefing'), findsOneWidget);
+      expect(find.text('Start with recap'), findsOneWidget);
     });
 
-    testWidgets('"Start with briefing" dispatches AcceptLoadout '
+    testWidgets('"Start with recap" dispatches AcceptLoadout '
         'with the briefing text', (tester) async {
       whenListen(
         mockLoadoutBloc,
@@ -553,7 +553,7 @@ void main() {
       await tester.pumpWidget(buildRoutedSubject());
       await tester.pump();
 
-      await tester.tap(find.text('Start with briefing'));
+      await tester.tap(find.text('Start with recap'));
       await tester.pump();
 
       verify(

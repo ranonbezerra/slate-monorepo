@@ -115,7 +115,7 @@ function LoadoutResultCard({
 
 				{loadout.action === "accepted" ? (
 					<Text c="green" fw={500}>
-						Mission started! Redirecting...
+						Session started! Redirecting...
 					</Text>
 				) : loadout.action === "rejected" ? (
 					<Text c="dimmed" fw={500}>
@@ -126,7 +126,7 @@ function LoadoutResultCard({
 						{briefingText && (
 							<Card withBorder p="sm" radius="sm">
 								<Text size="sm" fw={500} mb={4}>
-									Briefing
+									Recap
 								</Text>
 								<Text size="sm" c="dimmed">
 									{briefingText}
@@ -141,7 +141,7 @@ function LoadoutResultCard({
 									onClick={() => onAccept(briefingText)}
 									loading={isActioning}
 								>
-									Start with briefing
+									Start with recap
 								</Button>
 								<Button
 									variant="outline"
@@ -163,7 +163,7 @@ function LoadoutResultCard({
 										loading={isPreviewing}
 										disabled={isActioning || !loadout.libraryEntry}
 									>
-										Quick briefing
+										Quick recap
 									</Button>
 									<Button
 										variant="light"
@@ -172,7 +172,7 @@ function LoadoutResultCard({
 										loading={isPreviewing}
 										disabled={isActioning || !loadout.libraryEntry}
 									>
-										Deep briefing
+										Deep recap
 									</Button>
 								</Group>
 								<Group grow>

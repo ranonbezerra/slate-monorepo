@@ -454,12 +454,12 @@ describe("LoadoutPage - result cards", () => {
 		rollAndSetResults(mockMutate, [makeMockLoadout()]);
 
 		expect(screen.getByRole("button", { name: /Just play/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /Quick briefing/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /Deep briefing/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Quick recap/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Deep recap/i })).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /Reject/i })).toBeInTheDocument();
 	});
 
-	it("shows 'Mission started! Redirecting...' when action is accepted", () => {
+	it("shows 'Session started! Redirecting...' when action is accepted", () => {
 		const mockMutate = setupCreateMockWithCapture();
 		renderPage();
 
@@ -467,7 +467,7 @@ describe("LoadoutPage - result cards", () => {
 		// so allActioned is false and result cards remain visible.
 		rollAndSetResults(mockMutate, [makeMockLoadout({ action: "accepted" }), makeMockLoadout2()]);
 
-		expect(screen.getByText("Mission started! Redirecting...")).toBeInTheDocument();
+		expect(screen.getByText("Session started! Redirecting...")).toBeInTheDocument();
 	});
 
 	it("shows 'Rejected' when action is rejected", () => {
@@ -572,7 +572,7 @@ describe("LoadoutPage - accept and reject actions", () => {
 			onSuccess(makeMockLoadout({ action: "accepted" }));
 		});
 
-		expect(screen.getByText("Mission started! Redirecting...")).toBeInTheDocument();
+		expect(screen.getByText("Session started! Redirecting...")).toBeInTheDocument();
 
 		// Fast-forward the setTimeout(600) for navigation
 		act(() => {
@@ -633,7 +633,7 @@ describe("LoadoutPage - briefing flow", () => {
 		mockNavigate.mockClear();
 	});
 
-	it("previews a quick briefing when 'Quick briefing' is clicked", () => {
+	it("previews a quick briefing when 'Quick recap' is clicked", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
 		(usePreviewBriefing as Mock).mockReturnValue({
@@ -646,7 +646,7 @@ describe("LoadoutPage - briefing flow", () => {
 		renderPage();
 		rollAndSetResults(createMutate, [makeMockLoadout()]);
 
-		fireEvent.click(screen.getByRole("button", { name: /Quick briefing/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Quick recap/i }));
 
 		expect(previewMutate).toHaveBeenCalledTimes(1);
 		expect(previewMutate.mock.calls[0][0]).toEqual({
@@ -655,7 +655,7 @@ describe("LoadoutPage - briefing flow", () => {
 		});
 	});
 
-	it("previews a deep briefing when 'Deep briefing' is clicked", () => {
+	it("previews a deep briefing when 'Deep recap' is clicked", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
 		(usePreviewBriefing as Mock).mockReturnValue({
@@ -668,7 +668,7 @@ describe("LoadoutPage - briefing flow", () => {
 		renderPage();
 		rollAndSetResults(createMutate, [makeMockLoadout()]);
 
-		fireEvent.click(screen.getByRole("button", { name: /Deep briefing/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Deep recap/i }));
 
 		expect(previewMutate.mock.calls[0][0]).toEqual({
 			libraryEntryPublicId: "le-1",
@@ -676,7 +676,7 @@ describe("LoadoutPage - briefing flow", () => {
 		});
 	});
 
-	it("shows the briefing sub-card and 'Start with briefing' button once a briefing is fetched", () => {
+	it("shows the briefing sub-card and 'Start with recap' button once a briefing is fetched", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
 		(usePreviewBriefing as Mock).mockReturnValue({
@@ -689,7 +689,7 @@ describe("LoadoutPage - briefing flow", () => {
 		renderPage();
 		rollAndSetResults(createMutate, [makeMockLoadout()]);
 
-		fireEvent.click(screen.getByRole("button", { name: /Quick briefing/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Quick recap/i }));
 
 		// Simulate the preview onSuccess callback with a briefing text.
 		const onSuccess = previewMutate.mock.calls[0][1].onSuccess;
@@ -697,15 +697,15 @@ describe("LoadoutPage - briefing flow", () => {
 			onSuccess({ briefingText: "Focus on collecting charms early." });
 		});
 
-		expect(screen.getByText("Briefing")).toBeInTheDocument();
+		expect(screen.getByText("Recap")).toBeInTheDocument();
 		expect(screen.getByText("Focus on collecting charms early.")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /Start with briefing/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Start with recap/i })).toBeInTheDocument();
 		// The pre-briefing buttons should no longer be visible.
 		expect(screen.queryByRole("button", { name: /Just play/i })).not.toBeInTheDocument();
-		expect(screen.queryByRole("button", { name: /Quick briefing/i })).not.toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /Quick recap/i })).not.toBeInTheDocument();
 	});
 
-	it("accepts with the fetched briefing text when 'Start with briefing' is clicked", () => {
+	it("accepts with the fetched briefing text when 'Start with recap' is clicked", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
 		const acceptMutate = vi.fn();
@@ -724,13 +724,13 @@ describe("LoadoutPage - briefing flow", () => {
 		renderPage();
 		rollAndSetResults(createMutate, [makeMockLoadout()]);
 
-		fireEvent.click(screen.getByRole("button", { name: /Quick briefing/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Quick recap/i }));
 		const onSuccess = previewMutate.mock.calls[0][1].onSuccess;
 		act(() => {
 			onSuccess({ briefingText: "Focus on collecting charms early." });
 		});
 
-		fireEvent.click(screen.getByRole("button", { name: /Start with briefing/i }));
+		fireEvent.click(screen.getByRole("button", { name: /Start with recap/i }));
 
 		expect(acceptMutate).toHaveBeenCalledTimes(1);
 		expect(acceptMutate.mock.calls[0][0]).toEqual({

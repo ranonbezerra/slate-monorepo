@@ -33,7 +33,7 @@ interface DoorCardProps {
 	onClick: () => void;
 }
 
-const DISABLED_REASON = "Finish your active mission first";
+const DISABLED_REASON = "Finish your active session first";
 
 function DoorCard({ title, subtitle, icon, accent, disabled, onClick }: DoorCardProps) {
 	// Render as a real <button> (UnstyledButton) so the door is keyboard
@@ -102,7 +102,7 @@ export function PlayPage() {
 					<Stack gap="md">
 						<Group gap="sm">
 							<Badge color="teal" variant="dot" size="lg">
-								Mission active
+								Session active
 							</Badge>
 							<Title order={3}>{activeMission.libraryEntry.game.title}</Title>
 						</Group>
@@ -121,14 +121,14 @@ export function PlayPage() {
 								variant="light"
 								onClick={() => setShowBriefing(true)}
 							>
-								Briefing
+								Recap
 							</Button>
 							<Button
 								leftSection={<IconFlagCheck size={18} />}
 								color="teal"
 								onClick={() => setShowDebrief(true)}
 							>
-								End / Debrief
+								Wrap up
 							</Button>
 						</Group>
 					</Stack>
@@ -136,7 +136,7 @@ export function PlayPage() {
 			) : (
 				<Card withBorder p="lg" radius="md">
 					<Text c="dimmed" ta="center" py="sm">
-						No active mission. Choose a door below to get rolling.
+						No active session. Choose a door below to get rolling.
 					</Text>
 				</Card>
 			)}

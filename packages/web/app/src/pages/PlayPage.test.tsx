@@ -102,7 +102,7 @@ describe("PlayPage", () => {
 
 	it("shows an empty hint when there is no active mission", () => {
 		renderPage();
-		expect(screen.getByText(/No active mission/)).toBeInTheDocument();
+		expect(screen.getByText(/No active session/)).toBeInTheDocument();
 	});
 
 	it("renders the two non-concierge door cards in order", () => {
@@ -128,25 +128,25 @@ describe("PlayPage", () => {
 	it("shows the active mission card with the game title and briefing", () => {
 		(useActiveMission as Mock).mockReturnValue({ data: makeMission() });
 		renderPage();
-		expect(screen.getByText("Mission active")).toBeInTheDocument();
+		expect(screen.getByText("Session active")).toBeInTheDocument();
 		expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
 		expect(screen.getByText("Your next adventure awaits")).toBeInTheDocument();
 	});
 
-	it("shows 'Briefing' and 'End / Debrief' buttons on the active mission card", () => {
+	it("shows 'Recap' and 'Wrap up' buttons on the active mission card", () => {
 		(useActiveMission as Mock).mockReturnValue({ data: makeMission() });
 		renderPage();
-		expect(screen.getByRole("button", { name: /briefing/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /end \/ debrief/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /recap/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /wrap up/i })).toBeInTheDocument();
 		// No Resume button anymore.
 		expect(screen.queryByRole("button", { name: /resume/i })).not.toBeInTheDocument();
 	});
 
-	it("opens the briefing modal in view mode from the 'Briefing' button", () => {
+	it("opens the briefing modal in view mode from the 'Recap' button", () => {
 		(useActiveMission as Mock).mockReturnValue({ data: makeMission() });
 		renderPage();
 		expect(screen.queryByTestId("briefing-modal")).not.toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: /briefing/i }));
+		fireEvent.click(screen.getByRole("button", { name: /recap/i }));
 		const modal = screen.getByTestId("briefing-modal");
 		expect(modal).toBeInTheDocument();
 		expect(modal).toHaveTextContent("view");
@@ -154,11 +154,11 @@ describe("PlayPage", () => {
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
 
-	it("opens the debrief modal from the 'End / Debrief' button", () => {
+	it("opens the debrief modal from the 'Wrap up' button", () => {
 		(useActiveMission as Mock).mockReturnValue({ data: makeMission() });
 		renderPage();
 		expect(screen.queryByTestId("debrief-modal")).not.toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: /end \/ debrief/i }));
+		fireEvent.click(screen.getByRole("button", { name: /wrap up/i }));
 		expect(screen.getByTestId("debrief-modal")).toBeInTheDocument();
 		// Ending/debriefing does not navigate.
 		expect(mockNavigate).not.toHaveBeenCalled();

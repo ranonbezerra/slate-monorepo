@@ -111,7 +111,7 @@ function makeMissionItem(overrides: Partial<MissionListItem> = {}): MissionListI
 // ---------------------------------------------------------------------------
 
 describe("MissionsPage", () => {
-	it("renders the title 'Mission History'", () => {
+	it("renders the title 'Session history'", () => {
 		(useMissions as Mock).mockReturnValue({
 			data: { items: [], total: 0 },
 			isLoading: false,
@@ -119,7 +119,7 @@ describe("MissionsPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText("Mission History")).toBeInTheDocument();
+		expect(screen.getByText("Session history")).toBeInTheDocument();
 	});
 
 	it("renders empty state when missions list is empty", () => {
@@ -130,7 +130,7 @@ describe("MissionsPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText(/No missions yet/)).toBeInTheDocument();
+		expect(screen.getByText(/No sessions yet/)).toBeInTheDocument();
 		expect(screen.getByText(/Start one from the Play page/)).toBeInTheDocument();
 	});
 
@@ -144,7 +144,7 @@ describe("MissionsPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText("1 mission total")).toBeInTheDocument();
+		expect(screen.getByText("1 session total")).toBeInTheDocument();
 	});
 
 	it("renders mission count text for multiple missions (plural)", () => {
@@ -160,7 +160,7 @@ describe("MissionsPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText("2 missions total")).toBeInTheDocument();
+		expect(screen.getByText("2 sessions total")).toBeInTheDocument();
 	});
 
 	it("renders game title in the DataTable", () => {
@@ -250,7 +250,7 @@ describe("MissionsPage", () => {
 		expect(screen.getByText("Active")).toBeInTheDocument();
 	});
 
-	it("shows 'Debriefed' badge for debrief_completed missions", () => {
+	it("shows 'Wrapped' badge for debrief_completed missions", () => {
 		const items = [
 			makeMissionItem({
 				endedVia: "debrief_completed",
@@ -265,7 +265,7 @@ describe("MissionsPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText("Debriefed")).toBeInTheDocument();
+		expect(screen.getByText("Wrapped")).toBeInTheDocument();
 	});
 
 	it("shows 'Paused' badge for paused_app missions", () => {

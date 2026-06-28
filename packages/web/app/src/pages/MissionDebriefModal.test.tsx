@@ -148,7 +148,7 @@ describe("MissionDebriefModal", () => {
 	it("renders modal title with the game name", () => {
 		renderModal(makeMission());
 
-		expect(screen.getByText(/End Mission: Hollow Knight/)).toBeInTheDocument();
+		expect(screen.getByText(/End session: Hollow Knight/)).toBeInTheDocument();
 	});
 
 	it("renders title with different game name", () => {
@@ -176,7 +176,7 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(mission);
 
-		expect(screen.getByText(/End Mission: Elden Ring/)).toBeInTheDocument();
+		expect(screen.getByText(/End session: Elden Ring/)).toBeInTheDocument();
 	});
 
 	it("renders the debrief description text", () => {
@@ -191,17 +191,17 @@ describe("MissionDebriefModal", () => {
 		expect(screen.getByPlaceholderText(/Beat the Mantis Lords/)).toBeInTheDocument();
 	});
 
-	it("renders 'Skip debrief' and 'Submit debrief' buttons", () => {
+	it("renders 'Skip note' and 'Save note' buttons", () => {
 		renderModal(makeMission());
 
-		expect(screen.getByRole("button", { name: /Skip debrief/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /Submit debrief/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Skip note/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Save note/i })).toBeInTheDocument();
 	});
 
 	it("submit debrief button is disabled when text is shorter than 3 characters", () => {
 		renderModal(makeMission());
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		expect(submitButton).toBeDisabled();
 	});
 
@@ -211,7 +211,7 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Got the cloak" } });
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		expect(submitButton).not.toBeDisabled();
 	});
 
@@ -221,14 +221,14 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "   " } });
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		expect(submitButton).toBeDisabled();
 	});
 
 	it("skip debrief button is not disabled even without text", () => {
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip debrief/i });
+		const skipButton = screen.getByRole("button", { name: /Skip note/i });
 		expect(skipButton).not.toBeDisabled();
 	});
 
@@ -240,7 +240,7 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip debrief/i });
+		const skipButton = screen.getByRole("button", { name: /Skip note/i });
 		expect(skipButton).toHaveAttribute("data-loading");
 	});
 
@@ -252,11 +252,11 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		expect(submitButton).toHaveAttribute("data-loading");
 	});
 
-	// --- Submit debrief flow ---
+	// --- Save note flow ---
 
 	it("calls submitDebrief.mutateAsync on submit and shows success notification", async () => {
 		const mutateAsyncFn = vi.fn().mockResolvedValueOnce(undefined);
@@ -271,7 +271,7 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Beat the Mantis Lords and got the cloak" } });
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
@@ -284,7 +284,7 @@ describe("MissionDebriefModal", () => {
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "Mission complete",
+					title: "Session complete",
 					color: "green",
 				}),
 			);
@@ -307,13 +307,13 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Some debrief text" } });
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "Debrief failed",
+					title: "Couldn't save your note",
 					message: "Server error",
 					color: "red",
 				}),
@@ -333,13 +333,13 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Some debrief text" } });
 
-		const submitButton = screen.getByRole("button", { name: /Submit debrief/i });
+		const submitButton = screen.getByRole("button", { name: /Save note/i });
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "Debrief failed",
+					title: "Couldn't save your note",
 					message: "An unexpected error occurred",
 					color: "red",
 				}),
@@ -347,7 +347,7 @@ describe("MissionDebriefModal", () => {
 		});
 	});
 
-	// --- Skip debrief flow ---
+	// --- Skip note flow ---
 
 	it("calls endMission.mutateAsync on skip and shows notification", async () => {
 		const mutateAsyncFn = vi.fn().mockResolvedValueOnce(undefined);
@@ -359,7 +359,7 @@ describe("MissionDebriefModal", () => {
 		const onClose = vi.fn();
 		renderModal(makeMission(), onClose);
 
-		const skipButton = screen.getByRole("button", { name: /Skip debrief/i });
+		const skipButton = screen.getByRole("button", { name: /Skip note/i });
 		fireEvent.click(skipButton);
 
 		await waitFor(() => {
@@ -369,7 +369,7 @@ describe("MissionDebriefModal", () => {
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "Mission ended",
+					title: "Session ended",
 					color: "yellow",
 				}),
 			);
@@ -389,13 +389,13 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip debrief/i });
+		const skipButton = screen.getByRole("button", { name: /Skip note/i });
 		fireEvent.click(skipButton);
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "End mission failed",
+					title: "Couldn't end session",
 					message: "Server error",
 					color: "red",
 				}),
@@ -412,13 +412,13 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip debrief/i });
+		const skipButton = screen.getByRole("button", { name: /Skip note/i });
 		fireEvent.click(skipButton);
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "End mission failed",
+					title: "Couldn't end session",
 					message: "An unexpected error occurred",
 					color: "red",
 				}),

@@ -104,7 +104,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 				setCurrentBriefing(updated.briefingText);
 			} catch (err) {
 				notifications.show({
-					title: "Couldn't load briefing",
+					title: "Couldn't load recap",
 					message: err instanceof Error ? err.message : "An unexpected error occurred",
 					color: "red",
 				});
@@ -125,8 +125,8 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 		} catch (err) {
 			if (controller.signal.aborted) return; // user cancelled — stay silent
 			notifications.show({
-				title: "Deep briefing unavailable",
-				message: err instanceof Error ? err.message : "Try the quick briefing instead",
+				title: "Deep recap unavailable",
+				message: err instanceof Error ? err.message : "Try the quick recap instead",
 				color: "yellow",
 			});
 		} finally {
@@ -167,7 +167,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 		} catch (err) {
 			notifications.show({
 				title: "Regeneration failed",
-				message: err instanceof Error ? err.message : "Could not regenerate briefing",
+				message: err instanceof Error ? err.message : "Couldn't regenerate recap",
 				color: "red",
 			});
 		}
@@ -185,7 +185,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 			setStep("briefing");
 			notifications.show({
 				title: "Session recorded",
-				message: "Your unregistered session has been saved. The briefing has been updated.",
+				message: "Your unregistered session has been saved. The recap has been updated.",
 				color: "teal",
 			});
 		} catch (err) {
@@ -207,7 +207,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 			props.onConfirm(mission);
 		} catch (err) {
 			notifications.show({
-				title: "Cannot start mission",
+				title: "Couldn't start session",
 				message: err instanceof Error ? err.message : "An unexpected error occurred",
 				color: "red",
 			});
@@ -224,7 +224,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 			props.onConfirm(mission);
 		} catch (err) {
 			notifications.show({
-				title: "Cannot start mission",
+				title: "Couldn't start session",
 				message: err instanceof Error ? err.message : "An unexpected error occurred",
 				color: "red",
 			});
@@ -245,7 +245,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 		<Modal
 			opened
 			onClose={props.onClose}
-			title={<Title order={4}>Mission Briefing: {gameTitle}</Title>}
+			title={<Title order={4}>Recap: {gameTitle}</Title>}
 			size="lg"
 		>
 			<Stack gap="md">
@@ -255,7 +255,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 
 				{step === "chooseMode" && isPreview && (
 					<>
-						<Text size="sm">How should we prepare your briefing?</Text>
+						<Text size="sm">How should we prepare your recap?</Text>
 						<Button
 							variant="default"
 							fullWidth
@@ -265,7 +265,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							onClick={() => handleChooseMode("quick")}
 						>
 							<Stack gap={2} align="flex-start">
-								<Text fw={600}>⚡ Quick briefing</Text>
+								<Text fw={600}>⚡ Quick recap</Text>
 								<Text size="sm" c="dimmed">
 									Instant — built from your own past sessions. Recommended.
 								</Text>
@@ -280,7 +280,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							onClick={() => handleChooseMode("deep")}
 						>
 							<Stack gap={2} align="flex-start">
-								<Text fw={600}>🔎 Deep briefing (web)</Text>
+								<Text fw={600}>🔎 Deep recap (web)</Text>
 								<Text size="sm" c="dimmed">
 									Searches the web for spoiler-free next steps. Takes up to a minute.
 								</Text>
@@ -298,7 +298,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							<Stack gap={2} align="flex-start">
 								<Text fw={600}>▶️ Just play</Text>
 								<Text size="sm" c="dimmed">
-									Skip the briefing and start the mission right away.
+									Skip the recap and start your session right away.
 								</Text>
 							</Stack>
 						</Button>
@@ -307,7 +307,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 
 				{step === "correct" && (
 					<>
-						<Text size="sm">Tell us where you actually are so we can adjust the briefing:</Text>
+						<Text size="sm">Tell us where you actually are so we can adjust the recap:</Text>
 						<Textarea
 							placeholder="e.g. I'm actually in City of Tears now, working on the Soul Master fight"
 							value={correction}
@@ -334,7 +334,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 				{step === "retroactive" && isPreview && (
 					<>
 						<Text size="sm">
-							Tell us what happened in that unregistered session so we can update your briefing:
+							Tell us what happened in that unregistered session so we can update your recap:
 						</Text>
 						<Textarea
 							placeholder="e.g. I played for a couple hours, beat the Soul Master and explored the City of Tears. Got the Elegant Key."
@@ -353,7 +353,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 								disabled={!retroactiveText.trim()}
 								onClick={handleRetroactiveSubmit}
 							>
-								Record session & update briefing
+								Record session & update recap
 							</Button>
 						</Group>
 					</>
@@ -382,7 +382,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							<Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{displayBriefing}</Text>
 						) : (
 							<Text c="dimmed" fs="italic">
-								No briefing available for this session. This is your first mission for this game —
+								No recap available for this session. This is your first session for this game —
 								enjoy the adventure!
 							</Text>
 						)}
@@ -390,7 +390,7 @@ export function MissionBriefingModal(props: MissionBriefingModalProps) {
 							{isPreview ? (
 								<>
 									<Button variant="subtle" onClick={() => setStep("update")}>
-										Update this briefing
+										Update this recap
 									</Button>
 									<Button
 										color="teal"

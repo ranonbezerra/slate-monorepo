@@ -342,7 +342,7 @@ describe("LibraryPage", () => {
 		expect(screen.getByText("Status")).toBeInTheDocument();
 		expect(screen.getByRole("textbox", { name: "Notes" })).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Start Mission" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Start session" })).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
 	});
 
@@ -448,10 +448,10 @@ describe("LibraryPage", () => {
 	});
 
 	// -----------------------------------------------------------------------
-	// Start Mission per platform (one-active-mission rule)
+	// Start session per platform (one-active-mission rule)
 	// -----------------------------------------------------------------------
 
-	it("disables Start Mission for every platform when a mission is active", () => {
+	it("disables Start session for every platform when a mission is active", () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: {
 				items: [makeGroup({ platforms: [makeState({ publicId: "entry-1" })] })],
@@ -462,7 +462,7 @@ describe("LibraryPage", () => {
 			isLoading: false,
 		});
 		// Active mission is on a DIFFERENT entry, so this platform shows the
-		// disabled "Start Mission" label rather than "Mission active".
+		// disabled "Start session" label rather than "Session active".
 		(useActiveMission as Mock).mockReturnValue({
 			data: makeMission({
 				libraryEntry: {
@@ -480,10 +480,10 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		expect(screen.getByRole("button", { name: "Start Mission" })).toBeDisabled();
+		expect(screen.getByRole("button", { name: "Start session" })).toBeDisabled();
 	});
 
-	it('labels the active platform "Mission active" and disables it', () => {
+	it('labels the active platform "Session active" and disables it', () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: {
 				items: [makeGroup({ platforms: [makeState({ publicId: "entry-1" })] })],
@@ -499,11 +499,11 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		const btn = screen.getByRole("button", { name: "Mission active" });
+		const btn = screen.getByRole("button", { name: "Session active" });
 		expect(btn).toBeDisabled();
 	});
 
-	it("enables Start Mission when no mission is active", () => {
+	it("enables Start session when no mission is active", () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: { items: [makeGroup()], total: 1, limit: 50, offset: 0 },
 			isLoading: false,
@@ -512,10 +512,10 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		expect(screen.getByRole("button", { name: "Start Mission" })).not.toBeDisabled();
+		expect(screen.getByRole("button", { name: "Start session" })).not.toBeDisabled();
 	});
 
-	it("opens the briefing preview modal when Start Mission is clicked", async () => {
+	it("opens the briefing preview modal when Start session is clicked", async () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: { items: [makeGroup()], total: 1, limit: 50, offset: 0 },
 			isLoading: false,
@@ -525,7 +525,7 @@ describe("LibraryPage", () => {
 		renderPage();
 
 		expect(screen.queryByTestId("briefing-preview-modal")).not.toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: "Start Mission" }));
+		fireEvent.click(screen.getByRole("button", { name: "Start session" }));
 		expect(await screen.findByTestId("briefing-preview-modal")).toBeInTheDocument();
 	});
 
@@ -751,7 +751,7 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		expect(screen.getByText("Mission active")).toBeInTheDocument();
+		expect(screen.getByText("Session active")).toBeInTheDocument();
 		expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "End mission" })).toBeInTheDocument();
 	});

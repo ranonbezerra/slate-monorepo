@@ -341,7 +341,7 @@ class _PlatformRow extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.play_arrow),
                 onPressed: onStartMission,
-                tooltip: 'Start Mission',
+                tooltip: 'Start session',
                 iconSize: 20,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),

@@ -140,7 +140,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mission Briefing')),
+      appBar: AppBar(title: const Text('Recap')),
       body: SafeArea(
         child: BlocConsumer<MissionBloc, MissionState>(
           listener: (context, state) {
@@ -168,7 +168,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // Deep briefing in progress: show progress + cancel.
+            // Deep recap in progress: show progress + cancel.
             if (state is DeepBriefingLoading) {
               return _buildDeepLoading(context);
             }
@@ -244,14 +244,14 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'How should we prepare your briefing?',
+            'How should we prepare your recap?',
             style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: 16),
           _modeCard(
             context,
             icon: Icons.bolt,
-            title: 'Quick briefing',
+            title: 'Quick recap',
             subtitle:
                 'Instant — built from your own past sessions. Recommended.',
             onTap: () => _onSelectMode(false),
@@ -260,7 +260,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
           _modeCard(
             context,
             icon: Icons.travel_explore,
-            title: 'Deep briefing (web)',
+            title: 'Deep recap (web)',
             subtitle:
                 'Searches the web for spoiler-free next steps. Takes up to a '
                 'minute.',
@@ -271,7 +271,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
             context,
             icon: Icons.play_arrow,
             title: 'Just play',
-            subtitle: 'Skip the briefing and start the mission right away.',
+            subtitle: 'Skip the recap and start your session right away.',
             onTap: _onSkipBriefing,
           ),
         ],
@@ -337,7 +337,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
             const CircularProgressIndicator(),
             const SizedBox(height: 24),
             Text(
-              'Researching the web for your briefing',
+              'Researching the web for your recap',
               style: theme.textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -416,7 +416,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
           Text(briefingText, style: theme.textTheme.bodyLarge)
         else
           Text(
-            'No briefing available -- this is your first mission for this '
+            'No recap available -- this is your first session for this '
             'game. Enjoy the adventure!',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
@@ -431,7 +431,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
           child: _isPreview
               ? TextButton(
                   onPressed: () => setState(() => _step = _BriefingStep.update),
-                  child: const Text('Update this briefing'),
+                  child: const Text('Update this recap'),
                 )
               : TextButton(
                   onPressed: () =>
@@ -497,7 +497,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tell us where you actually are so we can adjust the briefing:',
+          'Tell us where you actually are so we can adjust the recap:',
           style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 12),
@@ -543,7 +543,7 @@ class _MissionBriefingPageState extends State<MissionBriefingPage> {
       children: [
         Text(
           'Tell us what happened in that unregistered session so we can '
-          'update your briefing:',
+          'update your recap:',
           style: theme.textTheme.bodyMedium,
         ),
         const SizedBox(height: 12),

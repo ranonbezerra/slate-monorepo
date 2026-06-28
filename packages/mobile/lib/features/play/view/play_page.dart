@@ -48,9 +48,9 @@ class _PlayPageState extends State<PlayPage> {
                 // can't safely confirm there is no active mission, so the
                 // start-doors stay locked to avoid double-starting.
                 final doorsDisabledHint = hasActiveMission
-                    ? 'Finish your active mission first'
+                    ? 'Finish your active session first'
                     : hasError
-                    ? 'Could not check your active mission'
+                    ? 'Could not check your active session'
                     : null;
 
                 return Column(
@@ -138,7 +138,7 @@ class _ActiveMissionCard extends StatelessWidget {
                 const Icon(Icons.flag, color: DLColors.coral, size: 18),
                 const SizedBox(width: 6),
                 Text(
-                  'Active mission',
+                  'Active session',
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: DLColors.coral,
                     fontWeight: FontWeight.w700,
@@ -179,7 +179,7 @@ class _ActiveMissionCard extends StatelessWidget {
                     onPressed: () =>
                         context.push('/missions/${mission.publicId}/briefing'),
                     icon: const Icon(Icons.article_outlined),
-                    label: const Text('Briefing'),
+                    label: const Text('Recap'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -187,7 +187,7 @@ class _ActiveMissionCard extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () =>
                         context.push('/missions/${mission.publicId}/debrief'),
-                    child: const Text('End / Debrief'),
+                    child: const Text('Wrap up'),
                   ),
                 ),
               ],
@@ -235,7 +235,7 @@ class _NoActiveMissionCard extends StatelessWidget {
               color: colors.onSurfaceVariant,
             ),
             const SizedBox(height: 12),
-            Text('No mission running', style: theme.textTheme.titleMedium),
+            Text('No session running', style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
             Text(
               'Pick something below and start playing.',
@@ -271,7 +271,7 @@ class _ActiveMissionError extends StatelessWidget {
             Icon(Icons.error_outline, size: 40, color: colors.error),
             const SizedBox(height: 12),
             Text(
-              "Couldn't load your mission",
+              "Couldn't load your session",
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 4),

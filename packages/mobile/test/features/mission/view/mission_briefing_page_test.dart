@@ -84,16 +84,13 @@ void main() {
   }
 
   group('MissionBriefingPage', () {
-    testWidgets('shows AppBar with Mission Briefing title', (tester) async {
+    testWidgets('shows AppBar with Recap title', (tester) async {
       when(() => missionBloc.state).thenReturn(const MissionInitial());
 
       await tester.pumpWidget(buildPreviewSubject());
 
       expect(
-        find.descendant(
-          of: find.byType(AppBar),
-          matching: find.text('Mission Briefing'),
-        ),
+        find.descendant(of: find.byType(AppBar), matching: find.text('Recap')),
         findsOneWidget,
       );
     });
@@ -114,9 +111,9 @@ void main() {
 
       await tester.pumpWidget(buildPreviewSubject());
 
-      expect(find.text('How should we prepare your briefing?'), findsOneWidget);
-      expect(find.text('Quick briefing'), findsOneWidget);
-      expect(find.text('Deep briefing (web)'), findsOneWidget);
+      expect(find.text('How should we prepare your recap?'), findsOneWidget);
+      expect(find.text('Quick recap'), findsOneWidget);
+      expect(find.text('Deep recap (web)'), findsOneWidget);
     });
 
     testWidgets('view mode dispatches LoadActiveMission on init', (
@@ -165,7 +162,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.widgetWithText(TextButton, 'Update this briefing'),
+        find.widgetWithText(TextButton, 'Update this recap'),
         findsOneWidget,
       );
       expect(find.widgetWithText(OutlinedButton, 'Cancel'), findsNothing);
@@ -232,7 +229,7 @@ void main() {
 
       await tester.pumpWidget(buildPreviewSubject());
 
-      expect(find.textContaining('No briefing available'), findsOneWidget);
+      expect(find.textContaining('No recap available'), findsOneWidget);
     });
 
     testWidgets('shows italic no briefing text when briefingText is null '
@@ -243,7 +240,7 @@ void main() {
 
       await tester.pumpWidget(buildViewSubject());
 
-      expect(find.textContaining('No briefing available'), findsOneWidget);
+      expect(find.textContaining('No recap available'), findsOneWidget);
     });
 
     testWidgets('Update → Correct my position opens the correction step', (
@@ -255,7 +252,7 @@ void main() {
 
       await tester.pumpWidget(buildPreviewSubject());
 
-      await tester.tap(find.widgetWithText(TextButton, 'Update this briefing'));
+      await tester.tap(find.widgetWithText(TextButton, 'Update this recap'));
       await tester.pumpAndSettle();
       await tester.tap(
         find.widgetWithText(OutlinedButton, 'Correct my current position'),
@@ -282,7 +279,7 @@ void main() {
 
       await tester.pumpWidget(buildPreviewSubject());
 
-      await tester.tap(find.widgetWithText(TextButton, 'Update this briefing'));
+      await tester.tap(find.widgetWithText(TextButton, 'Update this recap'));
       await tester.pumpAndSettle();
       await tester.tap(
         find.widgetWithText(OutlinedButton, "Log a session I didn't register"),
@@ -309,7 +306,7 @@ void main() {
 
       await tester.pumpWidget(buildPreviewSubject());
 
-      await tester.tap(find.widgetWithText(TextButton, 'Update this briefing'));
+      await tester.tap(find.widgetWithText(TextButton, 'Update this recap'));
       await tester.pumpAndSettle();
       await tester.tap(
         find.widgetWithText(OutlinedButton, 'Correct my current position'),
@@ -354,11 +351,11 @@ void main() {
         'MissionError in builder', (tester) async {
       when(
         () => missionBloc.state,
-      ).thenReturn(const MissionError(message: 'Failed to load briefing'));
+      ).thenReturn(const MissionError(message: 'Failed to load recap'));
 
       await tester.pumpWidget(buildPreviewSubject());
 
-      expect(find.text('Failed to load briefing'), findsOneWidget);
+      expect(find.text('Failed to load recap'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Go Back'), findsOneWidget);
     });
 
@@ -371,11 +368,11 @@ void main() {
 
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.text('Hollow Knight'), findsNothing);
-      expect(find.text('Quick briefing'), findsNothing);
+      expect(find.text('Quick recap'), findsNothing);
     });
 
     // ---------------------------------------------------------------
-    // Deep briefing (mode choice + progress + cancel)
+    // Deep recap (mode choice + progress + cancel)
     // ---------------------------------------------------------------
     group('deep briefing', () {
       testWidgets('view mode does NOT show the mode-choice cards', (
@@ -387,8 +384,8 @@ void main() {
 
         await tester.pumpWidget(buildViewSubject());
 
-        expect(find.text('Quick briefing'), findsNothing);
-        expect(find.text('Deep briefing (web)'), findsNothing);
+        expect(find.text('Quick recap'), findsNothing);
+        expect(find.text('Deep recap (web)'), findsNothing);
       });
 
       testWidgets('choosing Quick dispatches a quick PreviewBriefing', (
@@ -397,7 +394,7 @@ void main() {
         when(() => missionBloc.state).thenReturn(const MissionInitial());
 
         await tester.pumpWidget(buildPreviewSubject());
-        await tester.tap(find.text('Quick briefing'));
+        await tester.tap(find.text('Quick recap'));
         await tester.pump();
 
         verify(
@@ -435,7 +432,7 @@ void main() {
         when(() => missionBloc.state).thenReturn(const MissionInitial());
 
         await tester.pumpWidget(buildPreviewSubject());
-        await tester.tap(find.text('Deep briefing (web)'));
+        await tester.tap(find.text('Deep recap (web)'));
         await tester.pump();
 
         verify(
@@ -455,10 +452,7 @@ void main() {
 
         await tester.pumpWidget(buildPreviewSubject());
 
-        expect(
-          find.text('Researching the web for your briefing'),
-          findsOneWidget,
-        );
+        expect(find.text('Researching the web for your recap'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.widgetWithText(OutlinedButton, 'Cancel'), findsOneWidget);
       });

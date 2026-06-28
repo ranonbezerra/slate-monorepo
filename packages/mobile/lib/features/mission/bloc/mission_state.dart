@@ -57,7 +57,7 @@ final class MissionListLoaded extends MissionState {
   List<Object?> get props => [missions, total, isLoadingMore, loadMoreError];
 }
 
-/// Active mission has been loaded (null means no active mission).
+/// Active session has been loaded (null means no active mission).
 final class ActiveMissionLoaded extends MissionState {
   const ActiveMissionLoaded({this.mission});
 

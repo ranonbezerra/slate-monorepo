@@ -137,7 +137,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('No mission running'), findsOneWidget);
+      expect(find.text('No session running'), findsOneWidget);
       expect(
         find.text('Pick something below and start playing.'),
         findsOneWidget,
@@ -152,7 +152,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('No mission running'), findsOneWidget);
+      expect(find.text('No session running'), findsOneWidget);
     });
 
     testWidgets('shows loading placeholder when MissionLoading', (
@@ -163,7 +163,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('No mission running'), findsNothing);
+      expect(find.text('No session running'), findsNothing);
     });
 
     testWidgets('shows error card and locks start doors on MissionError', (
@@ -176,13 +176,13 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       // Genuine error is surfaced (not silently treated as "no mission").
-      expect(find.text("Couldn't load your mission"), findsOneWidget);
+      expect(find.text("Couldn't load your session"), findsOneWidget);
       expect(find.text('Network down'), findsOneWidget);
-      expect(find.text('No mission running'), findsNothing);
+      expect(find.text('No session running'), findsNothing);
 
       // Start doors are locked because the active mission is unknown.
       expect(
-        find.text('Could not check your active mission'),
+        find.text('Could not check your active session'),
         findsNWidgets(2),
       );
       expect(find.byIcon(Icons.lock_outline), findsNWidgets(2));
@@ -216,30 +216,26 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('Active mission'), findsOneWidget);
+      expect(find.text('Active session'), findsOneWidget);
       expect(find.text('Hollow Knight'), findsOneWidget);
       expect(find.text('PlayStation 5'), findsOneWidget);
       expect(find.text('Continue exploring Hallownest.'), findsOneWidget);
     });
 
-    testWidgets(
-      'active mission card shows Briefing and End / Debrief buttons',
-      (tester) async {
-        when(
-          () => missionBloc.state,
-        ).thenReturn(ActiveMissionLoaded(mission: _mission));
+    testWidgets('active mission card shows Recap and Wrap up buttons', (
+      tester,
+    ) async {
+      when(
+        () => missionBloc.state,
+      ).thenReturn(ActiveMissionLoaded(mission: _mission));
 
-        await tester.pumpWidget(buildSubject());
+      await tester.pumpWidget(buildSubject());
 
-        // Resume was removed — it had no real destination.
-        expect(find.text('Resume'), findsNothing);
-        expect(find.text('Briefing'), findsOneWidget);
-        expect(
-          find.widgetWithText(OutlinedButton, 'End / Debrief'),
-          findsOneWidget,
-        );
-      },
-    );
+      // Resume was removed — it had no real destination.
+      expect(find.text('Resume'), findsNothing);
+      expect(find.text('Recap'), findsOneWidget);
+      expect(find.widgetWithText(OutlinedButton, 'Wrap up'), findsOneWidget);
+    });
 
     testWidgets('active mission card hides briefing when none present', (
       tester,
@@ -250,11 +246,11 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('Active mission'), findsOneWidget);
+      expect(find.text('Active session'), findsOneWidget);
       expect(find.text('Continue exploring Hallownest.'), findsNothing);
     });
 
-    testWidgets('tapping Briefing navigates to the mission briefing', (
+    testWidgets('tapping Recap navigates to the mission briefing', (
       tester,
     ) async {
       when(
@@ -263,13 +259,13 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      await tester.tap(find.text('Briefing'));
+      await tester.tap(find.text('Recap'));
       await tester.pumpAndSettle();
 
       expect(find.text('Briefing stub'), findsOneWidget);
     });
 
-    testWidgets('tapping End / Debrief navigates to the mission debrief', (
+    testWidgets('tapping Wrap up navigates to the mission debrief', (
       tester,
     ) async {
       when(
@@ -278,7 +274,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      await tester.tap(find.widgetWithText(OutlinedButton, 'End / Debrief'));
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Wrap up'));
       await tester.pumpAndSettle();
 
       expect(find.text('Debrief stub'), findsOneWidget);
@@ -294,7 +290,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       // Hint replaces the subtitle on both start doors.
-      expect(find.text('Finish your active mission first'), findsNWidgets(2));
+      expect(find.text('Finish your active session first'), findsNWidgets(2));
       expect(find.byIcon(Icons.lock_outline), findsNWidgets(2));
 
       // Tapping the disabled door does not navigate.
@@ -325,7 +321,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('Finish your active mission first'), findsNothing);
+      expect(find.text('Finish your active session first'), findsNothing);
       expect(find.byIcon(Icons.lock_outline), findsNothing);
 
       await tester.tap(find.text("What's the move?"));

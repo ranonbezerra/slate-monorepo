@@ -153,7 +153,7 @@ describe("App - authenticated layout", () => {
 		expect(await screen.findByText("LoadoutPage")).toBeInTheDocument();
 	});
 
-	it("renders MissionsPage (Mission History) at /history", async () => {
+	it("renders MissionsPage (Session history) at /history", async () => {
 		renderApp(["/history"]);
 		expect(await screen.findByText("MissionsPage")).toBeInTheDocument();
 	});

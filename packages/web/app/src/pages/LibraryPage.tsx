@@ -196,7 +196,7 @@ export function LibraryPage() {
 					<Group justify="space-between">
 						<Group gap="sm">
 							<Badge color="teal" variant="dot" size="lg">
-								Mission active
+								Session active
 							</Badge>
 							<Text fw={500}>{activeMission.libraryEntry.game.title}</Text>
 							<Text size="sm" c="dimmed">
@@ -550,7 +550,7 @@ function PlatformRow({
 						disabled={hasActiveMission}
 						onClick={() => onStartMission(state)}
 					>
-						{isThisEntryActive ? "Mission active" : "Start Mission"}
+						{isThisEntryActive ? "Session active" : "Start session"}
 					</Button>
 					<Button
 						size="xs"

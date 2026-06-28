@@ -54,14 +54,14 @@ export function AiBriefingOverlay({ opened, gameTitle, deep, onCancel }: AiBrief
 				{/* Text */}
 				<Stack align="center" gap={4}>
 					<Text fw={600} size="sm">
-						{deep ? "Researching the web for your briefing" : "AI is preparing your briefing"}
+						{deep ? "Researching the web for your recap" : "Preparing your recap"}
 					</Text>
 					<Text size="sm" c="dimmed" ta="center">
 						{deep
 							? `Searching the web and your past sessions${gameTitle ? ` in ${gameTitle}` : ""} for spoiler-free next steps. This can take up to a minute.`
 							: gameTitle
-								? `Analyzing your previous sessions in ${gameTitle} to craft a personalized briefing.`
-								: "Analyzing your previous sessions to craft a personalized briefing."}
+								? `Analyzing your previous sessions in ${gameTitle} to craft a personalized recap.`
+								: "Analyzing your previous sessions to craft a personalized recap."}
 					</Text>
 				</Stack>
 

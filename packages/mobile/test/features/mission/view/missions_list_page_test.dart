@@ -142,7 +142,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('No missions yet.'), findsOneWidget);
+      expect(find.text('No sessions yet.'), findsOneWidget);
       expect(find.text('Start one from the Play tab.'), findsOneWidget);
       expect(find.byIcon(Icons.rocket_launch_outlined), findsOneWidget);
     });
@@ -215,7 +215,7 @@ void main() {
       expect(find.text('Active'), findsOneWidget);
     });
 
-    testWidgets('shows Debriefed status badge for debriefed mission', (
+    testWidgets('shows Wrapped status badge for debriefed mission', (
       tester,
     ) async {
       when(
@@ -224,7 +224,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('Debriefed'), findsOneWidget);
+      expect(find.text('Wrapped'), findsOneWidget);
     });
 
     testWidgets('shows Paused status badge for paused mission', (tester) async {
@@ -321,11 +321,11 @@ void main() {
 
       // Should not show loading, error, or empty state.
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(find.text('No missions yet.'), findsNothing);
+      expect(find.text('No sessions yet.'), findsNothing);
       expect(find.text('Retry'), findsNothing);
     });
 
-    testWidgets('shows AppBar with Mission History title', (tester) async {
+    testWidgets('shows AppBar with Session history title', (tester) async {
       when(() => missionBloc.state).thenReturn(const MissionInitial());
 
       await tester.pumpWidget(buildSubject());
@@ -333,7 +333,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(AppBar),
-          matching: find.text('Mission History'),
+          matching: find.text('Session history'),
         ),
         findsOneWidget,
       );
