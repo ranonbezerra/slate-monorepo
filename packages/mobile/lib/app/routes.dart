@@ -20,8 +20,8 @@ import 'package:app/features/library/view/library_list_page.dart';
 import 'package:app/features/library_import/view/library_import_page.dart';
 import 'package:app/features/loadout/view/loadout_page.dart';
 import 'package:app/features/play/view/play_page.dart';
-import 'package:app/features/play_session/view/play_session_briefing_page.dart';
 import 'package:app/features/play_session/view/play_session_debrief_page.dart';
+import 'package:app/features/play_session/view/play_session_recap_page.dart';
 import 'package:app/features/play_session/view/play_sessions_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -159,15 +159,15 @@ GoRouter createRouter(
         ),
       ),
       GoRoute(
-        path: '/play-sessions/briefing',
+        path: '/play-sessions/recap',
         builder: (context, state) {
           final entryId = state.uri.queryParameters['entry'];
-          return PlaySessionBriefingPage(libraryEntryPublicId: entryId);
+          return PlaySessionRecapPage(libraryEntryPublicId: entryId);
         },
       ),
       GoRoute(
-        path: '/play-sessions/:id/briefing',
-        builder: (context, state) => PlaySessionBriefingPage(
+        path: '/play-sessions/:id/recap',
+        builder: (context, state) => PlaySessionRecapPage(
           playSessionPublicId: state.pathParameters['id'],
         ),
       ),

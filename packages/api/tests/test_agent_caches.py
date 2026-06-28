@@ -1,6 +1,6 @@
 """Tests for the Phase 3 content-addressed caches (ROADMAP Epic 18).
 
-The deep-briefing agent, the research client, and the LLM ``complete()`` escape
+The deep-recap agent, the research client, and the LLM ``complete()`` escape
 hatch — each wrapped by a caching decorator. Exercised with a fake inner + the
 in-memory fake cache; no Redis, no real model.
 """
@@ -10,15 +10,15 @@ from __future__ import annotations
 from typing import Any
 
 from dailyloadout.infrastructure.agent.base import BriefResult, DeepBriefRequest
-from dailyloadout.infrastructure.agent.cached import CachedBriefingAgent
+from dailyloadout.infrastructure.agent.cached import CachedRecapAgent
 from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
-from dailyloadout.infrastructure.cache.keys import briefing_key, llm_key, research_key
+from dailyloadout.infrastructure.cache.keys import llm_key, recap_key, research_key
 from dailyloadout.infrastructure.llm.cached import CachedLLMClient
 from dailyloadout.infrastructure.research.base import SearchResult
 from dailyloadout.infrastructure.research.cached import CachedResearchClient
 from tests.test_cache_layer import FakeCache
 
-# ── Deep-briefing cache ──────────────────────────────────────────────────
+# ── Deep-recap cache ──────────────────────────────────────────────────
 
 
 class _FakeAgent:
@@ -35,14 +35,14 @@ _CTX: PlaySessionContext = {"game_title": "Hollow Knight", "next_action": "find 
 _REQ = DeepBriefRequest(context=_CTX, thread_id="t1")
 
 
-def test_briefing_key_changes_when_context_changes() -> None:
+def test_recap_key_changes_when_context_changes() -> None:
     other: PlaySessionContext = {**_CTX, "next_action": "beat the boss"}
-    assert briefing_key("deep", _CTX) != briefing_key("deep", other)
+    assert recap_key("deep", _CTX) != recap_key("deep", other)
 
 
-async def test_briefing_miss_then_hit_round_trips() -> None:
+async def test_recap_miss_then_hit_round_trips() -> None:
     inner = _FakeAgent(BriefResult(text="Go north.", source="deep_research", suspicious=False))
-    agent = CachedBriefingAgent(inner, FakeCache(), ttl_seconds=100)
+    agent = CachedRecapAgent(inner, FakeCache(), ttl_seconds=100)
 
     await agent.deep_brief(_REQ)
     second = await agent.deep_brief(_REQ)
@@ -53,9 +53,9 @@ async def test_briefing_miss_then_hit_round_trips() -> None:
     assert second.suspicious is False
 
 
-async def test_briefing_quick_fallback_not_cached() -> None:
+async def test_recap_quick_fallback_not_cached() -> None:
     inner = _FakeAgent(BriefResult(text="meh", source="quick_fallback", suspicious=False))
-    agent = CachedBriefingAgent(inner, FakeCache(), ttl_seconds=100)
+    agent = CachedRecapAgent(inner, FakeCache(), ttl_seconds=100)
 
     await agent.deep_brief(_REQ)
     await agent.deep_brief(_REQ)
@@ -63,9 +63,9 @@ async def test_briefing_quick_fallback_not_cached() -> None:
     assert inner.calls == 2  # degraded result never stored
 
 
-async def test_briefing_empty_text_not_cached() -> None:
+async def test_recap_empty_text_not_cached() -> None:
     inner = _FakeAgent(BriefResult(text="", source="deep_research", suspicious=False))
-    agent = CachedBriefingAgent(inner, FakeCache(), ttl_seconds=100)
+    agent = CachedRecapAgent(inner, FakeCache(), ttl_seconds=100)
 
     await agent.deep_brief(_REQ)
     await agent.deep_brief(_REQ)

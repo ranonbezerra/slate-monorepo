@@ -20,13 +20,13 @@ from fastapi import HTTPException
 
 from dailyloadout.config import Settings
 from dailyloadout.core.cache.invalidation import invalidate_user_stats
-from dailyloadout.core.play_session.briefing import BriefingMode, generate_briefing_for_mode
+from dailyloadout.core.play_session.recap import RecapMode, generate_recap_for_mode
 from dailyloadout.core.play_session.start import create_play_session_for_entry
-from dailyloadout.infrastructure.agent.base import AbstractBriefingAgent
+from dailyloadout.infrastructure.agent.base import AbstractRecapAgent
 from dailyloadout.infrastructure.agent.concierge.base import ConciergeTool
 from dailyloadout.infrastructure.agent.concierge.tools import _resolve_entry
 from dailyloadout.infrastructure.agent.concierge.write_schemas import (
-    GenerateBriefingArgs,
+    GenerateRecapArgs,
     RetroactiveDebriefArgs,
     SetStatusArgs,
     StartPlaySessionArgs,
@@ -39,23 +39,23 @@ logger = structlog.get_logger()
 
 # The statuses a player can move a game between (mirrors the library schema).
 _VALID_STATUSES = {"backlog", "playing", "paused", "completed", "dropped"}
-# Conversational briefing tops out at quick — deep research is slow and belongs
-# to the deliberate briefing flow, not a one-tap chat turn.
-_BRIEFING_CHOICES = {"none", "quick"}
+# Conversational recap tops out at quick — deep research is slow and belongs
+# to the deliberate recap flow, not a one-tap chat turn.
+_RECAP_CHOICES = {"none", "quick"}
 
 
 async def start_play_session(
     library_repo: LibraryRepository,
     play_session_repo: PlaySessionRepository,
     llm_client: AbstractLLMClient,
-    agent: AbstractBriefingAgent | None,
+    agent: AbstractRecapAgent | None,
     settings: Settings,
     user_id: int,
     *,
     library_entry_public_id: str,
-    briefing: str = "none",
+    recap: str = "none",
 ) -> str:
-    """Start a play_session for one game, optionally with a quick briefing."""
+    """Start a play_session for one game, optionally with a quick recap."""
     entry = await _resolve_entry(library_repo, user_id, library_entry_public_id)
     if entry is None:
         return "That game is not in the library, so I can't start it."
@@ -63,14 +63,14 @@ async def start_play_session(
     if await play_session_repo.get_active_for_user(user_id) is not None:
         return "There's already an active play_session. Finish or end it before starting another."
 
-    choice = briefing.strip().lower() if briefing else "none"
-    if choice not in _BRIEFING_CHOICES:
+    choice = recap.strip().lower() if recap else "none"
+    if choice not in _RECAP_CHOICES:
         choice = "none"
 
-    briefing_text: str | None = None
+    recap_text: str | None = None
     if choice != "none":
-        briefing_text = (
-            await generate_briefing_for_mode(
+        recap_text = (
+            await generate_recap_for_mode(
                 play_session_repo,
                 library_repo,
                 llm_client,
@@ -88,43 +88,43 @@ async def start_play_session(
             library_repo=library_repo,
             user_id=user_id,
             entry=entry,
-            briefing_text=briefing_text,
+            recap_text=recap_text,
         )
     except HTTPException:
         return "There's already an active play_session. Finish or end it before starting another."
 
     started = f"Started a play_session for {entry.game.title}."
-    if briefing_text:
-        return f"{started}\n\nBriefing:\n{briefing_text}"
+    if recap_text:
+        return f"{started}\n\nRecap:\n{recap_text}"
     return started
 
 
-async def generate_briefing(
+async def generate_recap(
     library_repo: LibraryRepository,
     play_session_repo: PlaySessionRepository,
     llm_client: AbstractLLMClient,
-    agent: AbstractBriefingAgent | None,
+    agent: AbstractRecapAgent | None,
     settings: Settings,
     user_id: int,
     *,
     mode: str = "quick",
 ) -> str:
-    """Generate a briefing for the user's active play_session and persist it.
+    """Generate a recap for the user's active play_session and persist it.
 
     ``mode`` is accepted for tool-schema compatibility but always clamped to
     ``quick``: the deep-research graph is too expensive to trigger from a single
-    chat turn (it would bypass the briefing limiter + cost guard).
+    chat turn (it would bypass the recap limiter + cost guard).
     """
     _ = mode  # accepted but intentionally ignored — always clamped to quick.
     play_session = await play_session_repo.get_active_for_user(user_id)
     if play_session is None:
         return "There's no active play_session to brief. Start one first."
 
-    # Clamp to 'quick' (mirror start_play_session's _BRIEFING_CHOICES): one 6/min chat
+    # Clamp to 'quick' (mirror start_play_session's _RECAP_CHOICES): one 6/min chat
     # turn must not be able to trigger the full deep-research graph and bypass the
-    # briefing limiter + cost guard.
-    selected: BriefingMode = "quick"
-    briefing_text = await generate_briefing_for_mode(
+    # recap limiter + cost guard.
+    selected: RecapMode = "quick"
+    recap_text = await generate_recap_for_mode(
         play_session_repo,
         library_repo,
         llm_client,
@@ -133,11 +133,11 @@ async def generate_briefing(
         play_session.library_entry,
         selected,
     )
-    if not briefing_text:
-        return "I couldn't put together a briefing right now. Try again in a moment."
+    if not recap_text:
+        return "I couldn't put together a recap right now. Try again in a moment."
 
-    await play_session_repo.set_briefing(play_session.id, briefing_text)
-    return f"Briefing for {play_session.library_entry.game.title}:\n{briefing_text}"
+    await play_session_repo.set_recap(play_session.id, recap_text)
+    return f"Recap for {play_session.library_entry.game.title}:\n{recap_text}"
 
 
 async def submit_retroactive_debrief(
@@ -213,12 +213,12 @@ def build_concierge_write_tools(
     library_repo: LibraryRepository,
     play_session_repo: PlaySessionRepository,
     llm_client: AbstractLLMClient,
-    agent: AbstractBriefingAgent | None,
+    agent: AbstractRecapAgent | None,
     settings: Settings,
 ) -> list[ConciergeTool]:
     """Build the per-request write tool set, each bound to *user_id* and the repos."""
 
-    async def _start(library_entry_public_id: str, briefing: str = "none") -> str:
+    async def _start(library_entry_public_id: str, recap: str = "none") -> str:
         return await start_play_session(
             library_repo,
             play_session_repo,
@@ -227,11 +227,11 @@ def build_concierge_write_tools(
             settings,
             user_id,
             library_entry_public_id=library_entry_public_id,
-            briefing=briefing,
+            recap=recap,
         )
 
     async def _brief(mode: str = "quick") -> str:
-        return await generate_briefing(
+        return await generate_recap(
             library_repo, play_session_repo, llm_client, agent, settings, user_id, mode=mode
         )
 
@@ -254,17 +254,17 @@ def build_concierge_write_tools(
         ConciergeTool(
             name="start_play_session",
             description="Start a play session (play_session) for one game from the library. Pass "
-            "briefing='quick' to include a short catch-up briefing. Only one play_session can be "
+            "recap='quick' to include a short catch-up recap. Only one play_session can be "
             "active at a time.",
             args_schema=StartPlaySessionArgs,
             coroutine=_start,
         ),
         ConciergeTool(
-            name="generate_briefing",
-            description="Write a catch-up briefing for the currently active play_session "
+            name="generate_recap",
+            description="Write a catch-up recap for the currently active play_session "
             "and save it. Use after start_play_session, or when the player asks for a "
             "refresher on where they left off.",
-            args_schema=GenerateBriefingArgs,
+            args_schema=GenerateRecapArgs,
             coroutine=_brief,
         ),
         ConciergeTool(

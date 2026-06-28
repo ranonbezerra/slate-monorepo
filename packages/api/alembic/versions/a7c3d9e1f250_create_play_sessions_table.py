@@ -33,7 +33,7 @@ def upgrade() -> None:
         ),
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("library_entry_id", sa.BigInteger(), nullable=False),
-        sa.Column("briefing_text", sa.Text(), nullable=True),
+        sa.Column("recap_text", sa.Text(), nullable=True),
         sa.Column("debrief_text", sa.Text(), nullable=True),
         sa.Column("extracted_state", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("ended_via", sa.String(), nullable=True),

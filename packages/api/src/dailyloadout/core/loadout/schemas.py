@@ -31,12 +31,12 @@ class LoadoutCreateRequest(BaseModel):
 class LoadoutAcceptRequest(BaseModel):
     """Optional body for ``POST /v1/loadouts/{id}/accept``.
 
-    Mirrors the play_session-start briefing stage: pass a pre-generated
-    *briefing_text* (e.g. from the preview flow) to start the play_session with a
-    briefing, or omit it to start without one.
+    Mirrors the play_session-start recap stage: pass a pre-generated
+    *recap_text* (e.g. from the preview flow) to start the play_session with a
+    recap, or omit it to start without one.
     """
 
-    briefing_text: str | None = None
+    recap_text: str | None = None
 
 
 class LoadoutStartRequest(BaseModel):
@@ -47,7 +47,7 @@ class LoadoutStartRequest(BaseModel):
     available_minutes: int = Field(ge=10, le=480)
     mental_energy: MentalEnergy
     context: str | None = Field(default=None, max_length=120)
-    briefing_text: str | None = None
+    recap_text: str | None = None
 
 
 # ---------------------------------------------------------------------------

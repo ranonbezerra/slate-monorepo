@@ -50,14 +50,14 @@ class AbstractLLMClient(ABC):
         ...
 
     @abstractmethod
-    async def generate_briefing(
+    async def generate_recap(
         self,
         game_title: str,
         previous_debriefs: list[dict[str, object]],
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
-        """Generate a play_session briefing from previous debrief context."""
+        """Generate a play_session recap from previous debrief context."""
         ...
 
     @abstractmethod

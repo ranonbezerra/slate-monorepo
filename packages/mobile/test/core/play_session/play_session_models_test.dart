@@ -108,7 +108,7 @@ void main() {
         'public_id': 'playSession-001',
         'library_entry': buildLibraryEntryJson(),
         'play_session_type': 'story',
-        'briefing_text': 'Your playSession today...',
+        'recap_text': 'Your playSession today...',
         'debrief_text': 'Great session!',
         'extracted_state': <String, dynamic>{'boss_defeated': true},
         'ended_via': 'debrief',
@@ -128,7 +128,7 @@ void main() {
       expect(playSession.publicId, equals('playSession-001'));
       expect(playSession.libraryEntry.publicId, equals('entry-001'));
       expect(playSession.playSessionType, equals('story'));
-      expect(playSession.briefingText, equals('Your playSession today...'));
+      expect(playSession.recapText, equals('Your playSession today...'));
       expect(playSession.debriefText, equals('Great session!'));
       expect(
         playSession.extractedState,
@@ -148,7 +148,7 @@ void main() {
         'public_id': 'playSession-002',
         'library_entry': buildLibraryEntryJson(),
         'play_session_type': 'freeplay',
-        'briefing_text': null,
+        'recap_text': null,
         'debrief_text': null,
         'extracted_state': null,
         'ended_via': null,
@@ -162,7 +162,7 @@ void main() {
       final playSession = PlaySession.fromJson(json);
 
       expect(playSession.publicId, equals('playSession-002'));
-      expect(playSession.briefingText, isNull);
+      expect(playSession.recapText, isNull);
       expect(playSession.debriefText, isNull);
       expect(playSession.extractedState, isNull);
       expect(playSession.endedVia, isNull);
@@ -320,20 +320,20 @@ void main() {
     });
   });
 
-  // ── BriefingPreview ──────────────────────────────────────────────
+  // ── RecapPreview ──────────────────────────────────────────────
 
-  group('BriefingPreview', () {
+  group('RecapPreview', () {
     test('fromJson parses full fields', () {
       final json = <String, dynamic>{
         'library_entry': buildLibraryEntryJson(),
-        'briefing_text': 'Welcome back, Tarnished.',
+        'recap_text': 'Welcome back, Tarnished.',
         'last_session_context': buildSessionContextJson(),
       };
 
-      final preview = BriefingPreview.fromJson(json);
+      final preview = RecapPreview.fromJson(json);
 
       expect(preview.libraryEntry.publicId, equals('entry-001'));
-      expect(preview.briefingText, equals('Welcome back, Tarnished.'));
+      expect(preview.recapText, equals('Welcome back, Tarnished.'));
       expect(preview.lastSessionContext, isA<SessionContext>());
       expect(preview.lastSessionContext?.nextAction, equals('Beat Margit'));
     });
@@ -341,38 +341,38 @@ void main() {
     test('fromJson parses with nullable fields null', () {
       final json = <String, dynamic>{
         'library_entry': buildLibraryEntryJson(),
-        'briefing_text': null,
+        'recap_text': null,
         'last_session_context': null,
       };
 
-      final preview = BriefingPreview.fromJson(json);
+      final preview = RecapPreview.fromJson(json);
 
-      expect(preview.briefingText, isNull);
+      expect(preview.recapText, isNull);
       expect(preview.lastSessionContext, isNull);
     });
 
     test('Equatable: equal instances are equal', () {
       final json = <String, dynamic>{
         'library_entry': buildLibraryEntryJson(),
-        'briefing_text': 'Brief',
+        'recap_text': 'Brief',
         'last_session_context': buildSessionContextJson(),
       };
-      final a = BriefingPreview.fromJson(json);
-      final b = BriefingPreview.fromJson(json);
+      final a = RecapPreview.fromJson(json);
+      final b = RecapPreview.fromJson(json);
 
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
 
     test('Equatable: different instances are not equal', () {
-      final a = BriefingPreview.fromJson(<String, dynamic>{
+      final a = RecapPreview.fromJson(<String, dynamic>{
         'library_entry': buildLibraryEntryJson(),
-        'briefing_text': 'Brief A',
+        'recap_text': 'Brief A',
         'last_session_context': null,
       });
-      final b = BriefingPreview.fromJson(<String, dynamic>{
+      final b = RecapPreview.fromJson(<String, dynamic>{
         'library_entry': buildLibraryEntryJson(publicId: 'entry-999'),
-        'briefing_text': 'Brief B',
+        'recap_text': 'Brief B',
         'last_session_context': null,
       });
 

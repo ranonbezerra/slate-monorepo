@@ -118,7 +118,7 @@ void main() {
     registerFallbackValue(const AcceptLoadout(publicId: 'x'));
     registerFallbackValue(const RejectLoadout(publicId: 'x'));
     registerFallbackValue(
-      const GenerateLoadoutBriefing(publicId: 'x', libraryEntryPublicId: 'y'),
+      const GenerateLoadoutRecap(publicId: 'x', libraryEntryPublicId: 'y'),
     );
   });
 
@@ -459,7 +459,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('Quick recap dispatches GenerateLoadoutBriefing (quick)', (
+    testWidgets('Quick recap dispatches GenerateLoadoutRecap (quick)', (
       tester,
     ) async {
       whenListen(
@@ -479,7 +479,7 @@ void main() {
       verify(
         () => mockLoadoutBloc.add(
           // mode defaults to 'quick'
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'loadout-001',
             libraryEntryPublicId: 'lib-001',
           ),
@@ -487,7 +487,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('Deep recap dispatches GenerateLoadoutBriefing (deep)', (
+    testWidgets('Deep recap dispatches GenerateLoadoutRecap (deep)', (
       tester,
     ) async {
       whenListen(
@@ -506,7 +506,7 @@ void main() {
 
       verify(
         () => mockLoadoutBloc.add(
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'loadout-001',
             libraryEntryPublicId: 'lib-001',
             mode: 'deep',
@@ -515,15 +515,15 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('renders briefing and "Start with recap" '
-        'after LoadoutBriefingReady', (tester) async {
+    testWidgets('renders recap and "Start with recap" '
+        'after LoadoutRecapReady', (tester) async {
       whenListen(
         mockLoadoutBloc,
         Stream<LoadoutState>.fromIterable([
           LoadoutResultsLoaded(results: [_loadout]),
-          const LoadoutBriefingReady(
+          const LoadoutRecapReady(
             publicId: 'loadout-001',
-            briefingText: 'Push toward the next checkpoint.',
+            recapText: 'Push toward the next checkpoint.',
           ),
         ]),
         initialState: const LoadoutInitial(),
@@ -537,14 +537,14 @@ void main() {
     });
 
     testWidgets('"Start with recap" dispatches AcceptLoadout '
-        'with the briefing text', (tester) async {
+        'with the recap text', (tester) async {
       whenListen(
         mockLoadoutBloc,
         Stream<LoadoutState>.fromIterable([
           LoadoutResultsLoaded(results: [_loadout]),
-          const LoadoutBriefingReady(
+          const LoadoutRecapReady(
             publicId: 'loadout-001',
-            briefingText: 'Push toward the next checkpoint.',
+            recapText: 'Push toward the next checkpoint.',
           ),
         ]),
         initialState: const LoadoutInitial(),
@@ -560,7 +560,7 @@ void main() {
         () => mockLoadoutBloc.add(
           const AcceptLoadout(
             publicId: 'loadout-001',
-            briefingText: 'Push toward the next checkpoint.',
+            recapText: 'Push toward the next checkpoint.',
           ),
         ),
       ).called(1);

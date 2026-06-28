@@ -117,7 +117,7 @@ class AdminPlaySessionService:
             platform_label=(
                 entry.platform.label if entry is not None and entry.platform else None
             ),
-            briefing_text=play_session.briefing_text,
+            recap_text=play_session.recap_text,
             debrief_text=play_session.debrief_text,
             has_extracted_state=play_session.extracted_state is not None,
         )

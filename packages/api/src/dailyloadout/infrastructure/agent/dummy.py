@@ -1,15 +1,15 @@
-"""Deterministic briefing agent for tests and offline development."""
+"""Deterministic recap agent for tests and offline development."""
 
 from __future__ import annotations
 
-from .base import AbstractBriefingAgent, BriefResult, DeepBriefRequest
+from .base import AbstractRecapAgent, BriefResult, DeepBriefRequest
 
 
-class DummyBriefingAgent(AbstractBriefingAgent):
-    """Return a canned deep-research briefing without running the graph."""
+class DummyRecapAgent(AbstractRecapAgent):
+    """Return a canned deep-research recap without running the graph."""
 
     async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
-        """Return a deterministic, spoiler-safe briefing for tests."""
+        """Return a deterministic, spoiler-safe recap for tests."""
         title = req.context.get("game_title", "your game")
         return BriefResult(
             text=(

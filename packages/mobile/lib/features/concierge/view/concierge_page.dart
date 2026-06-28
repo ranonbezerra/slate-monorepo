@@ -12,7 +12,7 @@ const _toolLabels = {
   'get_play_stats': 'checking your stats',
   'estimate_session_fit': 'sizing up the session',
   'start_play_session': 'starting your session',
-  'generate_briefing': 'writing a recap',
+  'generate_recap': 'writing a recap',
   'submit_retroactive_debrief': 'logging your session',
   'set_status': 'updating your library',
 };
@@ -179,10 +179,10 @@ class _MessageBubble extends StatelessWidget {
             if (message.recommendation != null) ...[
               const SizedBox(height: 8),
               FilledButton.icon(
-                // Open the briefing-choice flow for the recommended game,
+                // Open the recap-choice flow for the recommended game,
                 // mirroring the library "Start session" entry point.
                 onPressed: () => context.push(
-                  '/play-sessions/briefing?entry=${message.recommendation!.id}',
+                  '/play-sessions/recap?entry=${message.recommendation!.id}',
                 ),
                 icon: const Icon(Icons.play_arrow, size: 18),
                 label: Text('Play ${message.recommendation!.title}'),

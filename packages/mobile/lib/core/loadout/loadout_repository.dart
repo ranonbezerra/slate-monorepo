@@ -38,12 +38,12 @@ class LoadoutRepository {
   /// Accepts a loadout suggestion and auto-starts a
   /// playSession for it.
   ///
-  /// When [briefingText] is provided it is forwarded to the backend so the
-  /// auto-started playSession carries that briefing.
-  Future<Loadout> acceptLoadout(String publicId, {String? briefingText}) async {
+  /// When [recapText] is provided it is forwarded to the backend so the
+  /// auto-started playSession carries that recap.
+  Future<Loadout> acceptLoadout(String publicId, {String? recapText}) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/loadouts/$publicId/accept',
-      data: {if (briefingText != null) 'briefing_text': briefingText},
+      data: {if (recapText != null) 'recap_text': recapText},
     );
     return Loadout.fromJson(response.data!);
   }

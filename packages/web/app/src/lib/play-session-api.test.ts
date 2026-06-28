@@ -13,8 +13,8 @@ import {
 	getActivePlaySession,
 	getPlaySession,
 	listPlaySessions,
-	previewBriefing,
-	regenerateBriefing,
+	previewRecap,
+	regenerateRecap,
 	startPlaySession,
 	submitDebrief,
 	submitRetroactiveDebrief,
@@ -41,7 +41,7 @@ function makePlaySessionResponse(overrides: Record<string, unknown> = {}) {
 			updated_at: "2024-01-01",
 		},
 		play_session_type: "regular",
-		briefing_text: "Continue from Asphodel",
+		recap_text: "Continue from Asphodel",
 		debrief_text: null,
 		extracted_state: null,
 		ended_via: null,
@@ -59,11 +59,11 @@ beforeEach(() => {
 });
 
 // ---------------------------------------------------------------------------
-// Preview briefing
+// Preview recap
 // ---------------------------------------------------------------------------
 
-describe("previewBriefing", () => {
-	it("calls POST /v1/play-sessions/preview-briefing with library_entry_public_id", async () => {
+describe("previewRecap", () => {
+	it("calls POST /v1/play-sessions/preview-recap with library_entry_public_id", async () => {
 		const apiResponse = {
 			library_entry: {
 				public_id: "le1",
@@ -79,19 +79,19 @@ describe("previewBriefing", () => {
 				created_at: "2024-01-01",
 				updated_at: "2024-01-01",
 			},
-			briefing_text: "Start from the beginning",
+			recap_text: "Start from the beginning",
 			last_session_context: null,
 		};
 		mockApiFetch.mockResolvedValueOnce(apiResponse);
 
-		const result = await previewBriefing("le1");
+		const result = await previewRecap("le1");
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/preview-briefing", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/preview-recap", {
 			method: "POST",
 			body: JSON.stringify({ library_entry_public_id: "le1", mode: "quick" }),
 			signal: undefined,
 		});
-		expect(result.briefingText).toBe("Start from the beginning");
+		expect(result.recapText).toBe("Start from the beginning");
 		expect(result.libraryEntry.publicId).toBe("le1");
 	});
 
@@ -111,14 +111,14 @@ describe("previewBriefing", () => {
 				created_at: "2024-01-01",
 				updated_at: "2024-01-01",
 			},
-			briefing_text: "Continue from Elysium",
+			recap_text: "Continue from Elysium",
 			last_session_context: { location: "Elysium" },
 		};
 		mockApiFetch.mockResolvedValueOnce(apiResponse);
 
-		const result = await previewBriefing("le1", "Elysium");
+		const result = await previewRecap("le1", "Elysium");
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/preview-briefing", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/preview-recap", {
 			method: "POST",
 			body: JSON.stringify({
 				library_entry_public_id: "le1",
@@ -146,14 +146,14 @@ describe("previewBriefing", () => {
 				created_at: "2024-01-01",
 				updated_at: "2024-01-01",
 			},
-			briefing_text: "Web-researched recap",
+			recap_text: "Web-researched recap",
 			last_session_context: null,
 		});
 		const controller = new AbortController();
 
-		await previewBriefing("le1", undefined, "deep", controller.signal);
+		await previewRecap("le1", undefined, "deep", controller.signal);
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/preview-briefing", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/preview-recap", {
 			method: "POST",
 			body: JSON.stringify({ library_entry_public_id: "le1", mode: "deep" }),
 			signal: controller.signal,
@@ -182,7 +182,7 @@ describe("submitRetroactiveDebrief", () => {
 				created_at: "2024-01-01",
 				updated_at: "2024-01-01",
 			},
-			briefing_text: null,
+			recap_text: null,
 			last_session_context: { location: "Tartarus" },
 		};
 		mockApiFetch.mockResolvedValueOnce(apiResponse);
@@ -219,18 +219,16 @@ describe("startPlaySession", () => {
 		expect(result.libraryEntry.publicId).toBe("le1");
 	});
 
-	it("includes briefing_text when provided", async () => {
-		mockApiFetch.mockResolvedValueOnce(
-			makePlaySessionResponse({ briefing_text: "Custom briefing" }),
-		);
+	it("includes recap_text when provided", async () => {
+		mockApiFetch.mockResolvedValueOnce(makePlaySessionResponse({ recap_text: "Custom recap" }));
 
-		await startPlaySession("le1", "Custom briefing");
+		await startPlaySession("le1", "Custom recap");
 
 		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions", {
 			method: "POST",
 			body: JSON.stringify({
 				library_entry_public_id: "le1",
-				briefing_text: "Custom briefing",
+				recap_text: "Custom recap",
 			}),
 		});
 	});
@@ -249,7 +247,7 @@ describe("getActivePlaySession", () => {
 		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/active");
 		expect(result).not.toBeNull();
 		expect(result?.publicId).toBe("m1");
-		expect(result?.briefingText).toBe("Continue from Asphodel");
+		expect(result?.recapText).toBe("Continue from Asphodel");
 	});
 
 	it("returns null when API returns null", async () => {
@@ -428,30 +426,30 @@ describe("endPlaySession", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Regenerate briefing
+// Regenerate recap
 // ---------------------------------------------------------------------------
 
-describe("regenerateBriefing", () => {
-	it("calls POST /v1/play-sessions/:publicId/briefing/regenerate without body", async () => {
-		const response = makePlaySessionResponse({ briefing_text: "New briefing generated" });
+describe("regenerateRecap", () => {
+	it("calls POST /v1/play-sessions/:publicId/recap/regenerate without body", async () => {
+		const response = makePlaySessionResponse({ recap_text: "New recap generated" });
 		mockApiFetch.mockResolvedValueOnce(response);
 
-		const result = await regenerateBriefing("m1");
+		const result = await regenerateRecap("m1");
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/m1/briefing/regenerate", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/m1/recap/regenerate", {
 			method: "POST",
 			body: undefined,
 		});
-		expect(result.briefingText).toBe("New briefing generated");
+		expect(result.recapText).toBe("New recap generated");
 	});
 
 	it("includes current_position when provided", async () => {
-		const response = makePlaySessionResponse({ briefing_text: "Updated briefing" });
+		const response = makePlaySessionResponse({ recap_text: "Updated recap" });
 		mockApiFetch.mockResolvedValueOnce(response);
 
-		await regenerateBriefing("m1", "Elysium");
+		await regenerateRecap("m1", "Elysium");
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/m1/briefing/regenerate", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/m1/recap/regenerate", {
 			method: "POST",
 			body: JSON.stringify({ current_position: "Elysium" }),
 		});

@@ -179,10 +179,10 @@ void main() {
         ),
       ).captured;
       final body = captured[0] as Map<String, dynamic>;
-      expect(body.containsKey('briefing_text'), isFalse);
+      expect(body.containsKey('recap_text'), isFalse);
     });
 
-    test('includes briefing_text in body when provided', () async {
+    test('includes recap_text in body when provided', () async {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
@@ -192,7 +192,7 @@ void main() {
 
       await repository.acceptLoadout(
         'loadout-001',
-        briefingText: 'Head to the catacombs.',
+        recapText: 'Head to the catacombs.',
       );
 
       final captured = verify(
@@ -202,7 +202,7 @@ void main() {
         ),
       ).captured;
       final body = captured[0] as Map<String, dynamic>;
-      expect(body['briefing_text'], 'Head to the catacombs.');
+      expect(body['recap_text'], 'Head to the catacombs.');
     });
   });
 

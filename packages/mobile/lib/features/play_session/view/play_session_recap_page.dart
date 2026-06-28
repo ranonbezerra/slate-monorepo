@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-/// Step enum that controls which section of the briefing page is shown.
+/// Step enum that controls which section of the recap page is shown.
 ///
 /// In preview mode the user first picks quick vs deep ([chooseMode]); the
-/// briefing is only fetched after that choice. [update] is a small menu that
-/// merges the two "fix the briefing" actions.
-enum _BriefingStep { chooseMode, briefing, update, correct, retroactive }
+/// recap is only fetched after that choice. [update] is a small menu that
+/// merges the two "fix the recap" actions.
+enum _RecapStep { chooseMode, recap, update, correct, retroactive }
 
-/// Briefing preview / view page.
+/// Recap preview / view page.
 ///
 /// **Preview mode** — receives [libraryEntryPublicId] (before starting a
-/// session). Lets the user choose a briefing mode, review it, correct it, log a
+/// session). Lets the user choose a recap mode, review it, correct it, log a
 /// past session, or start the playSession.
 ///
 /// **View mode** — receives [playSessionPublicId] (for an active session).
-/// Shows the briefing and allows corrections via regeneration.
-class PlaySessionBriefingPage extends StatefulWidget {
-  const PlaySessionBriefingPage({
+/// Shows the recap and allows corrections via regeneration.
+class PlaySessionRecapPage extends StatefulWidget {
+  const PlaySessionRecapPage({
     this.libraryEntryPublicId,
     this.playSessionPublicId,
     super.key,
@@ -35,12 +35,11 @@ class PlaySessionBriefingPage extends StatefulWidget {
   final String? playSessionPublicId;
 
   @override
-  State<PlaySessionBriefingPage> createState() =>
-      _PlaySessionBriefingPageState();
+  State<PlaySessionRecapPage> createState() => _PlaySessionRecapPageState();
 }
 
-class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
-  late _BriefingStep _step;
+class _PlaySessionRecapPageState extends State<PlaySessionRecapPage> {
+  late _RecapStep _step;
   final _correctionController = TextEditingController();
   final _retroactiveController = TextEditingController();
 
@@ -51,9 +50,9 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
     super.initState();
     if (_isPreview) {
       // Don't fetch anything yet — wait for the user to pick quick vs deep.
-      _step = _BriefingStep.chooseMode;
+      _step = _RecapStep.chooseMode;
     } else {
-      _step = _BriefingStep.briefing;
+      _step = _RecapStep.recap;
       context.read<PlaySessionBloc>().add(const LoadActivePlaySession());
     }
   }
@@ -67,17 +66,17 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
 
   void _onSelectMode(bool deep) {
     context.read<PlaySessionBloc>().add(
-      PreviewBriefing(
+      PreviewRecap(
         libraryEntryPublicId: widget.libraryEntryPublicId!,
         mode: deep ? 'deep' : 'quick',
       ),
     );
-    setState(() => _step = _BriefingStep.briefing);
+    setState(() => _step = _RecapStep.recap);
   }
 
   void _onCancelDeep() {
     context.read<PlaySessionBloc>().add(
-      CancelDeepBriefing(libraryEntryPublicId: widget.libraryEntryPublicId!),
+      CancelDeepRecap(libraryEntryPublicId: widget.libraryEntryPublicId!),
     );
   }
 
@@ -87,21 +86,21 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
 
     if (_isPreview) {
       context.read<PlaySessionBloc>().add(
-        PreviewBriefing(
+        PreviewRecap(
           libraryEntryPublicId: widget.libraryEntryPublicId!,
           positionOverride: text,
         ),
       );
     } else {
       context.read<PlaySessionBloc>().add(
-        RegenerateBriefing(
+        RegenerateRecap(
           publicId: widget.playSessionPublicId!,
           currentPosition: text,
         ),
       );
     }
     _correctionController.clear();
-    setState(() => _step = _BriefingStep.briefing);
+    setState(() => _step = _RecapStep.recap);
   }
 
   void _onRetroactive() {
@@ -115,23 +114,23 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
       ),
     );
     _retroactiveController.clear();
-    setState(() => _step = _BriefingStep.briefing);
+    setState(() => _step = _RecapStep.recap);
   }
 
-  void _onStartPlaySession(String? briefingText) {
+  void _onStartPlaySession(String? recapText) {
     context.read<PlaySessionBloc>().add(
       StartPlaySession(
         libraryEntryPublicId: widget.libraryEntryPublicId!,
-        briefingText: briefingText,
+        recapText: recapText,
       ),
     );
   }
 
-  void _onSkipBriefing() {
+  void _onSkipRecap() {
     context.read<PlaySessionBloc>().add(
       StartPlaySession(
         libraryEntryPublicId: widget.libraryEntryPublicId!,
-        skipBriefing: true,
+        skipRecap: true,
       ),
     );
   }
@@ -160,7 +159,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
             }
           },
           builder: (context, state) {
-            // Preview mode, before a briefing mode is chosen.
+            // Preview mode, before a recap mode is chosen.
             if (_isPreview && state is PlaySessionInitial) {
               return _buildChooseMode(context);
             }
@@ -170,15 +169,15 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
             }
 
             // Deep recap in progress: show progress + cancel.
-            if (state is DeepBriefingLoading) {
+            if (state is DeepRecapLoading) {
               return _buildDeepLoading(context);
             }
 
-            // Preview mode: briefing preview loaded.
-            if (state is BriefingPreviewLoaded) {
-              return _buildBriefingContent(
+            // Preview mode: recap preview loaded.
+            if (state is RecapPreviewLoaded) {
+              return _buildRecapContent(
                 context,
-                briefingText: state.preview.briefingText,
+                recapText: state.preview.recapText,
                 gameTitle: state.preview.libraryEntry.game.title,
                 platformLabel: state.preview.libraryEntry.platform.label,
               );
@@ -186,9 +185,9 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
 
             // View mode: active playSession loaded.
             if (state is ActivePlaySessionLoaded && state.playSession != null) {
-              return _buildBriefingContent(
+              return _buildRecapContent(
                 context,
-                briefingText: state.playSession!.briefingText,
+                recapText: state.playSession!.recapText,
                 gameTitle: state.playSession!.libraryEntry.game.title,
                 platformLabel: state.playSession!.libraryEntry.platform.label,
               );
@@ -196,9 +195,9 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
 
             // View mode: playSession regenerated.
             if (state is PlaySessionStarted) {
-              return _buildBriefingContent(
+              return _buildRecapContent(
                 context,
-                briefingText: state.playSession.briefingText,
+                recapText: state.playSession.recapText,
                 gameTitle: state.playSession.libraryEntry.game.title,
                 platformLabel: state.playSession.libraryEntry.platform.label,
               );
@@ -273,7 +272,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
             icon: Icons.play_arrow,
             title: 'Just play',
             subtitle: 'Skip the recap and start your session right away.',
-            onTap: _onSkipBriefing,
+            onTap: _onSkipRecap,
           ),
         ],
       ),
@@ -362,11 +361,11 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
     );
   }
 
-  // -- Briefing content -----------------------------------------------------
+  // -- Recap content -----------------------------------------------------
 
-  Widget _buildBriefingContent(
+  Widget _buildRecapContent(
     BuildContext context, {
-    required String? briefingText,
+    required String? recapText,
     required String gameTitle,
     required String platformLabel,
   }) {
@@ -393,28 +392,28 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
           ),
           const SizedBox(height: 24),
 
-          // Step content (a loaded briefing defaults to the briefing step).
-          if (_step == _BriefingStep.update)
+          // Step content (a loaded recap defaults to the recap step).
+          if (_step == _RecapStep.update)
             _buildUpdateStep(context)
-          else if (_step == _BriefingStep.correct)
+          else if (_step == _RecapStep.correct)
             _buildCorrectStep(context)
-          else if (_step == _BriefingStep.retroactive)
+          else if (_step == _RecapStep.retroactive)
             _buildRetroactiveStep(context)
           else
-            _buildBriefingStep(context, briefingText),
+            _buildRecapStep(context, recapText),
         ],
       ),
     );
   }
 
-  Widget _buildBriefingStep(BuildContext context, String? briefingText) {
+  Widget _buildRecapStep(BuildContext context, String? recapText) {
     final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (briefingText != null && briefingText.isNotEmpty)
-          Text(briefingText, style: theme.textTheme.bodyLarge)
+        if (recapText != null && recapText.isNotEmpty)
+          Text(recapText, style: theme.textTheme.bodyLarge)
         else
           Text(
             'No recap available -- this is your first session for this '
@@ -426,17 +425,16 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
           ),
         const SizedBox(height: 32),
 
-        // Secondary action: one entry point for fixing the briefing.
+        // Secondary action: one entry point for fixing the recap.
         Align(
           alignment: Alignment.centerLeft,
           child: _isPreview
               ? TextButton(
-                  onPressed: () => setState(() => _step = _BriefingStep.update),
+                  onPressed: () => setState(() => _step = _RecapStep.update),
                   child: const Text('Update this recap'),
                 )
               : TextButton(
-                  onPressed: () =>
-                      setState(() => _step = _BriefingStep.correct),
+                  onPressed: () => setState(() => _step = _RecapStep.correct),
                   child: const Text("That's not right"),
                 ),
         ),
@@ -447,7 +445,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
           width: double.infinity,
           child: FilledButton(
             onPressed: _isPreview
-                ? () => _onStartPlaySession(briefingText)
+                ? () => _onStartPlaySession(recapText)
                 : () => context.pop(),
             child: Text(_isPreview ? "Got it, let's go" : 'Got it'),
           ),
@@ -467,7 +465,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => setState(() => _step = _BriefingStep.correct),
+            onPressed: () => setState(() => _step = _RecapStep.correct),
             child: const Text('Correct my current position'),
           ),
         ),
@@ -475,7 +473,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => setState(() => _step = _BriefingStep.retroactive),
+            onPressed: () => setState(() => _step = _RecapStep.retroactive),
             child: const Text("Log a session I didn't register"),
           ),
         ),
@@ -483,7 +481,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () => setState(() => _step = _BriefingStep.briefing),
+            onPressed: () => setState(() => _step = _RecapStep.recap),
             child: const Text('Back'),
           ),
         ),
@@ -519,9 +517,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
           children: [
             TextButton(
               onPressed: () => setState(
-                () => _step = _isPreview
-                    ? _BriefingStep.update
-                    : _BriefingStep.briefing,
+                () => _step = _isPreview ? _RecapStep.update : _RecapStep.recap,
               ),
               child: const Text('Back'),
             ),
@@ -564,7 +560,7 @@ class _PlaySessionBriefingPageState extends State<PlaySessionBriefingPage> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: () => setState(() => _step = _BriefingStep.update),
+              onPressed: () => setState(() => _step = _RecapStep.update),
               child: const Text('Back'),
             ),
             const SizedBox(width: 8),

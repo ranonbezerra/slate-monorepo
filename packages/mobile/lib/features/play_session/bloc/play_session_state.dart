@@ -72,11 +72,11 @@ final class ActivePlaySessionLoaded extends PlaySessionState {
   List<Object?> get props => [playSession];
 }
 
-/// Briefing preview has been loaded successfully.
-final class BriefingPreviewLoaded extends PlaySessionState {
-  const BriefingPreviewLoaded({required this.preview, this.isDeep = false});
+/// Recap preview has been loaded successfully.
+final class RecapPreviewLoaded extends PlaySessionState {
+  const RecapPreviewLoaded({required this.preview, this.isDeep = false});
 
-  final BriefingPreview preview;
+  final RecapPreview preview;
 
   /// Whether this preview came from the deep web-researched path.
   final bool isDeep;
@@ -85,9 +85,9 @@ final class BriefingPreviewLoaded extends PlaySessionState {
   List<Object?> get props => [preview, isDeep];
 }
 
-/// A deep (web-researched) briefing is generating; UI shows progress + cancel.
-final class DeepBriefingLoading extends PlaySessionState {
-  const DeepBriefingLoading();
+/// A deep (web-researched) recap is generating; UI shows progress + cancel.
+final class DeepRecapLoading extends PlaySessionState {
+  const DeepRecapLoading();
 }
 
 /// A playSession has been started successfully.

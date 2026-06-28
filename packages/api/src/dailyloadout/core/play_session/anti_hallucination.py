@@ -1,8 +1,8 @@
-"""Anti-hallucination validator for LLM-generated briefings.
+"""Anti-hallucination validator for LLM-generated recaps.
 
 Extracts "interesting tokens" (proper nouns and numbers) from the LLM
 output and verifies that at least 40% of them also appear in the input
-context.  If not, the briefing is flagged as suspicious.
+context.  If not, the recap is flagged as suspicious.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ logger = structlog.get_logger()
 _MIN_TOKEN_LENGTH = 3
 
 # Threshold: fraction of output tokens that must appear in the input.
-# Set lower (0.40) because the briefing prompt encourages the LLM to
+# Set lower (0.40) because the recap prompt encourages the LLM to
 # reference real game areas/zones the player hasn't explicitly mentioned.
 _OVERLAP_THRESHOLD = 0.40
 
@@ -35,16 +35,16 @@ class ValidationResult:
     missing_tokens: list[str]
 
 
-def validate_briefing(briefing_text: str, context_text: str) -> ValidationResult:
-    """Check whether *briefing_text* is grounded in *context_text*.
+def validate_recap(recap_text: str, context_text: str) -> ValidationResult:
+    """Check whether *recap_text* is grounded in *context_text*.
 
-    Returns a ``ValidationResult`` indicating whether the briefing is
+    Returns a ``ValidationResult`` indicating whether the recap is
     suspicious and which tokens from the output are not present in the
     input context.
     """
-    output_tokens = set(_INTERESTING_RE.findall(briefing_text))
+    output_tokens = set(_INTERESTING_RE.findall(recap_text))
     if not output_tokens:
-        # Nothing to validate — the briefing has no proper nouns or numbers.
+        # Nothing to validate — the recap has no proper nouns or numbers.
         return ValidationResult(is_suspicious=False, overlap_ratio=1.0, missing_tokens=[])
 
     # Build the set of tokens present in the context.
@@ -64,7 +64,7 @@ def validate_briefing(briefing_text: str, context_text: str) -> ValidationResult
 
     if is_suspicious:
         logger.warning(
-            "suspicious_briefing",
+            "suspicious_recap",
             overlap_ratio=round(overlap_ratio, 2),
             missing_tokens=missing[:10],
         )

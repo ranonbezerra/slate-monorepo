@@ -22,11 +22,11 @@ vi.mock("../hooks/usePlaySession", () => ({
 		mutateAsync: vi.fn(),
 		isPending: false,
 	})),
-	usePreviewBriefing: vi.fn(() => ({
+	usePreviewRecap: vi.fn(() => ({
 		mutateAsync: vi.fn(),
 		isPending: false,
 	})),
-	useRegenerateBriefing: vi.fn(() => ({
+	useRegenerateRecap: vi.fn(() => ({
 		mutateAsync: vi.fn(),
 		isPending: false,
 	})),
@@ -96,7 +96,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 			updatedAt: "2024-01-01T00:00:00Z",
 		},
 		playSessionType: "regular",
-		briefingText: "Welcome back to Hollow Knight...",
+		recapText: "Welcome back to Hollow Knight...",
 		debriefText: null,
 		extractedState: null,
 		endedVia: null,

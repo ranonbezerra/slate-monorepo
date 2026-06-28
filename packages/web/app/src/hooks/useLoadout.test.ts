@@ -173,14 +173,14 @@ describe("useAcceptLoadout", () => {
 		expect(acceptLoadout).toHaveBeenCalledWith("loadout-1", undefined);
 	});
 
-	it("forwards an optional briefingText", async () => {
+	it("forwards an optional recapText", async () => {
 		const { result } = renderHook(() => useAcceptLoadout(), {
 			wrapper: createWrapper(),
 		});
 
 		await result.current.mutateAsync({
 			publicId: "loadout-1",
-			briefingText: "Resume at the gate.",
+			recapText: "Resume at the gate.",
 		});
 
 		expect(acceptLoadout).toHaveBeenCalledWith("loadout-1", "Resume at the gate.");

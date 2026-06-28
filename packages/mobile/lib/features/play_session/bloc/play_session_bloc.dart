@@ -17,18 +17,18 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     on<LoadPlaySessions>(_onLoadPlaySessions);
     on<LoadMorePlaySessions>(_onLoadMorePlaySessions);
     on<LoadActivePlaySession>(_onLoadActivePlaySession);
-    on<PreviewBriefing>(_onPreviewBriefing);
-    on<CancelDeepBriefing>(_onCancelDeepBriefing);
+    on<PreviewRecap>(_onPreviewRecap);
+    on<CancelDeepRecap>(_onCancelDeepRecap);
     on<StartPlaySession>(_onStartPlaySession);
     on<SubmitDebrief>(_onSubmitDebrief);
     on<EndPlaySession>(_onEndPlaySession);
     on<SubmitRetroactiveDebrief>(_onSubmitRetroactiveDebrief);
-    on<RegenerateBriefing>(_onRegenerateBriefing);
+    on<RegenerateRecap>(_onRegenerateRecap);
   }
 
   final PlaySessionRepository _playSessionRepository;
 
-  /// Active cancel token for an in-flight deep briefing request, if any.
+  /// Active cancel token for an in-flight deep recap request, if any.
   CancelToken? _deepCancelToken;
 
   Future<void> _onLoadPlaySessions(
@@ -112,29 +112,29 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     }
   }
 
-  Future<void> _onPreviewBriefing(
-    PreviewBriefing event,
+  Future<void> _onPreviewRecap(
+    PreviewRecap event,
     Emitter<PlaySessionState> emit,
   ) async {
     final isDeep = event.mode == 'deep';
     if (isDeep) {
       _deepCancelToken = CancelToken();
-      emit(const DeepBriefingLoading());
+      emit(const DeepRecapLoading());
     } else {
       emit(const PlaySessionLoading());
     }
 
     try {
-      final preview = await _playSessionRepository.previewBriefing(
+      final preview = await _playSessionRepository.previewRecap(
         event.libraryEntryPublicId,
         positionOverride: event.positionOverride,
         mode: event.mode,
         cancelToken: isDeep ? _deepCancelToken : null,
       );
-      emit(BriefingPreviewLoaded(preview: preview, isDeep: isDeep));
+      emit(RecapPreviewLoaded(preview: preview, isDeep: isDeep));
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) {
-        // User cancelled the deep request -- fall back to the quick briefing.
+        // User cancelled the deep request -- fall back to the quick recap.
         await _emitQuickPreview(event.libraryEntryPublicId, emit);
         return;
       }
@@ -146,8 +146,8 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     }
   }
 
-  Future<void> _onCancelDeepBriefing(
-    CancelDeepBriefing event,
+  Future<void> _onCancelDeepRecap(
+    CancelDeepRecap event,
     Emitter<PlaySessionState> emit,
   ) async {
     _deepCancelToken?.cancel('cancelled_by_user');
@@ -158,10 +158,10 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     Emitter<PlaySessionState> emit,
   ) async {
     try {
-      final preview = await _playSessionRepository.previewBriefing(
+      final preview = await _playSessionRepository.previewRecap(
         libraryEntryPublicId,
       );
-      emit(BriefingPreviewLoaded(preview: preview));
+      emit(RecapPreviewLoaded(preview: preview));
     } on DioException catch (e) {
       emit(PlaySessionError(message: _extractErrorMessage(e)));
     } on Exception catch (e) {
@@ -178,8 +178,8 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     try {
       final playSession = await _playSessionRepository.startPlaySession(
         event.libraryEntryPublicId,
-        briefingText: event.briefingText,
-        skipBriefing: event.skipBriefing,
+        recapText: event.recapText,
+        skipRecap: event.skipRecap,
       );
       emit(PlaySessionStarted(playSession: playSession));
     } on DioException catch (e) {
@@ -238,7 +238,7 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
         event.libraryEntryPublicId,
         event.debriefText,
       );
-      emit(BriefingPreviewLoaded(preview: preview));
+      emit(RecapPreviewLoaded(preview: preview));
     } on DioException catch (e) {
       emit(PlaySessionError(message: _extractErrorMessage(e)));
     } on Exception catch (e) {
@@ -246,14 +246,14 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     }
   }
 
-  Future<void> _onRegenerateBriefing(
-    RegenerateBriefing event,
+  Future<void> _onRegenerateRecap(
+    RegenerateRecap event,
     Emitter<PlaySessionState> emit,
   ) async {
     emit(const PlaySessionLoading());
 
     try {
-      final playSession = await _playSessionRepository.regenerateBriefing(
+      final playSession = await _playSessionRepository.regenerateRecap(
         event.publicId,
         currentPosition: event.currentPosition,
       );
@@ -266,7 +266,7 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
   }
 
   String _extractErrorMessage(DioException e) {
-    // Briefing generation 403s until the email is verified; surface the
+    // Recap generation 403s until the email is verified; surface the
     // actionable verify prompt rather than the bare API detail.
     if (EmailVerification.isUnverifiedError(e)) {
       return EmailVerification.friendlyMessage;

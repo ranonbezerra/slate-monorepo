@@ -42,16 +42,16 @@ vi.mock("./CaptureTextModal", () => ({ CaptureTextModal: () => null }));
 vi.mock("./CaptureVoiceModal", () => ({ CaptureVoiceModal: () => null }));
 vi.mock("./CapturePhotoModal", () => ({ CapturePhotoModal: () => null }));
 vi.mock("./CaptureReviewModal", () => ({ CaptureReviewModal: () => null }));
-vi.mock("./PlaySessionBriefingModal", () => ({
-	PlaySessionBriefingModal: ({ mode }: { mode: string }) =>
-		mode === "preview" ? <div data-testid="briefing-preview-modal" /> : null,
+vi.mock("./PlaySessionRecapModal", () => ({
+	PlaySessionRecapModal: ({ mode }: { mode: string }) =>
+		mode === "preview" ? <div data-testid="recap-preview-modal" /> : null,
 }));
 vi.mock("./PlaySessionDebriefModal", () => ({ PlaySessionDebriefModal: () => null }));
 vi.mock("../components/QuickAddMenu", () => ({
 	QuickAddMenu: () => <button type="button">Quick Add</button>,
 }));
-vi.mock("../components/AiBriefingOverlay", () => ({
-	AiBriefingOverlay: () => null,
+vi.mock("../components/AiRecapOverlay", () => ({
+	AiRecapOverlay: () => null,
 }));
 
 // DataTable mock that renders column render functions AND rowExpansion content.
@@ -101,7 +101,7 @@ vi.mock("../hooks/useLibrary", () => ({
 
 vi.mock("../hooks/usePlaySession", () => ({
 	useActivePlaySession: vi.fn(),
-	usePreviewBriefing: vi.fn(),
+	usePreviewRecap: vi.fn(),
 }));
 
 // ---------------------------------------------------------------------------
@@ -115,7 +115,7 @@ import {
 	usePlatforms,
 	useUpdateEntry,
 } from "../hooks/useLibrary";
-import { useActivePlaySession, usePreviewBriefing } from "../hooks/usePlaySession";
+import { useActivePlaySession, usePreviewRecap } from "../hooks/usePlaySession";
 import type { Game, LibraryGameGroup, LibraryPlatformState } from "../types/library";
 import type { PlaySession } from "../types/play-session";
 import { LibraryPage } from "./LibraryPage";
@@ -188,7 +188,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 			updatedAt: "2024-06-02T00:00:00Z",
 		},
 		playSessionType: "regular",
-		briefingText: "Your next adventure awaits",
+		recapText: "Your next adventure awaits",
 		debriefText: null,
 		extractedState: null,
 		endedVia: null,
@@ -238,7 +238,7 @@ beforeEach(() => {
 	(usePlatforms as Mock).mockReturnValue({ data: [PC, SWITCH] });
 
 	(useActivePlaySession as Mock).mockReturnValue({ data: null });
-	(usePreviewBriefing as Mock).mockReturnValue(mutationStub);
+	(usePreviewRecap as Mock).mockReturnValue(mutationStub);
 });
 
 // ---------------------------------------------------------------------------
@@ -517,7 +517,7 @@ describe("LibraryPage", () => {
 		expect(screen.getByRole("button", { name: "Start session" })).not.toBeDisabled();
 	});
 
-	it("opens the briefing preview modal when Start session is clicked", async () => {
+	it("opens the recap preview modal when Start session is clicked", async () => {
 		(useLibrary as Mock).mockReturnValue({
 			data: { items: [makeGroup()], total: 1, limit: 50, offset: 0 },
 			isLoading: false,
@@ -526,9 +526,9 @@ describe("LibraryPage", () => {
 
 		renderPage();
 
-		expect(screen.queryByTestId("briefing-preview-modal")).not.toBeInTheDocument();
+		expect(screen.queryByTestId("recap-preview-modal")).not.toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: "Start session" }));
-		expect(await screen.findByTestId("briefing-preview-modal")).toBeInTheDocument();
+		expect(await screen.findByTestId("recap-preview-modal")).toBeInTheDocument();
 	});
 
 	// -----------------------------------------------------------------------
@@ -758,20 +758,20 @@ describe("LibraryPage", () => {
 		expect(screen.getByRole("button", { name: "End session" })).toBeInTheDocument();
 	});
 
-	it('shows "View briefing" only when the active playSession has briefing text', () => {
+	it('shows "View recap" only when the active playSession has recap text', () => {
 		(useActivePlaySession as Mock).mockReturnValue({
-			data: makePlaySession({ briefingText: null }),
+			data: makePlaySession({ recapText: null }),
 		});
 
 		const { unmount } = renderPage();
-		expect(screen.queryByRole("button", { name: "View briefing" })).not.toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "View recap" })).not.toBeInTheDocument();
 		unmount();
 
 		(useActivePlaySession as Mock).mockReturnValue({
-			data: makePlaySession({ briefingText: "go" }),
+			data: makePlaySession({ recapText: "go" }),
 		});
 		renderPage();
-		expect(screen.getByRole("button", { name: "View briefing" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "View recap" })).toBeInTheDocument();
 	});
 
 	// -----------------------------------------------------------------------

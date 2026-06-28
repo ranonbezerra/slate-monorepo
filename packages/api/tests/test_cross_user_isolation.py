@@ -467,12 +467,12 @@ class TestPlaySessionIsolation:
         assert resp_b.status_code == 200
         assert resp_b.json()["total"] == 0
 
-    async def test_user_b_cannot_regenerate_user_a_briefing(
+    async def test_user_b_cannot_regenerate_user_a_recap(
         self,
         async_client: AsyncClient,
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Regenerating User A's briefing should return 404 for User B."""
+        """Regenerating User A's recap should return 404 for User B."""
         headers_a = await _register_and_get_headers(async_client, _USER_A)
         headers_b = await _register_and_get_headers(async_client, _USER_B)
 
@@ -480,7 +480,7 @@ class TestPlaySessionIsolation:
         play_session = await _start_play_session(async_client, headers_a, entry["public_id"])
 
         resp = await async_client.post(
-            f"/v1/play-sessions/{play_session['public_id']}/briefing/regenerate",
+            f"/v1/play-sessions/{play_session['public_id']}/recap/regenerate",
             headers=headers_b,
         )
         assert resp.status_code == 404
@@ -509,7 +509,7 @@ class TestPlaySessionIsolation:
             headers=headers_b,
         )
         await async_client.post(
-            f"/v1/play-sessions/{play_session['public_id']}/briefing/regenerate",
+            f"/v1/play-sessions/{play_session['public_id']}/recap/regenerate",
             headers=headers_b,
         )
 

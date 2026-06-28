@@ -60,8 +60,8 @@ export function useAcceptLoadout() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (vars: { publicId: string; briefingText?: string }) =>
-			acceptLoadout(vars.publicId, vars.briefingText),
+		mutationFn: (vars: { publicId: string; recapText?: string }) =>
+			acceptLoadout(vars.publicId, vars.recapText),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: LOADOUTS_KEY });
 			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });

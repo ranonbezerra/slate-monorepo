@@ -29,11 +29,11 @@ class _LoadoutPageState extends State<LoadoutPage> {
   // Tracks which loadout is currently being actioned
   String? _actioningId;
 
-  // Tracks which loadout is currently generating a briefing.
-  String? _briefingId;
+  // Tracks which loadout is currently generating a recap.
+  String? _recapId;
 
-  // Generated briefing text keyed by loadout public id.
-  final Map<String, String> _briefings = {};
+  // Generated recap text keyed by loadout public id.
+  final Map<String, String> _recaps = {};
 
   // Keeps a local copy of results so we can update
   // individual items after accept / reject without
@@ -75,12 +75,12 @@ class _LoadoutPageState extends State<LoadoutPage> {
     context.read<LoadoutBloc>().add(RejectLoadout(publicId: loadout.publicId));
   }
 
-  void _onGetBriefing(Loadout loadout, String mode) {
+  void _onGetRecap(Loadout loadout, String mode) {
     final entryId = loadout.libraryEntry?.publicId;
     if (entryId == null) return;
-    setState(() => _briefingId = loadout.publicId);
+    setState(() => _recapId = loadout.publicId);
     context.read<LoadoutBloc>().add(
-      GenerateLoadoutBriefing(
+      GenerateLoadoutRecap(
         publicId: loadout.publicId,
         libraryEntryPublicId: entryId,
         mode: mode,
@@ -88,12 +88,12 @@ class _LoadoutPageState extends State<LoadoutPage> {
     );
   }
 
-  void _onStartWithBriefing(Loadout loadout) {
+  void _onStartWithRecap(Loadout loadout) {
     setState(() => _actioningId = loadout.publicId);
     context.read<LoadoutBloc>().add(
       AcceptLoadout(
         publicId: loadout.publicId,
-        briefingText: _briefings[loadout.publicId],
+        recapText: _recaps[loadout.publicId],
       ),
     );
   }
@@ -182,18 +182,17 @@ class _LoadoutPageState extends State<LoadoutPage> {
       _replaceInResults(state.loadout);
     }
 
-    if (state is LoadoutBriefingReady) {
+    if (state is LoadoutRecapReady) {
       setState(() {
-        _briefings[state.publicId] = state.briefingText;
-        _briefingId = null;
+        _recaps[state.publicId] = state.recapText;
+        _recapId = null;
       });
     }
 
-    if (state is LoadoutError &&
-        (_actioningId != null || _briefingId != null)) {
+    if (state is LoadoutError && (_actioningId != null || _recapId != null)) {
       setState(() {
         _actioningId = null;
-        _briefingId = null;
+        _recapId = null;
       });
     }
   }
@@ -214,12 +213,12 @@ class _LoadoutPageState extends State<LoadoutPage> {
             rank: i,
             totalResults: _results.length,
             isActioning: _actioningId == _results[i].publicId,
-            isGeneratingBriefing: _briefingId == _results[i].publicId,
-            briefingText: _briefings[_results[i].publicId],
+            isGeneratingRecap: _recapId == _results[i].publicId,
+            recapText: _recaps[_results[i].publicId],
             onAccept: () => _onAccept(_results[i]),
             onReject: () => _onReject(_results[i]),
-            onGetBriefing: (mode) => _onGetBriefing(_results[i], mode),
-            onStartWithBriefing: () => _onStartWithBriefing(_results[i]),
+            onGetRecap: (mode) => _onGetRecap(_results[i], mode),
+            onStartWithRecap: () => _onStartWithRecap(_results[i]),
           ),
         const SizedBox(height: 16),
         Center(

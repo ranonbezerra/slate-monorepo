@@ -21,8 +21,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActivePlaySession } from "../hooks/usePlaySession";
 import { FEATURES } from "../lib/features";
-import { PlaySessionBriefingModal } from "./PlaySessionBriefingModal";
 import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
+import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
 
 interface DoorCardProps {
 	title: string;
@@ -86,7 +86,7 @@ function DoorCard({ title, subtitle, icon, accent, disabled, onClick }: DoorCard
 export function PlayPage() {
 	const navigate = useNavigate();
 	const { data: activePlaySession } = useActivePlaySession();
-	const [showBriefing, setShowBriefing] = useState(false);
+	const [showRecap, setShowRecap] = useState(false);
 	const [showDebrief, setShowDebrief] = useState(false);
 	const hasActivePlaySession = Boolean(activePlaySession);
 
@@ -107,10 +107,10 @@ export function PlayPage() {
 							<Title order={3}>{activePlaySession.libraryEntry.game.title}</Title>
 						</Group>
 
-						{activePlaySession.briefingText && (
+						{activePlaySession.recapText && (
 							<Card withBorder p="sm" radius="sm">
 								<Text size="sm" c="dimmed" lineClamp={3}>
-									{activePlaySession.briefingText}
+									{activePlaySession.recapText}
 								</Text>
 							</Card>
 						)}
@@ -119,7 +119,7 @@ export function PlayPage() {
 							<Button
 								leftSection={<IconBook size={18} />}
 								variant="light"
-								onClick={() => setShowBriefing(true)}
+								onClick={() => setShowRecap(true)}
 							>
 								Recap
 							</Button>
@@ -167,11 +167,11 @@ export function PlayPage() {
 				)}
 			</SimpleGrid>
 
-			{showBriefing && activePlaySession && (
-				<PlaySessionBriefingModal
+			{showRecap && activePlaySession && (
+				<PlaySessionRecapModal
 					mode="view"
 					playSession={activePlaySession}
-					onClose={() => setShowBriefing(false)}
+					onClose={() => setShowRecap(false)}
 				/>
 			)}
 			<PlaySessionDebriefModal

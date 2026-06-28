@@ -190,9 +190,9 @@ class TestStartLoadout:
 
         active = (await async_client.get("/v1/play-sessions/active", headers=auth_headers)).json()
         assert active is not None
-        assert active["briefing_text"] is None
+        assert active["recap_text"] is None
 
-    async def test_start_with_briefing(
+    async def test_start_with_recap(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -200,11 +200,11 @@ class TestStartLoadout:
     ) -> None:
         await _create_library_entry(async_client, auth_headers, seed_platforms)
 
-        resp = await self._start(async_client, auth_headers, briefing_text="Resume at the gate.")
+        resp = await self._start(async_client, auth_headers, recap_text="Resume at the gate.")
         assert resp.status_code == 201, resp.text
 
         active = (await async_client.get("/v1/play-sessions/active", headers=auth_headers)).json()
-        assert active["briefing_text"] == "Resume at the gate."
+        assert active["recap_text"] == "Resume at the gate."
 
     async def test_start_no_eligible_games_returns_422(
         self,
@@ -252,27 +252,27 @@ class TestAcceptLoadout:
         assert play_session is not None
         assert play_session["library_entry"]["public_id"] == loadout["library_entry"]["public_id"]
 
-    async def test_accept_with_briefing_starts_play_session_with_briefing(
+    async def test_accept_with_recap_starts_play_session_with_recap(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Accepting a loadout can carry a pre-generated briefing (Epic 12)."""
+        """Accepting a loadout can carry a pre-generated recap (Epic 12)."""
         await _create_library_entry(async_client, auth_headers, seed_platforms)
         loadout = await _create_loadout(async_client, auth_headers)
 
         resp = await async_client.post(
             f"/v1/loadouts/{loadout['public_id']}/accept",
             headers=auth_headers,
-            json={"briefing_text": "Previously on your game: you reached the gate."},
+            json={"recap_text": "Previously on your game: you reached the gate."},
         )
         assert resp.status_code == 200
         assert resp.json()["action"] == "accepted"
 
         resp = await async_client.get("/v1/play-sessions/active", headers=auth_headers)
         play_session = resp.json()
-        assert play_session["briefing_text"] == "Previously on your game: you reached the gate."
+        assert play_session["recap_text"] == "Previously on your game: you reached the gate."
 
     async def test_accept_already_actioned(
         self,

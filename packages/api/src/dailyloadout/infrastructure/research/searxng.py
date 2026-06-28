@@ -90,7 +90,7 @@ class SearxngResearchClient(AbstractResearchClient):
         return results
 
     async def fetch(self, url: str) -> str:
-        """Fetch *url* and return cleaned page text for briefing grounding.
+        """Fetch *url* and return cleaned page text for recap grounding.
 
         SSRF guard: result URLs come from the open web, so before fetching we
         validate the target host resolves to a public IP. Redirects are disabled

@@ -53,7 +53,7 @@ class TimelineEntry(BaseModel):
     game_title: str
     platform_label: str
     play_session_type: str
-    briefing_text: str | None = None
+    recap_text: str | None = None
     debrief_text: str | None = None
     ended_via: str | None = None
     started_at: datetime

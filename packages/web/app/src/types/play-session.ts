@@ -19,7 +19,7 @@ export interface PlaySession {
 	publicId: string;
 	libraryEntry: LibraryEntry;
 	playSessionType: PlaySessionType;
-	briefingText: string | null;
+	recapText: string | null;
 	debriefText: string | null;
 	extractedState: Record<string, unknown> | null;
 	endedVia: EndedVia | null;
@@ -44,8 +44,8 @@ export interface PlaySessionListResponse {
 	total: number;
 }
 
-export interface BriefingPreview {
+export interface RecapPreview {
 	libraryEntry: LibraryEntry;
-	briefingText: string | null;
+	recapText: string | null;
 	lastSessionContext: SessionContext | null;
 }

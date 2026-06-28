@@ -1,7 +1,7 @@
 """Caching decorator for web-research clients (ROADMAP Epic 18).
 
 Wraps an ``AbstractResearchClient`` so identical queries — common across deep
-briefings that ground on the same game — skip the network hop. A cache
+recaps that ground on the same game — skip the network hop. A cache
 miss/outage falls through to the live client; empty result sets are not cached
 (a transient SearXNG hiccup shouldn't be remembered for hours).
 """

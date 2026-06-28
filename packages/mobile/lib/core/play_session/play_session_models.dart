@@ -28,7 +28,7 @@ class SessionContext extends Equatable {
   List<Object?> get props => [location, nextAction, level, currentQuest];
 }
 
-/// Represents a full playSession with briefing, debrief, and session context.
+/// Represents a full playSession with recap, debrief, and session context.
 class PlaySession extends Equatable {
   const PlaySession({
     required this.publicId,
@@ -37,7 +37,7 @@ class PlaySession extends Equatable {
     required this.startedAt,
     required this.createdAt,
     required this.updatedAt,
-    this.briefingText,
+    this.recapText,
     this.debriefText,
     this.extractedState,
     this.endedVia,
@@ -52,7 +52,7 @@ class PlaySession extends Equatable {
         json['library_entry'] as Map<String, dynamic>,
       ),
       playSessionType: json['play_session_type'] as String,
-      briefingText: json['briefing_text'] as String?,
+      recapText: json['recap_text'] as String?,
       debriefText: json['debrief_text'] as String?,
       extractedState: json['extracted_state'] as Map<String, dynamic>?,
       endedVia: json['ended_via'] as String?,
@@ -73,7 +73,7 @@ class PlaySession extends Equatable {
   final String publicId;
   final LibraryEntry libraryEntry;
   final String playSessionType;
-  final String? briefingText;
+  final String? recapText;
   final String? debriefText;
   final Map<String, dynamic>? extractedState;
   final String? endedVia;
@@ -88,7 +88,7 @@ class PlaySession extends Equatable {
     publicId,
     libraryEntry,
     playSessionType,
-    briefingText,
+    recapText,
     debriefText,
     extractedState,
     endedVia,
@@ -164,20 +164,20 @@ class PlaySessionListResponse extends Equatable {
   List<Object?> get props => [items, total];
 }
 
-/// Preview returned before starting a playSession, including briefing text.
-class BriefingPreview extends Equatable {
-  const BriefingPreview({
+/// Preview returned before starting a playSession, including recap text.
+class RecapPreview extends Equatable {
+  const RecapPreview({
     required this.libraryEntry,
-    this.briefingText,
+    this.recapText,
     this.lastSessionContext,
   });
 
-  factory BriefingPreview.fromJson(Map<String, dynamic> json) {
-    return BriefingPreview(
+  factory RecapPreview.fromJson(Map<String, dynamic> json) {
+    return RecapPreview(
       libraryEntry: LibraryEntry.fromJson(
         json['library_entry'] as Map<String, dynamic>,
       ),
-      briefingText: json['briefing_text'] as String?,
+      recapText: json['recap_text'] as String?,
       lastSessionContext: json['last_session_context'] != null
           ? SessionContext.fromJson(
               json['last_session_context'] as Map<String, dynamic>,
@@ -187,9 +187,9 @@ class BriefingPreview extends Equatable {
   }
 
   final LibraryEntry libraryEntry;
-  final String? briefingText;
+  final String? recapText;
   final SessionContext? lastSessionContext;
 
   @override
-  List<Object?> get props => [libraryEntry, briefingText, lastSessionContext];
+  List<Object?> get props => [libraryEntry, recapText, lastSessionContext];
 }

@@ -38,24 +38,24 @@ class PlaySessionStartRequest(BaseModel):
     """Body for ``POST /v1/play-sessions``."""
 
     library_entry_public_id: UUID
-    briefing_text: str | None = Field(
+    recap_text: str | None = Field(
         default=None,
         max_length=10000,
-        description="Pre-generated briefing from a preview call. Skips LLM generation.",
+        description="Pre-generated recap from a preview call. Skips LLM generation.",
     )
     mode: Literal["quick", "deep"] = Field(
         default="quick",
-        description="Briefing mode: 'quick' (single-shot) or 'deep' (web-researched).",
+        description="Recap mode: 'quick' (single-shot) or 'deep' (web-researched).",
     )
-    skip_briefing: bool = Field(
+    skip_recap: bool = Field(
         default=False,
-        description="Start with no briefing at all (don't generate one). The "
-        "briefing is an optional stage — this is the 'just play' path.",
+        description="Start with no recap at all (don't generate one). The "
+        "recap is an optional stage — this is the 'just play' path.",
     )
 
 
-class BriefingPreviewRequest(BaseModel):
-    """Body for ``POST /v1/play-sessions/preview-briefing``."""
+class RecapPreviewRequest(BaseModel):
+    """Body for ``POST /v1/play-sessions/preview-recap``."""
 
     library_entry_public_id: UUID
     position_override: str | None = Field(
@@ -65,7 +65,7 @@ class BriefingPreviewRequest(BaseModel):
     )
     mode: Literal["quick", "deep"] = Field(
         default="quick",
-        description="Briefing mode: 'quick' (single-shot) or 'deep' (web-researched).",
+        description="Recap mode: 'quick' (single-shot) or 'deep' (web-researched).",
     )
 
 
@@ -88,8 +88,8 @@ class PlaySessionEndRequest(BaseModel):
     ended_via: Literal["paused_app"] = "paused_app"
 
 
-class RegenerateBriefingRequest(BaseModel):
-    """Body for ``POST /v1/play-sessions/{public_id}/briefing/regenerate``."""
+class RegenerateRecapRequest(BaseModel):
+    """Body for ``POST /v1/play-sessions/{public_id}/recap/regenerate``."""
 
     current_position: str | None = Field(
         default=None,
@@ -109,7 +109,7 @@ class PlaySessionResponse(BaseModel):
     public_id: UUID
     library_entry: LibraryEntryResponse
     play_session_type: str = "regular"
-    briefing_text: str | None = None
+    recap_text: str | None = None
     debrief_text: str | None = None
     extracted_state: ExtractedState | None = None
     ended_via: str | None = None
@@ -142,11 +142,11 @@ class PlaySessionListResponse(BaseModel):
     total: int
 
 
-class BriefingPreviewResponse(BaseModel):
-    """Briefing preview without creating a play_session."""
+class RecapPreviewResponse(BaseModel):
+    """Recap preview without creating a play_session."""
 
     library_entry: LibraryEntryResponse
-    briefing_text: str | None = None
+    recap_text: str | None = None
     last_session_context: ExtractedState | None = None
 
     model_config = {"from_attributes": True}
@@ -161,8 +161,6 @@ PlaySessionStatus = Literal["active", "ended"]
 
 
 __all__ = [
-    "BriefingPreviewRequest",
-    "BriefingPreviewResponse",
     "EndedVia",
     "ExtractedState",
     "PlaySessionDebriefRequest",
@@ -173,6 +171,8 @@ __all__ = [
     "PlaySessionStartRequest",
     "PlaySessionStatus",
     "PlaySessionType",
-    "RegenerateBriefingRequest",
+    "RecapPreviewRequest",
+    "RecapPreviewResponse",
+    "RegenerateRecapRequest",
     "RetroactiveDebriefRequest",
 ]

@@ -264,7 +264,7 @@ class AdminPlaySessionDetail(AdminPlaySessionSummary):
     """
 
     platform_label: str | None
-    briefing_text: str | None
+    recap_text: str | None
     debrief_text: str | None
     has_extracted_state: bool
 

@@ -92,7 +92,7 @@ async def cached_call[T](
     *loads*/*dumps* convert between the live value (e.g. a Pydantic model) and a
     JSON-able cache payload; omit them when the value is already JSON-able.
     *cache_if* gates whether a freshly computed value is stored — use it to skip
-    caching degraded results (e.g. a deep briefing that fell back to quick). Set
+    caching degraded results (e.g. a deep recap that fell back to quick). Set
     *skip_cache* to force a fresh compute where freshness must be guaranteed.
     """
     if skip_cache:

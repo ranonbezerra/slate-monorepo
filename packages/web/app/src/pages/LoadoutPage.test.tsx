@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import { useAcceptLoadout, useCreateLoadout, useRejectLoadout } from "../hooks/useLoadout";
-import { usePreviewBriefing } from "../hooks/usePlaySession";
+import { usePreviewRecap } from "../hooks/usePlaySession";
 import type { Loadout } from "../types/loadout";
 import { LoadoutPage } from "./LoadoutPage";
 
@@ -29,7 +29,7 @@ vi.mock("../hooks/useLoadout", () => ({
 }));
 
 vi.mock("../hooks/usePlaySession", () => ({
-	usePreviewBriefing: vi.fn(),
+	usePreviewRecap: vi.fn(),
 }));
 
 vi.mock("@mantine/notifications", () => ({
@@ -116,7 +116,7 @@ function setDefaultMutationMocks() {
 		mutateAsync: vi.fn(),
 		isPending: false,
 	});
-	(usePreviewBriefing as Mock).mockReturnValue({
+	(usePreviewRecap as Mock).mockReturnValue({
 		mutate: vi.fn(),
 		mutateAsync: vi.fn(),
 		isPending: false,
@@ -157,7 +157,7 @@ function setupCreateMockWithCapture() {
 		mutateAsync: vi.fn(),
 		isPending: false,
 	});
-	(usePreviewBriefing as Mock).mockReturnValue({
+	(usePreviewRecap as Mock).mockReturnValue({
 		mutate: vi.fn(),
 		mutateAsync: vi.fn(),
 		isPending: false,
@@ -271,7 +271,7 @@ describe("LoadoutPage", () => {
 			mutateAsync: vi.fn(),
 			isPending: false,
 		});
-		(usePreviewBriefing as Mock).mockReturnValue({
+		(usePreviewRecap as Mock).mockReturnValue({
 			mutate: vi.fn(),
 			mutateAsync: vi.fn(),
 			isPending: false,
@@ -301,7 +301,7 @@ describe("LoadoutPage", () => {
 			mutateAsync: vi.fn(),
 			isPending: false,
 		});
-		(usePreviewBriefing as Mock).mockReturnValue({
+		(usePreviewRecap as Mock).mockReturnValue({
 			mutate: vi.fn(),
 			mutateAsync: vi.fn(),
 			isPending: false,
@@ -545,7 +545,7 @@ describe("LoadoutPage - accept and reject actions", () => {
 		expect(acceptMutate).toHaveBeenCalledTimes(1);
 		expect(acceptMutate.mock.calls[0][0]).toEqual({
 			publicId: "lo-1",
-			briefingText: undefined,
+			recapText: undefined,
 		});
 	});
 
@@ -625,18 +625,18 @@ describe("LoadoutPage - accept and reject actions", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Tests - briefing flow
+// Tests - recap flow
 // ---------------------------------------------------------------------------
 
-describe("LoadoutPage - briefing flow", () => {
+describe("LoadoutPage - recap flow", () => {
 	beforeEach(() => {
 		mockNavigate.mockClear();
 	});
 
-	it("previews a quick briefing when 'Quick recap' is clicked", () => {
+	it("previews a quick recap when 'Quick recap' is clicked", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
-		(usePreviewBriefing as Mock).mockReturnValue({
+		(usePreviewRecap as Mock).mockReturnValue({
 			mutate: previewMutate,
 			mutateAsync: vi.fn(),
 			isPending: false,
@@ -655,10 +655,10 @@ describe("LoadoutPage - briefing flow", () => {
 		});
 	});
 
-	it("previews a deep briefing when 'Deep recap' is clicked", () => {
+	it("previews a deep recap when 'Deep recap' is clicked", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
-		(usePreviewBriefing as Mock).mockReturnValue({
+		(usePreviewRecap as Mock).mockReturnValue({
 			mutate: previewMutate,
 			mutateAsync: vi.fn(),
 			isPending: false,
@@ -676,10 +676,10 @@ describe("LoadoutPage - briefing flow", () => {
 		});
 	});
 
-	it("shows the briefing sub-card and 'Start with recap' button once a briefing is fetched", () => {
+	it("shows the recap sub-card and 'Start with recap' button once a recap is fetched", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
-		(usePreviewBriefing as Mock).mockReturnValue({
+		(usePreviewRecap as Mock).mockReturnValue({
 			mutate: previewMutate,
 			mutateAsync: vi.fn(),
 			isPending: false,
@@ -691,25 +691,25 @@ describe("LoadoutPage - briefing flow", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: /Quick recap/i }));
 
-		// Simulate the preview onSuccess callback with a briefing text.
+		// Simulate the preview onSuccess callback with a recap text.
 		const onSuccess = previewMutate.mock.calls[0][1].onSuccess;
 		act(() => {
-			onSuccess({ briefingText: "Focus on collecting charms early." });
+			onSuccess({ recapText: "Focus on collecting charms early." });
 		});
 
 		expect(screen.getByText("Recap")).toBeInTheDocument();
 		expect(screen.getByText("Focus on collecting charms early.")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /Start with recap/i })).toBeInTheDocument();
-		// The pre-briefing buttons should no longer be visible.
+		// The pre-recap buttons should no longer be visible.
 		expect(screen.queryByRole("button", { name: /Just play/i })).not.toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: /Quick recap/i })).not.toBeInTheDocument();
 	});
 
-	it("accepts with the fetched briefing text when 'Start with recap' is clicked", () => {
+	it("accepts with the fetched recap text when 'Start with recap' is clicked", () => {
 		const createMutate = setupCreateMockWithCapture();
 		const previewMutate = vi.fn();
 		const acceptMutate = vi.fn();
-		(usePreviewBriefing as Mock).mockReturnValue({
+		(usePreviewRecap as Mock).mockReturnValue({
 			mutate: previewMutate,
 			mutateAsync: vi.fn(),
 			isPending: false,
@@ -727,7 +727,7 @@ describe("LoadoutPage - briefing flow", () => {
 		fireEvent.click(screen.getByRole("button", { name: /Quick recap/i }));
 		const onSuccess = previewMutate.mock.calls[0][1].onSuccess;
 		act(() => {
-			onSuccess({ briefingText: "Focus on collecting charms early." });
+			onSuccess({ recapText: "Focus on collecting charms early." });
 		});
 
 		fireEvent.click(screen.getByRole("button", { name: /Start with recap/i }));
@@ -735,7 +735,7 @@ describe("LoadoutPage - briefing flow", () => {
 		expect(acceptMutate).toHaveBeenCalledTimes(1);
 		expect(acceptMutate.mock.calls[0][0]).toEqual({
 			publicId: "lo-1",
-			briefingText: "Focus on collecting charms early.",
+			recapText: "Focus on collecting charms early.",
 		});
 	});
 });

@@ -2,7 +2,7 @@
 
 ``create_play_session_for_entry`` is the single place a PlaySession is created, regardless
 of how the game was chosen. These cover its invariants directly: the optional
-briefing, the ``last_played_at`` stamp, and the one-active-play_session guard mapped
+recap, the ``last_played_at`` stamp, and the one-active-play_session guard mapped
 to a clean 409.
 """
 
@@ -47,7 +47,7 @@ async def _entry(session: Any, entry_id: int) -> Any:
     return await session.get(LibraryEntry, entry_id)
 
 
-async def test_creates_play_session_without_briefing() -> None:
+async def test_creates_play_session_without_recap() -> None:
     async with _TestSessionFactory() as session:
         user_id, entry_id = await _seed(session)
         await session.commit()
@@ -60,12 +60,12 @@ async def test_creates_play_session_without_briefing() -> None:
             user_id=user_id,
             entry=entry,
         )
-        assert play_session.briefing_text is None
+        assert play_session.recap_text is None
         # last_played_at is stamped to the play_session start.
         assert entry.last_played_at == play_session.started_at
 
 
-async def test_creates_play_session_with_briefing() -> None:
+async def test_creates_play_session_with_recap() -> None:
     async with _TestSessionFactory() as session:
         user_id, entry_id = await _seed(session)
         await session.commit()
@@ -77,12 +77,12 @@ async def test_creates_play_session_with_briefing() -> None:
             library_repo=LibraryRepository(session),
             user_id=user_id,
             entry=entry,
-            briefing_text="Resume at the gate.",
+            recap_text="Resume at the gate.",
         )
-        assert play_session.briefing_text == "Resume at the gate."
+        assert play_session.recap_text == "Resume at the gate."
 
 
-async def test_empty_briefing_text_normalised_to_none() -> None:
+async def test_empty_recap_text_normalised_to_none() -> None:
     async with _TestSessionFactory() as session:
         user_id, entry_id = await _seed(session)
         await session.commit()
@@ -94,6 +94,6 @@ async def test_empty_briefing_text_normalised_to_none() -> None:
             library_repo=LibraryRepository(session),
             user_id=user_id,
             entry=entry,
-            briefing_text="",
+            recap_text="",
         )
-        assert play_session.briefing_text is None
+        assert play_session.recap_text is None

@@ -46,7 +46,7 @@ def _load_prompt(name: str) -> str:
 
 _CAPTURE_PARSE_SRC = _load_prompt("capture_parse.j2")
 _CAPTURE_PARSE_VISION_SRC = _load_prompt("capture_parse_vision.j2")
-_BRIEFING_SRC = _load_prompt("briefing.j2")
+_RECAP_SRC = _load_prompt("recap.j2")
 _DEBRIEF_EXTRACT_SRC = _load_prompt("debrief_extract.j2")
 _LOADOUT_PICK_SRC = _load_prompt("loadout_pick.j2")
 
@@ -168,15 +168,15 @@ class OllamaClient(AbstractLLMClient):
             logger.warning("ollama_vision_parse_error", error=str(exc))
             return []
 
-    async def generate_briefing(
+    async def generate_recap(
         self,
         game_title: str,
         previous_debriefs: list[dict[str, object]],
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
-        """Generate a play_session briefing using the smart LLM model."""
-        prompt = _jinja_env.from_string(_BRIEFING_SRC).render(
+        """Generate a play_session recap using the smart LLM model."""
+        prompt = _jinja_env.from_string(_RECAP_SRC).render(
             game_title=game_title,
             previous_debriefs=previous_debriefs,
             current_next_action=current_next_action,
@@ -188,7 +188,7 @@ class OllamaClient(AbstractLLMClient):
             "stream": False,
         }
 
-        resp = await self._call_generate(payload, "ollama_briefing_failed")
+        resp = await self._call_generate(payload, "ollama_recap_failed")
         if resp is None:
             return ""
 

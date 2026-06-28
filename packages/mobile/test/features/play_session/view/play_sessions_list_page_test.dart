@@ -188,7 +188,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       // History is read-only — active-session actions live on the Play page.
-      expect(find.text('View Briefing'), findsNothing);
+      expect(find.text('View Recap'), findsNothing);
       expect(find.text('End PlaySession'), findsNothing);
       expect(find.byType(OutlinedButton), findsNothing);
       expect(find.byType(FilledButton), findsNothing);
@@ -203,7 +203,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.text('View Briefing'), findsNothing);
+      expect(find.text('View Recap'), findsNothing);
       expect(find.text('End PlaySession'), findsNothing);
     });
 

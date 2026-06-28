@@ -3,7 +3,7 @@ import 'package:app/core/play_session/play_session_models.dart';
 import 'package:dio/dio.dart';
 
 final _llmOptions = Options(receiveTimeout: llmReceiveTimeout);
-final _deepLlmOptions = Options(receiveTimeout: deepBriefingReceiveTimeout);
+final _deepLlmOptions = Options(receiveTimeout: deepRecapReceiveTimeout);
 
 /// Provides high-level playSession operations backed by the API.
 class PlaySessionRepository {
@@ -12,19 +12,19 @@ class PlaySessionRepository {
 
   final ApiClient _apiClient;
 
-  /// Previews a briefing for a library entry before starting a playSession.
+  /// Previews a recap for a library entry before starting a playSession.
   ///
-  /// [mode] selects the quick single-shot briefing or the deep web-researched
+  /// [mode] selects the quick single-shot recap or the deep web-researched
   /// one. Deep mode uses a longer receive timeout and accepts a [cancelToken]
   /// so the user can abort the (slow) request.
-  Future<BriefingPreview> previewBriefing(
+  Future<RecapPreview> previewRecap(
     String libraryEntryPublicId, {
     String? positionOverride,
     String mode = 'quick',
     CancelToken? cancelToken,
   }) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
-      '/v1/play-sessions/preview-briefing',
+      '/v1/play-sessions/preview-recap',
       data: {
         'library_entry_public_id': libraryEntryPublicId,
         'mode': mode,
@@ -33,11 +33,11 @@ class PlaySessionRepository {
       options: mode == 'deep' ? _deepLlmOptions : _llmOptions,
       cancelToken: cancelToken,
     );
-    return BriefingPreview.fromJson(response.data!);
+    return RecapPreview.fromJson(response.data!);
   }
 
   /// Submits a retroactive debrief for a library entry.
-  Future<BriefingPreview> submitRetroactiveDebrief(
+  Future<RecapPreview> submitRetroactiveDebrief(
     String libraryEntryPublicId,
     String debriefText,
   ) async {
@@ -48,24 +48,24 @@ class PlaySessionRepository {
         'debrief_text': debriefText,
       },
     );
-    return BriefingPreview.fromJson(response.data!);
+    return RecapPreview.fromJson(response.data!);
   }
 
   /// Starts a new playSession for a library entry.
   ///
-  /// Pass [skipBriefing] to start with no briefing at all (the "just play"
-  /// path) — otherwise, with no [briefingText], the backend generates one.
+  /// Pass [skipRecap] to start with no recap at all (the "just play"
+  /// path) — otherwise, with no [recapText], the backend generates one.
   Future<PlaySession> startPlaySession(
     String libraryEntryPublicId, {
-    String? briefingText,
-    bool skipBriefing = false,
+    String? recapText,
+    bool skipRecap = false,
   }) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
       '/v1/play-sessions',
       data: {
         'library_entry_public_id': libraryEntryPublicId,
-        if (briefingText != null) 'briefing_text': briefingText,
-        if (skipBriefing) 'skip_briefing': true,
+        if (recapText != null) 'recap_text': recapText,
+        if (skipRecap) 'skip_recap': true,
       },
     );
     return PlaySession.fromJson(response.data!);
@@ -127,13 +127,13 @@ class PlaySessionRepository {
     return PlaySession.fromJson(response.data!);
   }
 
-  /// Regenerates the briefing for an existing playSession.
-  Future<PlaySession> regenerateBriefing(
+  /// Regenerates the recap for an existing playSession.
+  Future<PlaySession> regenerateRecap(
     String publicId, {
     String? currentPosition,
   }) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
-      '/v1/play-sessions/$publicId/briefing/regenerate',
+      '/v1/play-sessions/$publicId/recap/regenerate',
       data: {if (currentPosition != null) 'current_position': currentPosition},
       options: _llmOptions,
     );

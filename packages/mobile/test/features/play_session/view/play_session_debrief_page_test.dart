@@ -30,7 +30,7 @@ final _samplePlaySession = PlaySession(
   publicId: 'playSession-1',
   libraryEntry: _sampleLibraryEntry,
   playSessionType: 'regular',
-  briefingText: 'Explore the caverns below.',
+  recapText: 'Explore the caverns below.',
   startedAt: DateTime(2024, 6, 15, 10),
   createdAt: DateTime(2024, 6, 15, 10),
   updatedAt: DateTime(2024, 6, 15, 10),

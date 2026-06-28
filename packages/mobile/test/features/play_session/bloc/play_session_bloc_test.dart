@@ -41,7 +41,7 @@ final _playSession = PlaySession(
   startedAt: _now,
   createdAt: _now,
   updatedAt: _now,
-  briefingText: 'Welcome back!',
+  recapText: 'Welcome back!',
 );
 
 final _playSessionListItem = PlaySessionListItem(
@@ -56,10 +56,7 @@ final _listResponse = PlaySessionListResponse(
   total: 1,
 );
 
-final _preview = BriefingPreview(
-  libraryEntry: _entry,
-  briefingText: 'Your briefing',
-);
+final _preview = RecapPreview(libraryEntry: _entry, recapText: 'Your recap');
 
 // -------------------------------------------------------------------
 // Tests
@@ -384,23 +381,23 @@ void main() {
     });
 
     // ---------------------------------------------------------------
-    // PreviewBriefing
+    // PreviewRecap
     // ---------------------------------------------------------------
-    group('PreviewBriefing', () {
+    group('PreviewRecap', () {
       blocTest<PlaySessionBloc, PlaySessionState>(
-        'emits [PlaySessionLoading, BriefingPreviewLoaded] '
+        'emits [PlaySessionLoading, RecapPreviewLoaded] '
         'on success',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing('lib-001'),
+            () => mockPlaySessionRepository.previewRecap('lib-001'),
           ).thenAnswer((_) async => _preview);
         },
         build: buildBloc,
         act: (bloc) =>
-            bloc.add(const PreviewBriefing(libraryEntryPublicId: 'lib-001')),
+            bloc.add(const PreviewRecap(libraryEntryPublicId: 'lib-001')),
         expect: () => [
           const PlaySessionLoading(),
-          BriefingPreviewLoaded(preview: _preview),
+          RecapPreviewLoaded(preview: _preview),
         ],
       );
 
@@ -408,7 +405,7 @@ void main() {
         'passes positionOverride to repository',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               'lib-001',
               positionOverride: 'Chapter 3',
             ),
@@ -416,18 +413,18 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const PreviewBriefing(
+          const PreviewRecap(
             libraryEntryPublicId: 'lib-001',
             positionOverride: 'Chapter 3',
           ),
         ),
         expect: () => [
           const PlaySessionLoading(),
-          BriefingPreviewLoaded(preview: _preview),
+          RecapPreviewLoaded(preview: _preview),
         ],
         verify: (_) {
           verify(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               'lib-001',
               positionOverride: 'Chapter 3',
             ),
@@ -440,7 +437,7 @@ void main() {
         'on DioException',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               any(),
               positionOverride: any(named: 'positionOverride'),
             ),
@@ -457,7 +454,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) =>
-            bloc.add(const PreviewBriefing(libraryEntryPublicId: 'lib-999')),
+            bloc.add(const PreviewRecap(libraryEntryPublicId: 'lib-999')),
         expect: () => const [
           PlaySessionLoading(),
           PlaySessionError(message: 'Entry not found'),
@@ -465,11 +462,11 @@ void main() {
       );
 
       blocTest<PlaySessionBloc, PlaySessionState>(
-        'deep mode emits [DeepBriefingLoading, '
-        'BriefingPreviewLoaded(isDeep)]',
+        'deep mode emits [DeepRecapLoading, '
+        'RecapPreviewLoaded(isDeep)]',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               'lib-001',
               mode: 'deep',
               cancelToken: any(named: 'cancelToken'),
@@ -478,15 +475,15 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const PreviewBriefing(libraryEntryPublicId: 'lib-001', mode: 'deep'),
+          const PreviewRecap(libraryEntryPublicId: 'lib-001', mode: 'deep'),
         ),
         expect: () => [
-          const DeepBriefingLoading(),
-          BriefingPreviewLoaded(preview: _preview, isDeep: true),
+          const DeepRecapLoading(),
+          RecapPreviewLoaded(preview: _preview, isDeep: true),
         ],
         verify: (_) {
           verify(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               'lib-001',
               mode: 'deep',
               cancelToken: any(named: 'cancelToken'),
@@ -496,10 +493,10 @@ void main() {
       );
 
       blocTest<PlaySessionBloc, PlaySessionState>(
-        'deep cancellation falls back to the quick briefing',
+        'deep cancellation falls back to the quick recap',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               'lib-001',
               mode: 'deep',
               cancelToken: any(named: 'cancelToken'),
@@ -511,24 +508,24 @@ void main() {
             ),
           );
           when(
-            () => mockPlaySessionRepository.previewBriefing('lib-001'),
+            () => mockPlaySessionRepository.previewRecap('lib-001'),
           ).thenAnswer((_) async => _preview);
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const PreviewBriefing(libraryEntryPublicId: 'lib-001', mode: 'deep'),
+          const PreviewRecap(libraryEntryPublicId: 'lib-001', mode: 'deep'),
         ),
         expect: () => [
-          const DeepBriefingLoading(),
-          BriefingPreviewLoaded(preview: _preview),
+          const DeepRecapLoading(),
+          RecapPreviewLoaded(preview: _preview),
         ],
       );
 
       blocTest<PlaySessionBloc, PlaySessionState>(
-        'CancelDeepBriefing is a no-op when nothing is in flight',
+        'CancelDeepRecap is a no-op when nothing is in flight',
         build: buildBloc,
         act: (bloc) =>
-            bloc.add(const CancelDeepBriefing(libraryEntryPublicId: 'lib-001')),
+            bloc.add(const CancelDeepRecap(libraryEntryPublicId: 'lib-001')),
         expect: () => <PlaySessionState>[],
       );
     });
@@ -555,12 +552,12 @@ void main() {
       );
 
       blocTest<PlaySessionBloc, PlaySessionState>(
-        'passes briefingText to repository',
+        'passes recapText to repository',
         setUp: () {
           when(
             () => mockPlaySessionRepository.startPlaySession(
               'lib-001',
-              briefingText: 'Custom briefing',
+              recapText: 'Custom recap',
             ),
           ).thenAnswer((_) async => _playSession);
         },
@@ -568,7 +565,7 @@ void main() {
         act: (bloc) => bloc.add(
           const StartPlaySession(
             libraryEntryPublicId: 'lib-001',
-            briefingText: 'Custom briefing',
+            recapText: 'Custom recap',
           ),
         ),
         expect: () => [
@@ -579,7 +576,7 @@ void main() {
           verify(
             () => mockPlaySessionRepository.startPlaySession(
               'lib-001',
-              briefingText: 'Custom briefing',
+              recapText: 'Custom recap',
             ),
           ).called(1);
         },
@@ -592,7 +589,7 @@ void main() {
           when(
             () => mockPlaySessionRepository.startPlaySession(
               any(),
-              briefingText: any(named: 'briefingText'),
+              recapText: any(named: 'recapText'),
             ),
           ).thenThrow(
             DioException(
@@ -761,7 +758,7 @@ void main() {
     // ---------------------------------------------------------------
     group('SubmitRetroactiveDebrief', () {
       blocTest<PlaySessionBloc, PlaySessionState>(
-        'emits [PlaySessionLoading, BriefingPreviewLoaded] '
+        'emits [PlaySessionLoading, RecapPreviewLoaded] '
         'on success',
         setUp: () {
           when(
@@ -780,7 +777,7 @@ void main() {
         ),
         expect: () => [
           const PlaySessionLoading(),
-          BriefingPreviewLoaded(preview: _preview),
+          RecapPreviewLoaded(preview: _preview),
         ],
       );
 
@@ -819,21 +816,20 @@ void main() {
     });
 
     // ---------------------------------------------------------------
-    // RegenerateBriefing
+    // RegenerateRecap
     // ---------------------------------------------------------------
-    group('RegenerateBriefing', () {
+    group('RegenerateRecap', () {
       blocTest<PlaySessionBloc, PlaySessionState>(
         'emits [PlaySessionLoading, PlaySessionStarted] '
         'on success',
         setUp: () {
           when(
-            () =>
-                mockPlaySessionRepository.regenerateBriefing('playSession-001'),
+            () => mockPlaySessionRepository.regenerateRecap('playSession-001'),
           ).thenAnswer((_) async => _playSession);
         },
         build: buildBloc,
         act: (bloc) =>
-            bloc.add(const RegenerateBriefing(publicId: 'playSession-001')),
+            bloc.add(const RegenerateRecap(publicId: 'playSession-001')),
         expect: () => [
           const PlaySessionLoading(),
           PlaySessionStarted(playSession: _playSession),
@@ -844,7 +840,7 @@ void main() {
         'passes currentPosition to repository',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.regenerateBriefing(
+            () => mockPlaySessionRepository.regenerateRecap(
               'playSession-001',
               currentPosition: 'Boss fight',
             ),
@@ -852,7 +848,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const RegenerateBriefing(
+          const RegenerateRecap(
             publicId: 'playSession-001',
             currentPosition: 'Boss fight',
           ),
@@ -863,7 +859,7 @@ void main() {
         ],
         verify: (_) {
           verify(
-            () => mockPlaySessionRepository.regenerateBriefing(
+            () => mockPlaySessionRepository.regenerateRecap(
               'playSession-001',
               currentPosition: 'Boss fight',
             ),
@@ -876,7 +872,7 @@ void main() {
         'on DioException',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.regenerateBriefing(
+            () => mockPlaySessionRepository.regenerateRecap(
               any(),
               currentPosition: any(named: 'currentPosition'),
             ),
@@ -893,7 +889,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) =>
-            bloc.add(const RegenerateBriefing(publicId: 'playSession-001')),
+            bloc.add(const RegenerateRecap(publicId: 'playSession-001')),
         expect: () => const [
           PlaySessionLoading(),
           PlaySessionError(message: 'LLM unavailable'),

@@ -1,7 +1,7 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AiBriefingOverlay } from "./AiBriefingOverlay";
+import { AiRecapOverlay } from "./AiRecapOverlay";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -10,7 +10,7 @@ import { AiBriefingOverlay } from "./AiBriefingOverlay";
 function renderOverlay(props: { opened: boolean; gameTitle?: string }) {
 	return render(
 		<MantineProvider>
-			<AiBriefingOverlay {...props} />
+			<AiRecapOverlay {...props} />
 		</MantineProvider>,
 	);
 }
@@ -19,7 +19,7 @@ function renderOverlay(props: { opened: boolean; gameTitle?: string }) {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("AiBriefingOverlay", () => {
+describe("AiRecapOverlay", () => {
 	it("does not show modal content when opened is false", () => {
 		renderOverlay({ opened: false });
 

@@ -42,13 +42,13 @@ final _playSession = PlaySession(
   publicId: 'playSession-1',
   libraryEntry: _entry,
   playSessionType: 'regular',
-  briefingText: 'Continue exploring Hallownest.',
+  recapText: 'Continue exploring Hallownest.',
   startedAt: _now,
   createdAt: _now,
   updatedAt: _now,
 );
 
-final _playSessionNoBriefing = PlaySession(
+final _playSessionNoRecap = PlaySession(
   publicId: 'playSession-2',
   libraryEntry: _entry,
   playSessionType: 'regular',
@@ -95,8 +95,8 @@ void main() {
           builder: (_, __) => const Scaffold(body: Text('Library stub')),
         ),
         GoRoute(
-          path: '/play-sessions/:id/briefing',
-          builder: (_, __) => const Scaffold(body: Text('Briefing stub')),
+          path: '/play-sessions/:id/recap',
+          builder: (_, __) => const Scaffold(body: Text('Recap stub')),
         ),
         GoRoute(
           path: '/play-sessions/:id/debrief',
@@ -214,7 +214,7 @@ void main() {
     });
 
     testWidgets(
-      'shows active playSession card with title, platform and briefing',
+      'shows active playSession card with title, platform and recap',
       (tester) async {
         when(
           () => playSessionBloc.state,
@@ -244,12 +244,12 @@ void main() {
       expect(find.widgetWithText(OutlinedButton, 'Wrap up'), findsOneWidget);
     });
 
-    testWidgets('active playSession card hides briefing when none present', (
+    testWidgets('active playSession card hides recap when none present', (
       tester,
     ) async {
-      when(() => playSessionBloc.state).thenReturn(
-        ActivePlaySessionLoaded(playSession: _playSessionNoBriefing),
-      );
+      when(
+        () => playSessionBloc.state,
+      ).thenReturn(ActivePlaySessionLoaded(playSession: _playSessionNoRecap));
 
       await tester.pumpWidget(buildSubject());
 
@@ -257,7 +257,7 @@ void main() {
       expect(find.text('Continue exploring Hallownest.'), findsNothing);
     });
 
-    testWidgets('tapping Recap navigates to the playSession briefing', (
+    testWidgets('tapping Recap navigates to the playSession recap', (
       tester,
     ) async {
       when(
@@ -269,7 +269,7 @@ void main() {
       await tester.tap(find.text('Recap'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Briefing stub'), findsOneWidget);
+      expect(find.text('Recap stub'), findsOneWidget);
     });
 
     testWidgets('tapping Wrap up navigates to the playSession debrief', (

@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Read-only history of all playSessions.
 ///
-/// Active-playSession management (briefing / debrief) now lives on the Play page;
+/// Active-playSession management (recap / debrief) now lives on the Play page;
 /// this surface only lists past and ongoing playSessions.
 class PlaySessionsListPage extends StatefulWidget {
   const PlaySessionsListPage({super.key});

@@ -62,14 +62,14 @@ class DummyLLMClient(AbstractLLMClient):
             ),
         ]
 
-    async def generate_briefing(
+    async def generate_recap(
         self,
         game_title: str,
         previous_debriefs: list[dict[str, object]],
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
-        """Return a deterministic briefing for tests."""
+        """Return a deterministic recap for tests."""
         if not previous_debriefs:
             return (
                 f"Welcome to your first play_session in {game_title}! "
@@ -143,7 +143,7 @@ class DummyLLMClient(AbstractLLMClient):
     ) -> str:
         """Return canned text keyed by markers embedded in the agent prompts.
 
-        Matches the literal phrases used in the deep-briefing prompt templates
+        Matches the literal phrases used in the deep-recap prompt templates
         so the graph runs deterministically in tests. Grade defaults to
         ``sufficient`` (happy path); tests needing the refine/exhausted paths
         use a purpose-built fake that scripts grade responses.

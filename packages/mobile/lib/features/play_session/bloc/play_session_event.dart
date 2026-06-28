@@ -28,9 +28,9 @@ final class LoadActivePlaySession extends PlaySessionEvent {
   const LoadActivePlaySession();
 }
 
-/// Dispatched to preview a briefing before starting a playSession.
-final class PreviewBriefing extends PlaySessionEvent {
-  const PreviewBriefing({
+/// Dispatched to preview a recap before starting a playSession.
+final class PreviewRecap extends PlaySessionEvent {
+  const PreviewRecap({
     required this.libraryEntryPublicId,
     this.positionOverride,
     this.mode = 'quick',
@@ -39,16 +39,16 @@ final class PreviewBriefing extends PlaySessionEvent {
   final String libraryEntryPublicId;
   final String? positionOverride;
 
-  /// Briefing mode: `'quick'` (single-shot) or `'deep'` (web-researched).
+  /// Recap mode: `'quick'` (single-shot) or `'deep'` (web-researched).
   final String mode;
 
   @override
   List<Object?> get props => [libraryEntryPublicId, positionOverride, mode];
 }
 
-/// Dispatched to cancel an in-flight deep briefing request.
-final class CancelDeepBriefing extends PlaySessionEvent {
-  const CancelDeepBriefing({required this.libraryEntryPublicId});
+/// Dispatched to cancel an in-flight deep recap request.
+final class CancelDeepRecap extends PlaySessionEvent {
+  const CancelDeepRecap({required this.libraryEntryPublicId});
 
   final String libraryEntryPublicId;
 
@@ -60,18 +60,18 @@ final class CancelDeepBriefing extends PlaySessionEvent {
 final class StartPlaySession extends PlaySessionEvent {
   const StartPlaySession({
     required this.libraryEntryPublicId,
-    this.briefingText,
-    this.skipBriefing = false,
+    this.recapText,
+    this.skipRecap = false,
   });
 
   final String libraryEntryPublicId;
-  final String? briefingText;
+  final String? recapText;
 
-  /// Start with no briefing at all (the "just play" path).
-  final bool skipBriefing;
+  /// Start with no recap at all (the "just play" path).
+  final bool skipRecap;
 
   @override
-  List<Object?> get props => [libraryEntryPublicId, briefingText, skipBriefing];
+  List<Object?> get props => [libraryEntryPublicId, recapText, skipRecap];
 }
 
 /// Dispatched to submit a debrief for a playSession.
@@ -110,9 +110,9 @@ final class SubmitRetroactiveDebrief extends PlaySessionEvent {
   List<Object?> get props => [libraryEntryPublicId, debriefText];
 }
 
-/// Dispatched to regenerate the briefing for an existing playSession.
-final class RegenerateBriefing extends PlaySessionEvent {
-  const RegenerateBriefing({required this.publicId, this.currentPosition});
+/// Dispatched to regenerate the recap for an existing playSession.
+final class RegenerateRecap extends PlaySessionEvent {
+  const RegenerateRecap({required this.publicId, this.currentPosition});
 
   final String publicId;
   final String? currentPosition;

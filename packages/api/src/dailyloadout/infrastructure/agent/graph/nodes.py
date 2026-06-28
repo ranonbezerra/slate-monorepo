@@ -1,4 +1,4 @@
-"""Node functions for the deep-research briefing graph.
+"""Node functions for the deep-research recap graph.
 
 Each node takes the graph state and its injected dependencies (bound via
 ``functools.partial`` in ``builder.py``) and returns a partial state update.
@@ -13,12 +13,12 @@ import typing
 
 import structlog
 
-from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+from dailyloadout.core.play_session.anti_hallucination import validate_recap
 from dailyloadout.infrastructure.llm.base import AbstractLLMClient
 from dailyloadout.infrastructure.research.base import AbstractResearchClient
 
 from .render import render
-from .state import Grade, PlaySessionContext, ResearchBriefingState
+from .state import Grade, PlaySessionContext, ResearchRecapState
 
 logger = structlog.get_logger()
 
@@ -37,7 +37,7 @@ def _context_text(ctx: PlaySessionContext) -> str:
     return " ".join(p for p in parts if p)
 
 
-async def build_query(state: ResearchBriefingState) -> dict[str, object]:
+async def build_query(state: ResearchRecapState) -> dict[str, object]:
     """Build the initial search query from the play_session context. Deterministic."""
     ctx = state["context"]
     base = (
@@ -48,7 +48,7 @@ async def build_query(state: ResearchBriefingState) -> dict[str, object]:
 
 
 async def search(
-    state: ResearchBriefingState,
+    state: ResearchRecapState,
     *,
     research: AbstractResearchClient,
     max_results: int,
@@ -60,7 +60,7 @@ async def search(
 
 
 async def grade_results(
-    state: ResearchBriefingState,
+    state: ResearchRecapState,
     *,
     llm: AbstractLLMClient,
 ) -> dict[str, object]:
@@ -86,7 +86,7 @@ async def grade_results(
 
 
 async def refine_query(
-    state: ResearchBriefingState,
+    state: ResearchRecapState,
     *,
     llm: AbstractLLMClient,
 ) -> dict[str, object]:
@@ -105,13 +105,13 @@ async def refine_query(
 
 
 async def synthesize(
-    state: ResearchBriefingState,
+    state: ResearchRecapState,
     *,
     llm: AbstractLLMClient,
     research: AbstractResearchClient | None = None,
     scrape_top_n: int = 0,
 ) -> dict[str, object]:
-    """Synthesize a draft briefing (smart model).
+    """Synthesize a draft recap (smart model).
 
     When *scrape_top_n* > 0 and a *research* client is given, the top results'
     pages are fetched and fed in full for richer, more specific grounding;
@@ -126,7 +126,7 @@ async def synthesize(
                 pages.append({"title": r["title"], "url": r["url"], "content": content})
 
     prompt = render(
-        "briefing_research.j2",
+        "recap_research.j2",
         context=state["context"],
         results=results,
         pages=pages,
@@ -136,7 +136,7 @@ async def synthesize(
 
 
 async def spoiler_filter(
-    state: ResearchBriefingState,
+    state: ResearchRecapState,
     *,
     llm: AbstractLLMClient,
 ) -> dict[str, object]:
@@ -149,8 +149,8 @@ async def spoiler_filter(
     return {"filtered": (await llm.complete(prompt, role="smart")).strip()}
 
 
-async def anti_hallucination(state: ResearchBriefingState) -> dict[str, object]:
-    """Terminal gate: validate the filtered briefing against the grounding text.
+async def anti_hallucination(state: ResearchRecapState) -> dict[str, object]:
+    """Terminal gate: validate the filtered recap against the grounding text.
 
     Reuses the Epic 6 token-overlap validator. The grounding text is the
     player's own context plus the retrieved snippets.
@@ -160,7 +160,7 @@ async def anti_hallucination(state: ResearchBriefingState) -> dict[str, object]:
     scraped = state.get("scraped_text", "")
     grounding = f"{_context_text(ctx)} {snippets} {scraped}".strip()
 
-    result = validate_briefing(state["filtered"], grounding)
+    result = validate_recap(state["filtered"], grounding)
     text = state["filtered"]
     if result.is_suspicious:
         text += (
@@ -170,24 +170,24 @@ async def anti_hallucination(state: ResearchBriefingState) -> dict[str, object]:
     return {
         "overlap": result.overlap_ratio,
         "suspicious": result.is_suspicious,
-        "briefing": text,
+        "recap": text,
         "source": "deep_research",
     }
 
 
 async def fallback_quick(
-    state: ResearchBriefingState,
+    state: ResearchRecapState,
     *,
     llm: AbstractLLMClient,
 ) -> dict[str, object]:
-    """Degrade to the existing single-shot quick briefing."""
+    """Degrade to the existing single-shot quick recap."""
     ctx = state["context"]
     previous_debriefs = typing.cast(
         "list[dict[str, object]]", ctx.get("previous_debriefs", []) or []
     )
-    text = await llm.generate_briefing(
+    text = await llm.generate_recap(
         game_title=ctx.get("game_title", ""),
         previous_debriefs=previous_debriefs,
         current_next_action=ctx.get("next_action"),
     )
-    return {"briefing": text, "source": "quick_fallback"}
+    return {"recap": text, "source": "quick_fallback"}

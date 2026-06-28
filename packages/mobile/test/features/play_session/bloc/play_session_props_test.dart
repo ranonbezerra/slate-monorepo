@@ -31,7 +31,7 @@ final _playSession = PlaySession(
   startedAt: _now,
   createdAt: _now,
   updatedAt: _now,
-  briefingText: 'Welcome back!',
+  recapText: 'Welcome back!',
 );
 
 final _listItem = PlaySessionListItem(
@@ -41,10 +41,7 @@ final _listItem = PlaySessionListItem(
   startedAt: _now,
 );
 
-final _preview = BriefingPreview(
-  libraryEntry: _entry,
-  briefingText: 'Your briefing',
-);
+final _preview = RecapPreview(libraryEntry: _entry, recapText: 'Your recap');
 
 void main() {
   group('PlaySessionEvent', () {
@@ -66,13 +63,13 @@ void main() {
       expect(const LoadActivePlaySession().props, isEmpty);
     });
 
-    test('PreviewBriefing supports value equality and props', () {
-      const a = PreviewBriefing(
+    test('PreviewRecap supports value equality and props', () {
+      const a = PreviewRecap(
         libraryEntryPublicId: 'lib-1',
         positionOverride: 'chapter 2',
         mode: 'deep',
       );
-      const b = PreviewBriefing(
+      const b = PreviewRecap(
         libraryEntryPublicId: 'lib-1',
         positionOverride: 'chapter 2',
         mode: 'deep',
@@ -81,15 +78,15 @@ void main() {
       expect(a.props, ['lib-1', 'chapter 2', 'deep']);
     });
 
-    test('PreviewBriefing uses default mode', () {
-      const a = PreviewBriefing(libraryEntryPublicId: 'lib-1');
+    test('PreviewRecap uses default mode', () {
+      const a = PreviewRecap(libraryEntryPublicId: 'lib-1');
       expect(a.mode, 'quick');
       expect(a.props, ['lib-1', null, 'quick']);
     });
 
-    test('CancelDeepBriefing supports value equality and props', () {
-      const a = CancelDeepBriefing(libraryEntryPublicId: 'lib-1');
-      const b = CancelDeepBriefing(libraryEntryPublicId: 'lib-1');
+    test('CancelDeepRecap supports value equality and props', () {
+      const a = CancelDeepRecap(libraryEntryPublicId: 'lib-1');
+      const b = CancelDeepRecap(libraryEntryPublicId: 'lib-1');
       expect(a, b);
       expect(a.props, ['lib-1']);
     });
@@ -97,11 +94,11 @@ void main() {
     test('StartPlaySession supports value equality and props', () {
       const a = StartPlaySession(
         libraryEntryPublicId: 'lib-1',
-        briefingText: 'go',
+        recapText: 'go',
       );
       const b = StartPlaySession(
         libraryEntryPublicId: 'lib-1',
-        briefingText: 'go',
+        recapText: 'go',
       );
       expect(a, b);
       expect(a.props, ['lib-1', 'go', false]);
@@ -113,7 +110,7 @@ void main() {
       expect(
         const StartPlaySession(
           libraryEntryPublicId: 'lib-1',
-          skipBriefing: true,
+          skipRecap: true,
         ).props,
         ['lib-1', null, true],
       );
@@ -150,12 +147,12 @@ void main() {
       expect(a.props, ['lib-1', 'done']);
     });
 
-    test('RegenerateBriefing supports value equality and props', () {
-      const a = RegenerateBriefing(publicId: 'm-1', currentPosition: 'boss');
-      const b = RegenerateBriefing(publicId: 'm-1', currentPosition: 'boss');
+    test('RegenerateRecap supports value equality and props', () {
+      const a = RegenerateRecap(publicId: 'm-1', currentPosition: 'boss');
+      const b = RegenerateRecap(publicId: 'm-1', currentPosition: 'boss');
       expect(a, b);
       expect(a.props, ['m-1', 'boss']);
-      expect(const RegenerateBriefing(publicId: 'm-1').props, ['m-1', null]);
+      expect(const RegenerateRecap(publicId: 'm-1').props, ['m-1', null]);
     });
   });
 
@@ -204,17 +201,17 @@ void main() {
       expect(const ActivePlaySessionLoaded().props, [null]);
     });
 
-    test('BriefingPreviewLoaded supports value equality and props', () {
-      final a = BriefingPreviewLoaded(preview: _preview, isDeep: true);
-      final b = BriefingPreviewLoaded(preview: _preview, isDeep: true);
+    test('RecapPreviewLoaded supports value equality and props', () {
+      final a = RecapPreviewLoaded(preview: _preview, isDeep: true);
+      final b = RecapPreviewLoaded(preview: _preview, isDeep: true);
       expect(a, b);
       expect(a.props, [_preview, true]);
-      expect(BriefingPreviewLoaded(preview: _preview).props, [_preview, false]);
+      expect(RecapPreviewLoaded(preview: _preview).props, [_preview, false]);
     });
 
-    test('DeepBriefingLoading supports value equality', () {
-      expect(const DeepBriefingLoading(), const DeepBriefingLoading());
-      expect(const DeepBriefingLoading().props, isEmpty);
+    test('DeepRecapLoading supports value equality', () {
+      expect(const DeepRecapLoading(), const DeepRecapLoading());
+      expect(const DeepRecapLoading().props, isEmpty);
     });
 
     test('PlaySessionStarted supports value equality and props', () {

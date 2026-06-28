@@ -202,7 +202,7 @@ class StatsService:
                     game_title=m.library_entry.game.title,
                     platform_label=m.library_entry.platform.label,
                     play_session_type=m.play_session_type,
-                    briefing_text=m.briefing_text,
+                    recap_text=m.recap_text,
                     debrief_text=m.debrief_text,
                     ended_via=m.ended_via,
                     started_at=m.started_at,

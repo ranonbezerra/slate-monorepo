@@ -119,7 +119,7 @@ class _LibraryListPageState extends State<LibraryListPage> {
                         return _LibraryGameCard(
                           group: group,
                           onStartPlaySession: (entryPublicId) => context.push(
-                            '/play-sessions/briefing?entry=$entryPublicId',
+                            '/play-sessions/recap?entry=$entryPublicId',
                           ),
                         );
                       },

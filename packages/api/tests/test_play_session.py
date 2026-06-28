@@ -44,12 +44,12 @@ async def _start_play_session(
     client: AsyncClient,
     headers: dict[str, str],
     entry_public_id: str,
-    briefing_text: str | None = None,
+    recap_text: str | None = None,
 ) -> dict[str, Any]:
     """Start a play_session and return the parsed response."""
     body: dict[str, Any] = {"library_entry_public_id": entry_public_id}
-    if briefing_text is not None:
-        body["briefing_text"] = briefing_text
+    if recap_text is not None:
+        body["recap_text"] = recap_text
     resp = await client.post(
         "/v1/play-sessions",
         json=body,
@@ -59,18 +59,18 @@ async def _start_play_session(
     return resp.json()
 
 
-async def _preview_briefing(
+async def _preview_recap(
     client: AsyncClient,
     headers: dict[str, str],
     entry_public_id: str,
     position_override: str | None = None,
 ) -> dict[str, Any]:
-    """Preview a briefing without starting a play_session."""
+    """Preview a recap without starting a play_session."""
     body: dict[str, Any] = {"library_entry_public_id": entry_public_id}
     if position_override is not None:
         body["position_override"] = position_override
     resp = await client.post(
-        "/v1/play-sessions/preview-briefing",
+        "/v1/play-sessions/preview-recap",
         json=body,
         headers=headers,
     )
@@ -97,39 +97,39 @@ class TestStartPlaySession:
         assert play_session["ended_at"] is None
         assert play_session["ended_via"] is None
         assert play_session["started_at"] is not None
-        # First play_session — no prior debriefs, but briefing should still be generated.
-        assert play_session["briefing_text"] is not None
+        # First play_session — no prior debriefs, but recap should still be generated.
+        assert play_session["recap_text"] is not None
 
-    async def test_start_skip_briefing(
+    async def test_start_skip_recap(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """The 'just play' path starts with no briefing and generates none."""
+        """The 'just play' path starts with no recap and generates none."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
         resp = await async_client.post(
             "/v1/play-sessions",
-            json={"library_entry_public_id": entry["public_id"], "skip_briefing": True},
+            json={"library_entry_public_id": entry["public_id"], "skip_recap": True},
             headers=auth_headers,
         )
         assert resp.status_code == 201, resp.text
         play_session = resp.json()
         assert play_session["ended_at"] is None
-        assert play_session["briefing_text"] is None  # no briefing generated
+        assert play_session["recap_text"] is None  # no recap generated
 
-    async def test_start_first_play_session_briefing(
+    async def test_start_first_play_session_recap(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """First play_session should get a welcome-style briefing."""
+        """First play_session should get a welcome-style recap."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
         play_session = await _start_play_session(async_client, auth_headers, entry["public_id"])
 
-        briefing = play_session["briefing_text"].lower()
-        assert "first play_session" in briefing or "welcome" in briefing
+        recap = play_session["recap_text"].lower()
+        assert "first play_session" in recap or "welcome" in recap
 
     async def test_start_deep_mode_uses_agent(
         self,
@@ -137,7 +137,7 @@ class TestStartPlaySession:
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Deep mode routes through the briefing agent (dummy in testing)."""
+        """Deep mode routes through the recap agent (dummy in testing)."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
         resp = await async_client.post(
             "/v1/play-sessions",
@@ -146,8 +146,8 @@ class TestStartPlaySession:
         )
         assert resp.status_code == 201, resp.text
         play_session = resp.json()
-        # DummyBriefingAgent returns a deterministic deep-research briefing.
-        assert "Previously on" in play_session["briefing_text"]
+        # DummyRecapAgent returns a deterministic deep-research recap.
+        assert "Previously on" in play_session["recap_text"]
 
     async def test_start_invalid_mode_rejected(
         self,
@@ -155,7 +155,7 @@ class TestStartPlaySession:
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """An unknown briefing mode fails request validation."""
+        """An unknown recap mode fails request validation."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
         resp = await async_client.post(
             "/v1/play-sessions",
@@ -279,8 +279,8 @@ class TestSubmitDebrief:
             headers=auth_headers,
         )
 
-        # Preview briefing — sync fallback should extract the first debrief.
-        preview = await _preview_briefing(async_client, auth_headers, entry["public_id"])
+        # Preview recap — sync fallback should extract the first debrief.
+        preview = await _preview_recap(async_client, auth_headers, entry["public_id"])
         assert preview["last_session_context"] is not None
         assert preview["last_session_context"]["next_action"] is not None
 
@@ -354,7 +354,7 @@ class TestRetroactiveDebrief:
         assert resp.status_code == 200
         preview = resp.json()
         assert preview["last_session_context"] is not None
-        assert preview["briefing_text"] is not None
+        assert preview["recap_text"] is not None
 
         # Verify the retroactive play_session exists in the timeline.
         resp = await async_client.get("/v1/play-sessions", headers=auth_headers)
@@ -477,18 +477,18 @@ class TestEndPlaySession:
 
 
 # =====================================================================
-# Test: Briefing with context from debriefs
+# Test: Recap with context from debriefs
 # =====================================================================
 
 
-class TestBriefingWithContext:
+class TestRecapWithContext:
     async def test_second_play_session_uses_debrief_context(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """The second play_session's briefing should reference the first debrief."""
+        """The second play_session's recap should reference the first debrief."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
         # First play_session with debrief.
@@ -499,20 +499,20 @@ class TestBriefingWithContext:
             headers=auth_headers,
         )
 
-        # Second play_session should have a briefing referencing the debrief.
+        # Second play_session should have a recap referencing the debrief.
         m2 = await _start_play_session(async_client, auth_headers, entry["public_id"])
-        assert m2["briefing_text"] is not None
+        assert m2["recap_text"] is not None
         # The dummy LLM uses debrief data — should reference it.
-        briefing = m2["briefing_text"].lower()
-        assert "previously" in briefing or "hollow knight" in briefing
+        recap = m2["recap_text"].lower()
+        assert "previously" in recap or "hollow knight" in recap
 
 
 # =====================================================================
-# Test: Regenerate briefing
+# Test: Regenerate recap
 # =====================================================================
 
 
-class TestRegenerateBriefing:
+class TestRegenerateRecap:
     async def test_regenerate_success(
         self,
         async_client: AsyncClient,
@@ -523,11 +523,11 @@ class TestRegenerateBriefing:
         play_session = await _start_play_session(async_client, auth_headers, entry["public_id"])
 
         resp = await async_client.post(
-            f"/v1/play-sessions/{play_session['public_id']}/briefing/regenerate",
+            f"/v1/play-sessions/{play_session['public_id']}/recap/regenerate",
             headers=auth_headers,
         )
         assert resp.status_code == 200
-        assert resp.json()["briefing_text"] is not None
+        assert resp.json()["recap_text"] is not None
 
     async def test_regenerate_ended_play_session(
         self,
@@ -545,7 +545,7 @@ class TestRegenerateBriefing:
         )
 
         resp = await async_client.post(
-            f"/v1/play-sessions/{play_session['public_id']}/briefing/regenerate",
+            f"/v1/play-sessions/{play_session['public_id']}/recap/regenerate",
             headers=auth_headers,
         )
         assert resp.status_code == 409
@@ -634,79 +634,79 @@ class TestGetPlaySession:
 
 
 class TestAntiHallucination:
-    def test_valid_briefing(self) -> None:
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+    def test_valid_recap(self) -> None:
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
-        result = validate_briefing(
-            briefing_text="You were at Greenpath fighting the Mantis Lords.",
+        result = validate_recap(
+            recap_text="You were at Greenpath fighting the Mantis Lords.",
             context_text="Location: Greenpath. Next action: fight the Mantis Lords.",
         )
         assert not result.is_suspicious
         assert result.overlap_ratio >= 0.40
 
-    def test_suspicious_briefing(self) -> None:
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+    def test_suspicious_recap(self) -> None:
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
-        result = validate_briefing(
-            briefing_text="You were at Harkenburg Castle fighting King Aldric the Terrible.",
+        result = validate_recap(
+            recap_text="You were at Harkenburg Castle fighting King Aldric the Terrible.",
             context_text="Location: Greenpath. Next action: find the Mothwing Cloak.",
         )
         assert result.is_suspicious
         assert result.overlap_ratio < 0.40
         assert len(result.missing_tokens) > 0
 
-    def test_empty_briefing(self) -> None:
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+    def test_empty_recap(self) -> None:
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
-        result = validate_briefing(
-            briefing_text="just some lowercase text without proper nouns",
+        result = validate_recap(
+            recap_text="just some lowercase text without proper nouns",
             context_text="any context",
         )
         assert not result.is_suspicious
         assert result.overlap_ratio == 1.0
 
-    def test_only_numbers_in_briefing(self) -> None:
+    def test_only_numbers_in_recap(self) -> None:
         """Numbers are interesting tokens; they must also appear in context."""
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
         # Both numbers present in context -- should be fully grounded.
         # Note: "Level" is also an interesting token ([A-Z][a-z]{2,}).
         # The context uses "Level" capitalised so it appears in context_tokens.
-        result = validate_briefing(
-            briefing_text="Level 42 with 100 gold",
+        result = validate_recap(
+            recap_text="Level 42 with 100 gold",
             context_text="Level 42 character with 100 gold coins.",
         )
         assert not result.is_suspicious
-        # Briefing tokens: {"Level", "42", "100"}.
+        # Recap tokens: {"Level", "42", "100"}.
         # Context tokens: {"Level", "42", "100"}.
         # All three grounded -> ratio = 1.0.
         assert result.overlap_ratio == 1.0
         assert result.missing_tokens == []
 
         # Now test where the numbers are NOT in context -- suspicious.
-        result_bad = validate_briefing(
-            briefing_text="Level 42 with 100 gold",
+        result_bad = validate_recap(
+            recap_text="Level 42 with 100 gold",
             context_text="the player is exploring a dungeon",
         )
-        # Briefing tokens: {"Level", "42", "100"}.
+        # Recap tokens: {"Level", "42", "100"}.
         # Context has no interesting tokens (all lowercase, no numbers).
         # overlap = 0/3 = 0.0 -> suspicious.
         assert result_bad.is_suspicious
         assert result_bad.overlap_ratio < 0.40
 
     def test_mixed_case_tokens(self) -> None:
-        """Tokens in the briefing should match context via case-insensitive comparison."""
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+        """Tokens in the recap should match context via case-insensitive comparison."""
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
-        # Briefing has "Greenpath" (capitalised), context has "GREENPATH"
+        # Recap has "Greenpath" (capitalised), context has "GREENPATH"
         # (all-caps).  The validator lowercases both sides for comparison,
         # so "greenpath" == "greenpath" should count as grounded.
-        result = validate_briefing(
-            briefing_text="Head to Greenpath and find the Cloak.",
+        result = validate_recap(
+            recap_text="Head to Greenpath and find the Cloak.",
             context_text="Next area: GREENPATH. Obtain the CLOAK there.",
         )
         assert not result.is_suspicious
-        # Briefing tokens: {"Greenpath", "Cloak", "Head"}
+        # Recap tokens: {"Greenpath", "Cloak", "Head"}
         # Context tokens: {"GREENPATH", "CLOAK", "Obtain", "Next"}
         # Case-insensitive: "greenpath" in context_lower, "cloak" in
         # context_lower, "head" NOT in context_lower.
@@ -714,26 +714,26 @@ class TestAntiHallucination:
         assert result.overlap_ratio >= 0.40
         assert len(result.missing_tokens) <= 1
 
-    def test_entirely_grounded_briefing(self) -> None:
-        """When every interesting token from the briefing exists in context,
+    def test_entirely_grounded_recap(self) -> None:
+        """When every interesting token from the recap exists in context,
         overlap_ratio must be exactly 1.0."""
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
-        result = validate_briefing(
-            briefing_text="Explore Greenpath and defeat the Mantis Lords.",
+        result = validate_recap(
+            recap_text="Explore Greenpath and defeat the Mantis Lords.",
             context_text="Location: Greenpath. Boss: Mantis Lords. Action: Explore.",
         )
         assert not result.is_suspicious
         assert result.overlap_ratio == 1.0
         assert result.missing_tokens == []
 
-    def test_single_token_briefing(self) -> None:
-        """Edge case: briefing with exactly one interesting token."""
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+    def test_single_token_recap(self) -> None:
+        """Edge case: recap with exactly one interesting token."""
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
         # Single token present in context -- ratio = 1/1 = 1.0
-        result_present = validate_briefing(
-            briefing_text="Greenpath",
+        result_present = validate_recap(
+            recap_text="Greenpath",
             context_text="You are at Greenpath.",
         )
         assert not result_present.is_suspicious
@@ -741,21 +741,21 @@ class TestAntiHallucination:
         assert result_present.missing_tokens == []
 
         # Single token absent from context -- ratio = 0/1 = 0.0
-        result_absent = validate_briefing(
-            briefing_text="Greenpath",
+        result_absent = validate_recap(
+            recap_text="Greenpath",
             context_text="You are at the crossroads.",
         )
         assert result_absent.is_suspicious
         assert result_absent.overlap_ratio == 0.0
         assert result_absent.missing_tokens == ["Greenpath"]
 
-    def test_context_contains_game_title_referenced_in_briefing(self) -> None:
-        """Briefing referencing the game title should be grounded when
+    def test_context_contains_game_title_referenced_in_recap(self) -> None:
+        """Recap referencing the game title should be grounded when
         the title appears in the context."""
-        from dailyloadout.core.play_session.anti_hallucination import validate_briefing
+        from dailyloadout.core.play_session.anti_hallucination import validate_recap
 
-        result = validate_briefing(
-            briefing_text=(
+        result = validate_recap(
+            recap_text=(
                 "Welcome back to Hollow Knight. "
                 "Last time you explored Greenpath and found the Mothwing Cloak."
             ),
@@ -764,7 +764,7 @@ class TestAntiHallucination:
                 "Previous session: explored Greenpath, acquired Mothwing Cloak."
             ),
         )
-        # Briefing tokens: {"Welcome", "Hollow", "Knight", "Last",
+        # Recap tokens: {"Welcome", "Hollow", "Knight", "Last",
         #                    "Greenpath", "Mothwing", "Cloak"}
         # Context tokens: {"Game", "Hollow", "Knight", "Previous",
         #                   "Greenpath", "Mothwing", "Cloak"}
@@ -778,11 +778,11 @@ class TestAntiHallucination:
 
 
 # =====================================================================
-# Test: Actionable briefing (suggestions + position override)
+# Test: Actionable recap (suggestions + position override)
 # =====================================================================
 
 
-class TestActionableBriefing:
+class TestActionableRecap:
     async def test_preview_returns_last_session_context(
         self,
         async_client: AsyncClient,
@@ -793,7 +793,7 @@ class TestActionableBriefing:
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
         # First preview: no prior sessions.
-        p1 = await _preview_briefing(async_client, auth_headers, entry["public_id"])
+        p1 = await _preview_recap(async_client, auth_headers, entry["public_id"])
         assert p1["last_session_context"] is None
 
         # First play_session: start, debrief, end.
@@ -805,17 +805,17 @@ class TestActionableBriefing:
         )
 
         # Second preview: should carry context from the first.
-        p2 = await _preview_briefing(async_client, auth_headers, entry["public_id"])
+        p2 = await _preview_recap(async_client, auth_headers, entry["public_id"])
         assert p2["last_session_context"] is not None
         assert p2["last_session_context"]["next_action"] is not None
 
-    async def test_briefing_contains_suggestions(
+    async def test_recap_contains_suggestions(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Briefing should contain actionable 'What you could do' section."""
+        """Recap should contain actionable 'What you could do' section."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
         # First play_session with debrief.
@@ -828,8 +828,8 @@ class TestActionableBriefing:
 
         # Second play_session should have suggestions.
         m2 = await _start_play_session(async_client, auth_headers, entry["public_id"])
-        assert m2["briefing_text"] is not None
-        assert "What you could do" in m2["briefing_text"]
+        assert m2["recap_text"] is not None
+        assert "What you could do" in m2["recap_text"]
 
     async def test_regenerate_with_position_override(
         self,
@@ -853,13 +853,13 @@ class TestActionableBriefing:
 
         # Regenerate with correction.
         resp = await async_client.post(
-            f"/v1/play-sessions/{m2['public_id']}/briefing/regenerate",
+            f"/v1/play-sessions/{m2['public_id']}/recap/regenerate",
             json={"current_position": "Actually at City of Tears now"},
             headers=auth_headers,
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert "City of Tears" in data["briefing_text"]
+        assert "City of Tears" in data["recap_text"]
 
     async def test_regenerate_without_body_still_works(
         self,
@@ -872,7 +872,7 @@ class TestActionableBriefing:
         m = await _start_play_session(async_client, auth_headers, entry["public_id"])
 
         resp = await async_client.post(
-            f"/v1/play-sessions/{m['public_id']}/briefing/regenerate",
+            f"/v1/play-sessions/{m['public_id']}/recap/regenerate",
             headers=auth_headers,
         )
         assert resp.status_code == 200
@@ -885,7 +885,7 @@ class TestActionableBriefing:
     ) -> None:
         """First preview has no prior context — lastSessionContext should be null."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
-        p = await _preview_briefing(async_client, auth_headers, entry["public_id"])
+        p = await _preview_recap(async_client, auth_headers, entry["public_id"])
         assert p["last_session_context"] is None
 
 
@@ -1110,12 +1110,12 @@ class TestAutoClamp:
 
 
 # =====================================================================
-# Test: Deep briefing mode (preview)
+# Test: Deep recap mode (preview)
 # =====================================================================
 
 
-class TestDeepBriefingPreview:
-    async def test_preview_deep_mode_returns_briefing(
+class TestDeepRecapPreview:
+    async def test_preview_deep_mode_returns_recap(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -1124,12 +1124,12 @@ class TestDeepBriefingPreview:
         """Preview with mode='deep' routes through the agent (dummy in testing)."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
         resp = await async_client.post(
-            "/v1/play-sessions/preview-briefing",
+            "/v1/play-sessions/preview-recap",
             json={"library_entry_public_id": entry["public_id"], "mode": "deep"},
             headers=auth_headers,
         )
         assert resp.status_code == 200, resp.text
-        assert resp.json()["briefing_text"]
+        assert resp.json()["recap_text"]
 
     async def test_preview_invalid_mode_rejected(
         self,
@@ -1139,7 +1139,7 @@ class TestDeepBriefingPreview:
     ) -> None:
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
         resp = await async_client.post(
-            "/v1/play-sessions/preview-briefing",
+            "/v1/play-sessions/preview-recap",
             json={"library_entry_public_id": entry["public_id"], "mode": "turbo"},
             headers=auth_headers,
         )

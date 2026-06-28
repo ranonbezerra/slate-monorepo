@@ -30,12 +30,12 @@ vi.mock("../lib/features", () => ({
 	FEATURES: { backlogConcierge: false },
 }));
 
-// The briefing/debrief modals are rendered inline on the page now. They pull
+// The recap/debrief modals are rendered inline on the page now. They pull
 // in their own data hooks; stub them out so this suite stays focused on the
 // PlayPage behavior and does not need a QueryClient provider.
-vi.mock("./PlaySessionBriefingModal", () => ({
-	PlaySessionBriefingModal: ({ mode }: { mode: string }) => (
-		<div data-testid="briefing-modal">{mode}</div>
+vi.mock("./PlaySessionRecapModal", () => ({
+	PlaySessionRecapModal: ({ mode }: { mode: string }) => (
+		<div data-testid="recap-modal">{mode}</div>
 	),
 }));
 vi.mock("./PlaySessionDebriefModal", () => ({
@@ -76,7 +76,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 			updatedAt: "2024-06-02T00:00:00Z",
 		},
 		playSessionType: "regular",
-		briefingText: "Your next adventure awaits",
+		recapText: "Your next adventure awaits",
 		debriefText: null,
 		extractedState: null,
 		endedVia: null,
@@ -125,7 +125,7 @@ describe("PlayPage", () => {
 		expect(mockNavigate).toHaveBeenCalledWith("/library");
 	});
 
-	it("shows the active playSession card with the game title and briefing", () => {
+	it("shows the active playSession card with the game title and recap", () => {
 		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
 		renderPage();
 		expect(screen.getByText("Session active")).toBeInTheDocument();
@@ -142,15 +142,15 @@ describe("PlayPage", () => {
 		expect(screen.queryByRole("button", { name: /resume/i })).not.toBeInTheDocument();
 	});
 
-	it("opens the briefing modal in view mode from the 'Recap' button", () => {
+	it("opens the recap modal in view mode from the 'Recap' button", () => {
 		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
 		renderPage();
-		expect(screen.queryByTestId("briefing-modal")).not.toBeInTheDocument();
+		expect(screen.queryByTestId("recap-modal")).not.toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: /recap/i }));
-		const modal = screen.getByTestId("briefing-modal");
+		const modal = screen.getByTestId("recap-modal");
 		expect(modal).toBeInTheDocument();
 		expect(modal).toHaveTextContent("view");
-		// Opening the briefing does not navigate.
+		// Opening the recap does not navigate.
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
 

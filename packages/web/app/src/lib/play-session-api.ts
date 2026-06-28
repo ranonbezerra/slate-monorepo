@@ -1,30 +1,30 @@
 import { apiFetch } from "@dl/shared/api";
 import { snakeToCamel } from "@dl/shared/case-convert";
-import type { BriefingPreview, PlaySession, PlaySessionListResponse } from "../types/play-session";
+import type { PlaySession, PlaySessionListResponse, RecapPreview } from "../types/play-session";
 
 // ---------------------------------------------------------------------------
-// Preview briefing (before starting a playSession)
+// Preview recap (before starting a playSession)
 // ---------------------------------------------------------------------------
 
-export type BriefingMode = "quick" | "deep";
+export type RecapMode = "quick" | "deep";
 
-export async function previewBriefing(
+export async function previewRecap(
 	libraryEntryPublicId: string,
 	positionOverride?: string,
-	mode: BriefingMode = "quick",
+	mode: RecapMode = "quick",
 	signal?: AbortSignal,
-): Promise<BriefingPreview> {
+): Promise<RecapPreview> {
 	const body: Record<string, string> = {
 		library_entry_public_id: libraryEntryPublicId,
 		mode,
 	};
 	if (positionOverride) body.position_override = positionOverride;
-	const raw = await apiFetch<unknown>("/v1/play-sessions/preview-briefing", {
+	const raw = await apiFetch<unknown>("/v1/play-sessions/preview-recap", {
 		method: "POST",
 		body: JSON.stringify(body),
 		signal,
 	});
-	return snakeToCamel<BriefingPreview>(raw);
+	return snakeToCamel<RecapPreview>(raw);
 }
 
 // ---------------------------------------------------------------------------
@@ -34,7 +34,7 @@ export async function previewBriefing(
 export async function submitRetroactiveDebrief(
 	libraryEntryPublicId: string,
 	debriefText: string,
-): Promise<BriefingPreview> {
+): Promise<RecapPreview> {
 	const raw = await apiFetch<unknown>("/v1/play-sessions/retroactive-debrief", {
 		method: "POST",
 		body: JSON.stringify({
@@ -42,7 +42,7 @@ export async function submitRetroactiveDebrief(
 			debrief_text: debriefText,
 		}),
 	});
-	return snakeToCamel<BriefingPreview>(raw);
+	return snakeToCamel<RecapPreview>(raw);
 }
 
 // ---------------------------------------------------------------------------
@@ -51,12 +51,12 @@ export async function submitRetroactiveDebrief(
 
 export async function startPlaySession(
 	libraryEntryPublicId: string,
-	briefingText?: string,
-	skipBriefing?: boolean,
+	recapText?: string,
+	skipRecap?: boolean,
 ): Promise<PlaySession> {
 	const body: Record<string, unknown> = { library_entry_public_id: libraryEntryPublicId };
-	if (briefingText) body.briefing_text = briefingText;
-	if (skipBriefing) body.skip_briefing = true;
+	if (recapText) body.recap_text = recapText;
+	if (skipRecap) body.skip_recap = true;
 	const raw = await apiFetch<unknown>("/v1/play-sessions", {
 		method: "POST",
 		body: JSON.stringify(body),
@@ -130,15 +130,15 @@ export async function endPlaySession(
 }
 
 // ---------------------------------------------------------------------------
-// Regenerate briefing
+// Regenerate recap
 // ---------------------------------------------------------------------------
 
-export async function regenerateBriefing(
+export async function regenerateRecap(
 	publicId: string,
 	currentPosition?: string,
 ): Promise<PlaySession> {
 	const body = currentPosition ? JSON.stringify({ current_position: currentPosition }) : undefined;
-	const raw = await apiFetch<unknown>(`/v1/play-sessions/${publicId}/briefing/regenerate`, {
+	const raw = await apiFetch<unknown>(`/v1/play-sessions/${publicId}/recap/regenerate`, {
 		method: "POST",
 		body,
 	});

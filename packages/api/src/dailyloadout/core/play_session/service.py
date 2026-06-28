@@ -1,4 +1,4 @@
-"""PlaySession service: lifecycle management, briefing, and debrief orchestration."""
+"""PlaySession service: lifecycle management, recap, and debrief orchestration."""
 
 from __future__ import annotations
 
@@ -10,14 +10,14 @@ from fastapi import HTTPException, status
 from dailyloadout.config import Settings
 from dailyloadout.config import settings as default_settings
 from dailyloadout.core.cache.invalidation import invalidate_user_stats
-from dailyloadout.core.play_session.briefing import (
-    BriefingMode,
+from dailyloadout.core.play_session.recap import (
+    RecapMode,
     build_preview,
-    generate_briefing,
-    generate_briefing_for_mode,
+    generate_recap,
+    generate_recap_for_mode,
 )
 from dailyloadout.core.play_session.start import create_play_session_for_entry
-from dailyloadout.infrastructure.agent.base import AbstractBriefingAgent
+from dailyloadout.infrastructure.agent.base import AbstractRecapAgent
 from dailyloadout.infrastructure.db.models import LibraryEntry, PlaySession
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
 from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
@@ -27,14 +27,14 @@ logger = structlog.get_logger()
 
 
 class PlaySessionService:
-    """Orchestrates play_session lifecycle: start, briefing, debrief, and end."""
+    """Orchestrates play_session lifecycle: start, recap, debrief, and end."""
 
     def __init__(
         self,
         play_session_repo: PlaySessionRepository,
         library_repo: LibraryRepository,
         llm_client: AbstractLLMClient,
-        agent: AbstractBriefingAgent | None = None,
+        agent: AbstractRecapAgent | None = None,
         settings: Settings | None = None,
     ) -> None:
         self._play_session_repo = play_session_repo
@@ -65,20 +65,20 @@ class PlaySessionService:
         self,
         user_id: int,
         library_entry_public_id: UUID,
-        briefing_text: str | None = None,
-        mode: BriefingMode = "quick",
-        skip_briefing: bool = False,
+        recap_text: str | None = None,
+        mode: RecapMode = "quick",
+        skip_recap: bool = False,
     ) -> PlaySession:
         """Start a new play_session for a library entry.
 
-        If *briefing_text* is provided, it's used as-is. If *skip_briefing* is
-        set, the play_session starts with no briefing at all (the "just play" path).
-        Otherwise a briefing is generated in *mode* (quick or deep).
+        If *recap_text* is provided, it's used as-is. If *skip_recap* is
+        set, the play_session starts with no recap at all (the "just play" path).
+        Otherwise a recap is generated in *mode* (quick or deep).
         """
         entry = await self._load_startable_entry(user_id, library_entry_public_id)
 
-        if briefing_text is None and not skip_briefing:
-            briefing_text = await generate_briefing_for_mode(
+        if recap_text is None and not skip_recap:
+            recap_text = await generate_recap_for_mode(
                 self._play_session_repo,
                 self._library_repo,
                 self._llm_client,
@@ -93,19 +93,19 @@ class PlaySessionService:
             library_repo=self._library_repo,
             user_id=user_id,
             entry=entry,
-            briefing_text=briefing_text,
+            recap_text=recap_text,
         )
 
-    # -- Preview briefing ------------------------------------------------
+    # -- Preview recap ------------------------------------------------
 
-    async def preview_briefing(
+    async def preview_recap(
         self,
         user_id: int,
         library_entry_public_id: UUID,
         position_override: str | None = None,
-        mode: BriefingMode = "quick",
+        mode: RecapMode = "quick",
     ) -> dict[str, object]:
-        """Preview a briefing (quick or deep) without creating a play_session."""
+        """Preview a recap (quick or deep) without creating a play_session."""
         entry = await self._load_startable_entry(user_id, library_entry_public_id)
         return await build_preview(
             self._play_session_repo,
@@ -129,7 +129,7 @@ class PlaySessionService:
         """Record a debrief for a play session that wasn't tracked.
 
         Creates a pre-ended play_session with ``play_session_type="retroactive"``,
-        runs LLM extraction synchronously, and returns a fresh briefing
+        runs LLM extraction synchronously, and returns a fresh recap
         preview.
         """
         entry = await self._library_repo.get_by_public_id(library_entry_public_id, user_id)
@@ -263,15 +263,15 @@ class PlaySessionService:
         await invalidate_user_stats(user_id)
         return await self.get_play_session(user_id, play_session_public_id)
 
-    # -- Regenerate briefing ---------------------------------------------
+    # -- Regenerate recap ---------------------------------------------
 
-    async def regenerate_briefing(
+    async def regenerate_recap(
         self,
         user_id: int,
         play_session_public_id: UUID,
         position_override: str | None = None,
     ) -> PlaySession:
-        """Regenerate the briefing for an active play_session.
+        """Regenerate the recap for an active play_session.
 
         If *position_override* is provided, it replaces the stored session
         context for suggestion generation.
@@ -280,11 +280,11 @@ class PlaySessionService:
         if play_session.ended_at is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Cannot regenerate briefing for an ended play_session",
+                detail="Cannot regenerate recap for an ended play_session",
             )
 
         entry = play_session.library_entry
-        briefing_text = await generate_briefing(
+        recap_text = await generate_recap(
             self._play_session_repo,
             self._library_repo,
             self._llm_client,
@@ -293,7 +293,7 @@ class PlaySessionService:
             entry.play_session_next_action,
             position_override=position_override,
         )
-        if briefing_text:
-            await self._play_session_repo.set_briefing(play_session.id, briefing_text)
+        if recap_text:
+            await self._play_session_repo.set_recap(play_session.id, recap_text)
 
         return await self.get_play_session(user_id, play_session_public_id)

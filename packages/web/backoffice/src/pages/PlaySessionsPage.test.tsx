@@ -39,7 +39,7 @@ function detail(over: Partial<AdminPlaySessionDetail> = {}): AdminPlaySessionDet
 	return {
 		...playSession(),
 		platformLabel: "PC",
-		briefingText: "Beat the boss",
+		recapText: "Beat the boss",
 		debriefText: null,
 		hasExtractedState: false,
 		...over,

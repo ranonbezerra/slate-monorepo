@@ -1,4 +1,4 @@
-"""Port for the deep-research briefing agent."""
+"""Port for the deep-research recap agent."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from .graph.state import PlaySessionContext
 
 @dataclass
 class DeepBriefRequest:
-    """Input to a deep briefing run."""
+    """Input to a deep recap run."""
 
     context: PlaySessionContext
     thread_id: str
@@ -18,17 +18,17 @@ class DeepBriefRequest:
 
 @dataclass
 class BriefResult:
-    """Output of a deep briefing run."""
+    """Output of a deep recap run."""
 
     text: str
     source: str  # "deep_research" | "quick_fallback"
     suspicious: bool
 
 
-class AbstractBriefingAgent(ABC):
-    """Contract for agents that produce a web-grounded play_session briefing."""
+class AbstractRecapAgent(ABC):
+    """Contract for agents that produce a web-grounded play_session recap."""
 
     @abstractmethod
     async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
-        """Produce a deep, spoiler-safe briefing for the given context."""
+        """Produce a deep, spoiler-safe recap for the given context."""
         ...

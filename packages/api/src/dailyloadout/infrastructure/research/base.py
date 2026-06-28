@@ -1,4 +1,4 @@
-"""Base classes for web research clients used by the deep briefing agent."""
+"""Base classes for web research clients used by the deep recap agent."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ class AbstractResearchClient(ABC):
         ...
 
     async def fetch(self, url: str) -> str:
-        """Return cleaned page text for *url*, for richer briefing grounding.
+        """Return cleaned page text for *url*, for richer recap grounding.
 
         Optional capability: the default returns an empty string (snippets-only
         grounding). Providers that can scrape override this.

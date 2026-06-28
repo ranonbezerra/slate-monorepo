@@ -1,7 +1,7 @@
 import 'package:app/core/library/library_models.dart';
 import 'package:app/core/play_session/play_session_models.dart';
 import 'package:app/features/play_session/bloc/play_session_bloc.dart';
-import 'package:app/features/play_session/view/play_session_briefing_page.dart';
+import 'package:app/features/play_session/view/play_session_recap_page.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,26 +26,24 @@ final _sampleLibraryEntry = LibraryEntry(
   updatedAt: DateTime(2024),
 );
 
-final _samplePreview = BriefingPreview(
+final _samplePreview = RecapPreview(
   libraryEntry: _sampleLibraryEntry,
-  briefingText: 'Welcome back to Hallownest!',
+  recapText: 'Welcome back to Hallownest!',
 );
 
-final _samplePreviewNoBriefing = BriefingPreview(
-  libraryEntry: _sampleLibraryEntry,
-);
+final _samplePreviewNoRecap = RecapPreview(libraryEntry: _sampleLibraryEntry);
 
 final _samplePlaySession = PlaySession(
   publicId: 'playSession-1',
   libraryEntry: _sampleLibraryEntry,
   playSessionType: 'regular',
-  briefingText: 'Continue your journey through the caverns.',
+  recapText: 'Continue your journey through the caverns.',
   startedAt: DateTime(2024, 6, 15, 10),
   createdAt: DateTime(2024, 6, 15, 10),
   updatedAt: DateTime(2024, 6, 15, 10),
 );
 
-final _samplePlaySessionNoBriefing = PlaySession(
+final _samplePlaySessionNoRecap = PlaySession(
   publicId: 'playSession-2',
   libraryEntry: _sampleLibraryEntry,
   playSessionType: 'regular',
@@ -69,7 +67,7 @@ void main() {
     return BlocProvider<PlaySessionBloc>.value(
       value: playSessionBloc,
       child: const MaterialApp(
-        home: PlaySessionBriefingPage(libraryEntryPublicId: 'entry-1'),
+        home: PlaySessionRecapPage(libraryEntryPublicId: 'entry-1'),
       ),
     );
   }
@@ -78,12 +76,12 @@ void main() {
     return BlocProvider<PlaySessionBloc>.value(
       value: playSessionBloc,
       child: const MaterialApp(
-        home: PlaySessionBriefingPage(playSessionPublicId: 'playSession-1'),
+        home: PlaySessionRecapPage(playSessionPublicId: 'playSession-1'),
       ),
     );
   }
 
-  group('PlaySessionBriefingPage', () {
+  group('PlaySessionRecapPage', () {
     testWidgets('shows AppBar with Recap title', (tester) async {
       when(() => playSessionBloc.state).thenReturn(const PlaySessionInitial());
 
@@ -128,11 +126,11 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('preview mode shows game title and briefing text '
-        'when BriefingPreviewLoaded', (tester) async {
+    testWidgets('preview mode shows game title and recap text '
+        'when RecapPreviewLoaded', (tester) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
@@ -143,19 +141,19 @@ void main() {
     testWidgets('preview mode shows platform label', (tester) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
       expect(find.text('PC'), findsOneWidget);
     });
 
-    testWidgets('preview briefing shows Got it and Update, no Cancel', (
+    testWidgets('preview recap shows Got it and Update, no Cancel', (
       tester,
     ) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
@@ -170,11 +168,11 @@ void main() {
       expect(find.widgetWithText(OutlinedButton, 'Cancel'), findsNothing);
     });
 
-    testWidgets('preview briefing merges the fixers behind Update '
+    testWidgets('preview recap merges the fixers behind Update '
         '(no direct fix buttons)', (tester) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
@@ -182,7 +180,7 @@ void main() {
       expect(find.text("That's not right"), findsNothing);
     });
 
-    testWidgets('view mode shows briefing from ActivePlaySessionLoaded', (
+    testWidgets('view mode shows recap from ActivePlaySessionLoaded', (
       tester,
     ) async {
       when(
@@ -223,21 +221,21 @@ void main() {
       expect(find.text('I played without registering'), findsNothing);
     });
 
-    testWidgets('shows italic no briefing text when briefingText is null '
+    testWidgets('shows italic no recap text when recapText is null '
         '(preview mode)', (tester) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreviewNoBriefing));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreviewNoRecap));
 
       await tester.pumpWidget(buildPreviewSubject());
 
       expect(find.textContaining('No recap available'), findsOneWidget);
     });
 
-    testWidgets('shows italic no briefing text when briefingText is null '
+    testWidgets('shows italic no recap text when recapText is null '
         '(view mode)', (tester) async {
       when(() => playSessionBloc.state).thenReturn(
-        ActivePlaySessionLoaded(playSession: _samplePlaySessionNoBriefing),
+        ActivePlaySessionLoaded(playSession: _samplePlaySessionNoRecap),
       );
 
       await tester.pumpWidget(buildViewSubject());
@@ -250,7 +248,7 @@ void main() {
     ) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
@@ -277,7 +275,7 @@ void main() {
     ) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
@@ -299,12 +297,12 @@ void main() {
       );
     });
 
-    testWidgets('Back from the correction step returns to the briefing', (
+    testWidgets('Back from the correction step returns to the recap', (
       tester,
     ) async {
       when(
         () => playSessionBloc.state,
-      ).thenReturn(BriefingPreviewLoaded(preview: _samplePreview));
+      ).thenReturn(RecapPreviewLoaded(preview: _samplePreview));
 
       await tester.pumpWidget(buildPreviewSubject());
 
@@ -315,7 +313,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Back: correct → update, then update → briefing.
+      // Back: correct → update, then update → recap.
       await tester.tap(find.widgetWithText(TextButton, 'Back'));
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(TextButton, 'Back'));
@@ -333,7 +331,7 @@ void main() {
         Stream<PlaySessionState>.fromIterable([
           const PlaySessionError(message: 'Something went wrong'),
         ]),
-        initialState: BriefingPreviewLoaded(preview: _samplePreview),
+        initialState: RecapPreviewLoaded(preview: _samplePreview),
       );
 
       await tester.pumpWidget(buildPreviewSubject());
@@ -378,7 +376,7 @@ void main() {
     // ---------------------------------------------------------------
     // Deep recap (mode choice + progress + cancel)
     // ---------------------------------------------------------------
-    group('deep briefing', () {
+    group('deep recap', () {
       testWidgets('view mode does NOT show the mode-choice cards', (
         tester,
       ) async {
@@ -392,7 +390,7 @@ void main() {
         expect(find.text('Deep recap (web)'), findsNothing);
       });
 
-      testWidgets('choosing Quick dispatches a quick PreviewBriefing', (
+      testWidgets('choosing Quick dispatches a quick PreviewRecap', (
         tester,
       ) async {
         when(
@@ -405,7 +403,7 @@ void main() {
 
         verify(
           () => playSessionBloc.add(
-            const PreviewBriefing(
+            const PreviewRecap(
               libraryEntryPublicId: 'entry-1',
               // mode defaults to 'quick'
             ),
@@ -413,29 +411,28 @@ void main() {
         ).called(1);
       });
 
-      testWidgets(
-        'choosing Just play starts the playSession with no briefing',
-        (tester) async {
-          when(
-            () => playSessionBloc.state,
-          ).thenReturn(const PlaySessionInitial());
+      testWidgets('choosing Just play starts the playSession with no recap', (
+        tester,
+      ) async {
+        when(
+          () => playSessionBloc.state,
+        ).thenReturn(const PlaySessionInitial());
 
-          await tester.pumpWidget(buildPreviewSubject());
-          await tester.tap(find.text('Just play'));
-          await tester.pump();
+        await tester.pumpWidget(buildPreviewSubject());
+        await tester.tap(find.text('Just play'));
+        await tester.pump();
 
-          verify(
-            () => playSessionBloc.add(
-              const StartPlaySession(
-                libraryEntryPublicId: 'entry-1',
-                skipBriefing: true,
-              ),
+        verify(
+          () => playSessionBloc.add(
+            const StartPlaySession(
+              libraryEntryPublicId: 'entry-1',
+              skipRecap: true,
             ),
-          ).called(1);
-        },
-      );
+          ),
+        ).called(1);
+      });
 
-      testWidgets('choosing Deep dispatches a deep PreviewBriefing', (
+      testWidgets('choosing Deep dispatches a deep PreviewRecap', (
         tester,
       ) async {
         when(
@@ -448,20 +445,15 @@ void main() {
 
         verify(
           () => playSessionBloc.add(
-            const PreviewBriefing(
-              libraryEntryPublicId: 'entry-1',
-              mode: 'deep',
-            ),
+            const PreviewRecap(libraryEntryPublicId: 'entry-1', mode: 'deep'),
           ),
         ).called(1);
       });
 
-      testWidgets('DeepBriefingLoading shows progress and a Cancel button', (
+      testWidgets('DeepRecapLoading shows progress and a Cancel button', (
         tester,
       ) async {
-        when(
-          () => playSessionBloc.state,
-        ).thenReturn(const DeepBriefingLoading());
+        when(() => playSessionBloc.state).thenReturn(const DeepRecapLoading());
 
         await tester.pumpWidget(buildPreviewSubject());
 
@@ -470,12 +462,10 @@ void main() {
         expect(find.widgetWithText(OutlinedButton, 'Cancel'), findsOneWidget);
       });
 
-      testWidgets('Cancel during deep dispatches CancelDeepBriefing', (
+      testWidgets('Cancel during deep dispatches CancelDeepRecap', (
         tester,
       ) async {
-        when(
-          () => playSessionBloc.state,
-        ).thenReturn(const DeepBriefingLoading());
+        when(() => playSessionBloc.state).thenReturn(const DeepRecapLoading());
 
         await tester.pumpWidget(buildPreviewSubject());
         await tester.tap(find.widgetWithText(OutlinedButton, 'Cancel'));
@@ -483,7 +473,7 @@ void main() {
 
         verify(
           () => playSessionBloc.add(
-            const CancelDeepBriefing(libraryEntryPublicId: 'entry-1'),
+            const CancelDeepRecap(libraryEntryPublicId: 'entry-1'),
           ),
         ).called(1);
       });

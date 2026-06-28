@@ -1,16 +1,16 @@
 import { Box, Button, Loader, Modal, Stack, Text } from "@mantine/core";
 import { IconBrain } from "@tabler/icons-react";
 
-interface AiBriefingOverlayProps {
+interface AiRecapOverlayProps {
 	opened: boolean;
 	gameTitle?: string;
-	/** When set, the overlay describes a slower web-researched (deep) briefing. */
+	/** When set, the overlay describes a slower web-researched (deep) recap. */
 	deep?: boolean;
 	/** When set, a Cancel button is shown that aborts the in-flight request. */
 	onCancel?: () => void;
 }
 
-export function AiBriefingOverlay({ opened, gameTitle, deep, onCancel }: AiBriefingOverlayProps) {
+export function AiRecapOverlay({ opened, gameTitle, deep, onCancel }: AiRecapOverlayProps) {
 	return (
 		<Modal
 			opened={opened}

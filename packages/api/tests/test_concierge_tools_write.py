@@ -13,7 +13,7 @@ from uuid import uuid4
 from dailyloadout.config import settings
 from dailyloadout.infrastructure.agent.concierge.tools_write import (
     build_concierge_write_tools,
-    generate_briefing,
+    generate_recap,
     set_status,
     start_play_session,
     submit_retroactive_debrief,
@@ -70,10 +70,10 @@ async def test_start_play_session_creates_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         active = await PlaySessionRepository(session).get_active_for_user(user_id)
         assert active is not None
-        assert active.briefing_text is None
+        assert active.recap_text is None
 
 
-async def test_start_play_session_with_quick_briefing() -> None:
+async def test_start_play_session_with_quick_recap() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, _ = await _seed(session)
         await session.commit()
@@ -87,15 +87,15 @@ async def test_start_play_session_with_quick_briefing() -> None:
             settings,
             user_id,
             library_entry_public_id=public_id,
-            briefing="quick",
+            recap="quick",
         )
-        assert "Briefing:" in out
+        assert "Recap:" in out
         await session.commit()
 
     async with _TestSessionFactory() as session:
         active = await PlaySessionRepository(session).get_active_for_user(user_id)
         assert active is not None
-        assert active.briefing_text
+        assert active.recap_text
 
 
 async def test_start_play_session_unknown_game() -> None:
@@ -146,16 +146,16 @@ async def test_start_play_session_rejects_second_active() -> None:
         assert "already an active play_session" in out
 
 
-# -- generate_briefing ----------------------------------------------------------
+# -- generate_recap ----------------------------------------------------------
 
 
-async def test_generate_briefing_needs_active_play_session() -> None:
+async def test_generate_recap_needs_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         user_id, _, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await generate_briefing(
+        out = await generate_recap(
             LibraryRepository(session),
             PlaySessionRepository(session),
             DummyLLMClient(),
@@ -166,7 +166,7 @@ async def test_generate_briefing_needs_active_play_session() -> None:
         assert "no active play_session" in out.lower()
 
 
-async def test_generate_briefing_persists_on_active_play_session() -> None:
+async def test_generate_recap_persists_on_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, _ = await _seed(session)
         await session.commit()
@@ -184,7 +184,7 @@ async def test_generate_briefing_persists_on_active_play_session() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await generate_briefing(
+        out = await generate_recap(
             LibraryRepository(session),
             PlaySessionRepository(session),
             DummyLLMClient(),
@@ -198,10 +198,10 @@ async def test_generate_briefing_persists_on_active_play_session() -> None:
     async with _TestSessionFactory() as session:
         active = await PlaySessionRepository(session).get_active_for_user(user_id)
         assert active is not None
-        assert active.briefing_text
+        assert active.recap_text
 
 
-async def test_generate_briefing_clamps_deep_to_quick() -> None:
+async def test_generate_recap_clamps_deep_to_quick() -> None:
     """A 'deep' mode request must NOT trigger the deep-research agent."""
 
     class _ExplodingAgent:
@@ -227,7 +227,7 @@ async def test_generate_briefing_clamps_deep_to_quick() -> None:
     async with _TestSessionFactory() as session:
         # Even with mode='deep' and a (would-be) deep agent available, the quick
         # path runs — the agent is never called.
-        out = await generate_briefing(
+        out = await generate_recap(
             LibraryRepository(session),
             PlaySessionRepository(session),
             DummyLLMClient(),
@@ -360,7 +360,7 @@ async def test_build_concierge_write_tools_shapes() -> None:
         names = {t.name for t in tools}
         assert names == {
             "start_play_session",
-            "generate_briefing",
+            "generate_recap",
             "submit_retroactive_debrief",
             "set_status",
         }

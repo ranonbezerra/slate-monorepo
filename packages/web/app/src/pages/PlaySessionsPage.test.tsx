@@ -397,7 +397,7 @@ describe("PlaySessionsPage", () => {
 		renderPage();
 
 		expect(screen.queryByRole("button", { name: "End session" })).not.toBeInTheDocument();
-		expect(screen.queryByRole("button", { name: "Briefing" })).not.toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Recap" })).not.toBeInTheDocument();
 	});
 
 	it("renders DataTable column headers", () => {

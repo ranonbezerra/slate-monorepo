@@ -16,7 +16,7 @@ from typing import Any
 # Keep the trailing separator out of the constant; builders add it.
 NS_IGDB = "igdb"
 NS_STATS = "stats"
-NS_BRIEFING = "briefing"
+NS_RECAP = "recap"
 NS_LLM = "llm"
 NS_RESEARCH = "research"
 NS_REF = "ref"
@@ -59,14 +59,14 @@ def stats_namespace(user_id: int) -> str:
 # ── Content-addressed keys (no user dimension) ───────────────────────────
 
 
-def briefing_key(mode: str, context: Any) -> str:
-    """Key for a deep briefing, addressed by its grounding context.
+def recap_key(mode: str, context: Any) -> str:
+    """Key for a deep recap, addressed by its grounding context.
 
     The context *includes* the session's debriefs, so a new debrief changes the
     digest and naturally yields a fresh key — "bust on new debrief" falls out of
     content-addressing, no explicit invalidation needed.
     """
-    return f"{NS_BRIEFING}:{mode}:{digest(context)}"
+    return f"{NS_RECAP}:{mode}:{digest(context)}"
 
 
 def research_key(query: str, limit: int) -> str:

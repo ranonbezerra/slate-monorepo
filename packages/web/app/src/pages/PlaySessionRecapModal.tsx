@@ -1,20 +1,20 @@
 import { Button, Group, Modal, Stack, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRef, useState } from "react";
-import { AiBriefingOverlay } from "../components/AiBriefingOverlay";
+import { AiRecapOverlay } from "../components/AiRecapOverlay";
 import {
-	usePreviewBriefing,
-	useRegenerateBriefing,
+	usePreviewRecap,
+	useRegenerateRecap,
 	useRetroactiveDebrief,
 	useStartPlaySession,
 } from "../hooks/usePlaySession";
-import type { BriefingMode } from "../lib/play-session-api";
+import type { RecapMode } from "../lib/play-session-api";
 import type { LibraryEntry } from "../types/library";
 import type { PlaySession } from "../types/play-session";
 
 // ---------------------------------------------------------------------------
-// Preview mode: user picks a briefing mode, then reviews it before starting.
-// The briefing is fetched on demand (after the mode choice), not pre-fetched.
+// Preview mode: user picks a recap mode, then reviews it before starting.
+// The recap is fetched on demand (after the mode choice), not pre-fetched.
 // ---------------------------------------------------------------------------
 
 interface PreviewModeProps {
@@ -26,7 +26,7 @@ interface PreviewModeProps {
 }
 
 // ---------------------------------------------------------------------------
-// View mode: user is viewing a briefing of an already-started playSession
+// View mode: user is viewing a recap of an already-started playSession
 // ---------------------------------------------------------------------------
 
 interface ViewModeProps {
@@ -36,12 +36,12 @@ interface ViewModeProps {
 	onPlaySessionUpdated?: (playSession: PlaySession) => void;
 }
 
-type PlaySessionBriefingModalProps = PreviewModeProps | ViewModeProps;
+type PlaySessionRecapModalProps = PreviewModeProps | ViewModeProps;
 
 // "chooseMode" → pick quick vs deep; "update" → pick which fix to apply.
-type ModalStep = "chooseMode" | "briefing" | "update" | "correct" | "retroactive";
+type ModalStep = "chooseMode" | "recap" | "update" | "correct" | "retroactive";
 
-export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
+export function PlaySessionRecapModal(props: PlaySessionRecapModalProps) {
 	const isPreview = props.mode === "preview";
 
 	const gameTitle = isPreview
@@ -50,23 +50,23 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 	const platformLabel = isPreview
 		? props.libraryEntry.platform.label
 		: props.playSession.libraryEntry.platform.label;
-	// In view mode the briefing is already on the playSession; in preview it's fetched.
-	const baseBriefing = isPreview ? null : props.playSession.briefingText;
+	// In view mode the recap is already on the playSession; in preview it's fetched.
+	const baseRecap = isPreview ? null : props.playSession.recapText;
 
-	const [step, setStep] = useState<ModalStep>(isPreview ? "chooseMode" : "briefing");
+	const [step, setStep] = useState<ModalStep>(isPreview ? "chooseMode" : "recap");
 	const [correction, setCorrection] = useState("");
 	const [retroactiveText, setRetroactiveText] = useState("");
-	const [currentBriefing, setCurrentBriefing] = useState<string | null>(null);
+	const [currentRecap, setCurrentRecap] = useState<string | null>(null);
 	const [deepLoading, setDeepLoading] = useState(false);
 	const deepAbortRef = useRef<AbortController | null>(null);
 
 	// Preview mode hooks
-	const previewMutation = usePreviewBriefing();
+	const previewMutation = usePreviewRecap();
 	const startPlaySession = useStartPlaySession();
 	const retroactiveMutation = useRetroactiveDebrief();
 
 	// View mode hook
-	const regenerate = useRegenerateBriefing();
+	const regenerate = useRegenerateRecap();
 
 	// Reset state when the modal content changes.
 	const contentKey = isPreview
@@ -75,24 +75,24 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 	const [prevKey, setPrevKey] = useState<string | null>(null);
 	if (contentKey !== prevKey) {
 		setPrevKey(contentKey);
-		setStep(isPreview ? "chooseMode" : "briefing");
+		setStep(isPreview ? "chooseMode" : "recap");
 		setCorrection("");
 		setRetroactiveText("");
-		setCurrentBriefing(null);
+		setCurrentRecap(null);
 		setDeepLoading(false);
 		deepAbortRef.current?.abort();
 		deepAbortRef.current = null;
 	}
 
-	const displayBriefing = currentBriefing ?? baseBriefing;
+	const displayRecap = currentRecap ?? baseRecap;
 
 	// -- Mode choice ----------------------------------------------------------
 
-	const handleChooseMode = async (next: BriefingMode) => {
+	const handleChooseMode = async (next: RecapMode) => {
 		if (!isPreview) return;
 		deepAbortRef.current?.abort();
 		deepAbortRef.current = null;
-		setStep("briefing");
+		setStep("recap");
 
 		if (next === "quick") {
 			setDeepLoading(false);
@@ -101,7 +101,7 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 					libraryEntryPublicId: props.libraryEntryPublicId,
 					mode: "quick",
 				});
-				setCurrentBriefing(updated.briefingText);
+				setCurrentRecap(updated.recapText);
 			} catch (err) {
 				notifications.show({
 					title: "Couldn't load recap",
@@ -121,7 +121,7 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 				mode: "deep",
 				signal: controller.signal,
 			});
-			if (!controller.signal.aborted) setCurrentBriefing(updated.briefingText);
+			if (!controller.signal.aborted) setCurrentRecap(updated.recapText);
 		} catch (err) {
 			if (controller.signal.aborted) return; // user cancelled — stay silent
 			notifications.show({
@@ -144,7 +144,7 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 		setStep("chooseMode"); // nothing loaded yet — let them pick again
 	};
 
-	// -- Briefing corrections -------------------------------------------------
+	// -- Recap corrections -------------------------------------------------
 
 	const handleCorrection = async () => {
 		if (!correction.trim()) return;
@@ -154,15 +154,15 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 					libraryEntryPublicId: props.libraryEntryPublicId,
 					positionOverride: correction.trim(),
 				});
-				setCurrentBriefing(updated.briefingText);
-				setStep("briefing");
+				setCurrentRecap(updated.recapText);
+				setStep("recap");
 			} else {
 				const updated = await regenerate.mutateAsync({
 					publicId: props.playSession.publicId,
 					currentPosition: correction.trim(),
 				});
 				props.onPlaySessionUpdated?.(updated);
-				setStep("briefing");
+				setStep("recap");
 			}
 		} catch (err) {
 			notifications.show({
@@ -180,9 +180,9 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 				libraryEntryPublicId: props.libraryEntryPublicId,
 				debriefText: retroactiveText.trim(),
 			});
-			setCurrentBriefing(updatedPreview.briefingText);
+			setCurrentRecap(updatedPreview.recapText);
 			setRetroactiveText("");
-			setStep("briefing");
+			setStep("recap");
 			notifications.show({
 				title: "Session recorded",
 				message: "Your unregistered session has been saved. The recap has been updated.",
@@ -202,7 +202,7 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 		try {
 			const playSession = await startPlaySession.mutateAsync({
 				libraryEntryPublicId: props.libraryEntryPublicId,
-				briefingText: displayBriefing ?? undefined,
+				recapText: displayRecap ?? undefined,
 			});
 			props.onConfirm(playSession);
 		} catch (err) {
@@ -214,12 +214,12 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 		}
 	};
 
-	const handleSkipBriefing = async () => {
+	const handleSkipRecap = async () => {
 		if (!isPreview) return;
 		try {
 			const playSession = await startPlaySession.mutateAsync({
 				libraryEntryPublicId: props.libraryEntryPublicId,
-				skipBriefing: true,
+				skipRecap: true,
 			});
 			props.onConfirm(playSession);
 		} catch (err) {
@@ -292,7 +292,7 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 							justify="flex-start"
 							py="md"
 							styles={choiceButtonStyles}
-							onClick={handleSkipBriefing}
+							onClick={handleSkipRecap}
 							loading={startPlaySession.isPending}
 						>
 							<Stack gap={2} align="flex-start">
@@ -317,7 +317,7 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 							maxRows={4}
 						/>
 						<Group justify="flex-end">
-							<Button variant="subtle" onClick={() => setStep(isPreview ? "update" : "briefing")}>
+							<Button variant="subtle" onClick={() => setStep(isPreview ? "update" : "recap")}>
 								Back
 							</Button>
 							<Button
@@ -369,17 +369,17 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 							Log a session I didn't register
 						</Button>
 						<Group justify="flex-end">
-							<Button variant="subtle" onClick={() => setStep("briefing")}>
+							<Button variant="subtle" onClick={() => setStep("recap")}>
 								Back
 							</Button>
 						</Group>
 					</>
 				)}
 
-				{step === "briefing" && (
+				{step === "recap" && (
 					<>
-						{displayBriefing ? (
-							<Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{displayBriefing}</Text>
+						{displayRecap ? (
+							<Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{displayRecap}</Text>
 						) : (
 							<Text c="dimmed" fs="italic">
 								No recap available for this session. This is your first session for this game —
@@ -413,12 +413,12 @@ export function PlaySessionBriefingModal(props: PlaySessionBriefingModalProps) {
 				)}
 			</Stack>
 
-			<AiBriefingOverlay
+			<AiRecapOverlay
 				opened={isRegenerating || retroactiveMutation.isPending}
 				gameTitle={gameTitle}
 			/>
 
-			<AiBriefingOverlay
+			<AiRecapOverlay
 				opened={deepLoading}
 				gameTitle={gameTitle}
 				deep

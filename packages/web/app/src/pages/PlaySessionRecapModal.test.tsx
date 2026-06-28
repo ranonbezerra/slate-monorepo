@@ -59,13 +59,13 @@ vi.mock("@mantine/notifications", () => ({
 	notifications: { show: vi.fn() },
 }));
 
-vi.mock("../components/AiBriefingOverlay", () => ({
-	AiBriefingOverlay: () => null,
+vi.mock("../components/AiRecapOverlay", () => ({
+	AiRecapOverlay: () => null,
 }));
 
 vi.mock("../hooks/usePlaySession", () => ({
-	usePreviewBriefing: vi.fn(),
-	useRegenerateBriefing: vi.fn(),
+	usePreviewRecap: vi.fn(),
+	useRegenerateRecap: vi.fn(),
 	useRetroactiveDebrief: vi.fn(),
 	useStartPlaySession: vi.fn(),
 }));
@@ -76,14 +76,14 @@ vi.mock("../hooks/usePlaySession", () => ({
 
 import { notifications } from "@mantine/notifications";
 import {
-	usePreviewBriefing,
-	useRegenerateBriefing,
+	usePreviewRecap,
+	useRegenerateRecap,
 	useRetroactiveDebrief,
 	useStartPlaySession,
 } from "../hooks/usePlaySession";
 import type { LibraryEntry } from "../types/library";
-import type { BriefingPreview, PlaySession } from "../types/play-session";
-import { PlaySessionBriefingModal } from "./PlaySessionBriefingModal";
+import type { PlaySession, RecapPreview } from "../types/play-session";
+import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
 
 // ---------------------------------------------------------------------------
 // Factories
@@ -115,10 +115,10 @@ function makeEntry(overrides: Partial<LibraryEntry> = {}): LibraryEntry {
 	};
 }
 
-function makePreview(overrides: Partial<BriefingPreview> = {}): BriefingPreview {
+function makePreview(overrides: Partial<RecapPreview> = {}): RecapPreview {
 	return {
 		libraryEntry: makeEntry(),
-		briefingText: QUICK_TEXT,
+		recapText: QUICK_TEXT,
 		lastSessionContext: null,
 		...overrides,
 	};
@@ -129,7 +129,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 		publicId: "playSession-1",
 		libraryEntry: makeEntry(),
 		playSessionType: "regular",
-		briefingText: "Continue exploring the City of Tears. Look for the Soul Master.",
+		recapText: "Continue exploring the City of Tears. Look for the Soul Master.",
 		debriefText: null,
 		extractedState: null,
 		endedVia: null,
@@ -173,7 +173,7 @@ function renderPreviewMode(
 	return render(
 		<MantineProvider>
 			<MemoryRouter>
-				<PlaySessionBriefingModal
+				<PlaySessionRecapModal
 					mode="preview"
 					libraryEntry={libraryEntry}
 					libraryEntryPublicId={overrides.libraryEntryPublicId ?? libraryEntry.publicId}
@@ -192,7 +192,7 @@ function renderViewMode(
 	return render(
 		<MantineProvider>
 			<MemoryRouter>
-				<PlaySessionBriefingModal
+				<PlaySessionRecapModal
 					mode="view"
 					playSession={playSession}
 					onClose={overrides.onClose ?? vi.fn()}
@@ -203,8 +203,8 @@ function renderViewMode(
 	);
 }
 
-// Render preview mode and choose Quick → lands on the briefing step.
-async function renderPreviewBriefing(libraryEntry?: LibraryEntry, overrides?: PreviewOverrides) {
+// Render preview mode and choose Quick → lands on the recap step.
+async function renderPreviewRecap(libraryEntry?: LibraryEntry, overrides?: PreviewOverrides) {
 	const result = renderPreviewMode(libraryEntry, overrides);
 	fireEvent.click(screen.getByText("⚡ Quick recap"));
 	await screen.findByText(QUICK_TEXT);
@@ -237,7 +237,7 @@ beforeEach(() => {
 	mockPreviewMutateAsync.mockResolvedValue(makePreview());
 	mockStartMutateAsync.mockResolvedValue(makePlaySession());
 
-	(usePreviewBriefing as Mock).mockReturnValue({
+	(usePreviewRecap as Mock).mockReturnValue({
 		mutateAsync: mockPreviewMutateAsync,
 		isPending: false,
 	});
@@ -245,7 +245,7 @@ beforeEach(() => {
 		mutateAsync: mockStartMutateAsync,
 		isPending: false,
 	});
-	(useRegenerateBriefing as Mock).mockReturnValue({
+	(useRegenerateRecap as Mock).mockReturnValue({
 		mutateAsync: mockRegenerateMutateAsync,
 		isPending: false,
 	});
@@ -259,16 +259,16 @@ beforeEach(() => {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("PlaySessionBriefingModal", () => {
-	describe("preview mode — choose briefing", () => {
-		it("shows the two briefing-mode buttons and a skip option on open", () => {
+describe("PlaySessionRecapModal", () => {
+	describe("preview mode — choose recap", () => {
+		it("shows the two recap-mode buttons and a skip option on open", () => {
 			renderPreviewMode();
 			expect(screen.getByText("⚡ Quick recap")).toBeInTheDocument();
 			expect(screen.getByText("🔎 Deep recap (web)")).toBeInTheDocument();
 			expect(screen.getByText("▶️ Just play")).toBeInTheDocument();
 		});
 
-		it("'Just play' starts the playSession with no briefing and confirms", async () => {
+		it("'Just play' starts the playSession with no recap and confirms", async () => {
 			const onConfirm = vi.fn();
 			renderPreviewMode(makeEntry(), { onConfirm });
 
@@ -276,10 +276,10 @@ describe("PlaySessionBriefingModal", () => {
 
 			await waitFor(() => {
 				expect(mockStartMutateAsync).toHaveBeenCalledWith(
-					expect.objectContaining({ libraryEntryPublicId: "entry-1", skipBriefing: true }),
+					expect.objectContaining({ libraryEntryPublicId: "entry-1", skipRecap: true }),
 				);
 			});
-			expect(mockPreviewMutateAsync).not.toHaveBeenCalled(); // never generated a briefing
+			expect(mockPreviewMutateAsync).not.toHaveBeenCalled(); // never generated a recap
 			await waitFor(() => expect(onConfirm).toHaveBeenCalled());
 		});
 
@@ -289,12 +289,12 @@ describe("PlaySessionBriefingModal", () => {
 			expect(screen.getByText("PC")).toBeInTheDocument();
 		});
 
-		it("does NOT fetch a briefing until a mode is chosen", () => {
+		it("does NOT fetch a recap until a mode is chosen", () => {
 			renderPreviewMode();
 			expect(mockPreviewMutateAsync).not.toHaveBeenCalled();
 		});
 
-		it("choosing Quick fetches and shows the quick briefing", async () => {
+		it("choosing Quick fetches and shows the quick recap", async () => {
 			renderPreviewMode();
 			fireEvent.click(screen.getByText("⚡ Quick recap"));
 
@@ -306,9 +306,9 @@ describe("PlaySessionBriefingModal", () => {
 			expect(await screen.findByText(QUICK_TEXT)).toBeInTheDocument();
 		});
 
-		it("choosing Deep fetches the deep briefing", async () => {
+		it("choosing Deep fetches the deep recap", async () => {
 			mockPreviewMutateAsync.mockResolvedValueOnce(
-				makePreview({ briefingText: "Web-researched: head north to the next area." }),
+				makePreview({ recapText: "Web-researched: head north to the next area." }),
 			);
 			renderPreviewMode();
 			fireEvent.click(screen.getByText("🔎 Deep recap (web)"));
@@ -323,8 +323,8 @@ describe("PlaySessionBriefingModal", () => {
 			).toBeInTheDocument();
 		});
 
-		it("shows the no-briefing message when the fetched briefing is empty", async () => {
-			mockPreviewMutateAsync.mockResolvedValueOnce(makePreview({ briefingText: null }));
+		it("shows the no-recap message when the fetched recap is empty", async () => {
+			mockPreviewMutateAsync.mockResolvedValueOnce(makePreview({ recapText: null }));
 			renderPreviewMode();
 			fireEvent.click(screen.getByText("⚡ Quick recap"));
 
@@ -332,16 +332,16 @@ describe("PlaySessionBriefingModal", () => {
 		});
 	});
 
-	describe("preview mode — briefing actions", () => {
+	describe("preview mode — recap actions", () => {
 		it("shows 'Got it' and 'Update this recap', and no Cancel", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			expect(screen.getByRole("button", { name: "Got it, let's go" })).toBeInTheDocument();
 			expect(screen.getByRole("button", { name: "Update this recap" })).toBeInTheDocument();
 			expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
 		});
 
 		it("'Update this recap' opens the fix menu with both options", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openUpdate();
 			expect(
 				screen.getByRole("button", { name: "Correct my current position" }),
@@ -353,7 +353,7 @@ describe("PlaySessionBriefingModal", () => {
 	});
 
 	describe("view mode", () => {
-		it("renders the briefing text", () => {
+		it("renders the recap text", () => {
 			renderViewMode();
 			expect(
 				screen.getByText("Continue exploring the City of Tears. Look for the Soul Master."),
@@ -378,8 +378,8 @@ describe("PlaySessionBriefingModal", () => {
 			expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
 		});
 
-		it("shows no briefing message when briefingText is null", () => {
-			renderViewMode(makePlaySession({ briefingText: null }));
+		it("shows no recap message when recapText is null", () => {
+			renderViewMode(makePlaySession({ recapText: null }));
 			expect(screen.getByText(/No recap available/)).toBeInTheDocument();
 		});
 
@@ -395,23 +395,23 @@ describe("PlaySessionBriefingModal", () => {
 
 	describe("correction flow", () => {
 		it("update button is disabled when correction text is empty", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openCorrection();
 			expect(screen.getByRole("button", { name: "Update & regenerate" })).toBeDisabled();
 		});
 
-		it("Back returns through the fix menu to the briefing", async () => {
-			await renderPreviewBriefing();
+		it("Back returns through the fix menu to the recap", async () => {
+			await renderPreviewRecap();
 			openCorrection();
 			expect(screen.queryByText(QUICK_TEXT)).not.toBeInTheDocument();
 
 			fireEvent.click(screen.getByRole("button", { name: "Back" })); // correct → update
-			fireEvent.click(screen.getByRole("button", { name: "Back" })); // update → briefing
+			fireEvent.click(screen.getByRole("button", { name: "Back" })); // update → recap
 			expect(screen.getByText(QUICK_TEXT)).toBeInTheDocument();
 		});
 
 		it("preview: correction calls previewMutation with positionOverride", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openCorrection();
 			fireEvent.change(screen.getByPlaceholderText(/I'm actually in City of Tears/), {
 				target: { value: "I'm in City of Tears" },
@@ -427,7 +427,7 @@ describe("PlaySessionBriefingModal", () => {
 		});
 
 		it("preview: correction error shows notification", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			mockPreviewMutateAsync.mockRejectedValueOnce(new Error("Network failure"));
 			openCorrection();
 			fireEvent.change(screen.getByPlaceholderText(/I'm actually in City of Tears/), {
@@ -447,7 +447,7 @@ describe("PlaySessionBriefingModal", () => {
 		});
 
 		it("preview: correction with non-Error rejection shows fallback message", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			mockPreviewMutateAsync.mockRejectedValueOnce("string error");
 			openCorrection();
 			fireEvent.change(screen.getByPlaceholderText(/I'm actually in City of Tears/), {
@@ -467,7 +467,7 @@ describe("PlaySessionBriefingModal", () => {
 		});
 
 		it("view: correction calls regenerate with publicId and currentPosition", async () => {
-			const updatedPlaySession = makePlaySession({ briefingText: "Regenerated view briefing." });
+			const updatedPlaySession = makePlaySession({ recapText: "Regenerated view recap." });
 			mockRegenerateMutateAsync.mockResolvedValue(updatedPlaySession);
 			const onPlaySessionUpdated = vi.fn();
 
@@ -492,16 +492,16 @@ describe("PlaySessionBriefingModal", () => {
 
 	describe("retroactive flow", () => {
 		it("record button is disabled when retroactive text is empty", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openRetroactive();
 			expect(screen.getByRole("button", { name: "Record session & update recap" })).toBeDisabled();
 		});
 
 		it("preview: retroactive submit calls retroactiveMutation", async () => {
 			mockRetroactiveMutateAsync.mockResolvedValue(
-				makePreview({ briefingText: "Updated after retroactive session." }),
+				makePreview({ recapText: "Updated after retroactive session." }),
 			);
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openRetroactive();
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master and got the Desolate Dive" },
@@ -518,9 +518,9 @@ describe("PlaySessionBriefingModal", () => {
 
 		it("preview: successful retroactive shows success notification", async () => {
 			mockRetroactiveMutateAsync.mockResolvedValue(
-				makePreview({ briefingText: "Updated after retroactive session." }),
+				makePreview({ recapText: "Updated after retroactive session." }),
 			);
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openRetroactive();
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master" },
@@ -539,7 +539,7 @@ describe("PlaySessionBriefingModal", () => {
 
 		it("preview: retroactive error shows error notification", async () => {
 			mockRetroactiveMutateAsync.mockRejectedValue(new Error("Session recording failed"));
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openRetroactive();
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master" },
@@ -559,7 +559,7 @@ describe("PlaySessionBriefingModal", () => {
 
 		it("preview: retroactive with non-Error rejection shows fallback message", async () => {
 			mockRetroactiveMutateAsync.mockRejectedValue({ code: 500 });
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			openRetroactive();
 			fireEvent.change(screen.getByPlaceholderText(/I played for a couple hours/), {
 				target: { value: "I beat the Soul Master" },
@@ -579,18 +579,18 @@ describe("PlaySessionBriefingModal", () => {
 	});
 
 	describe("confirm start", () => {
-		it("preview: 'Got it, let's go' calls startPlaySession with the briefing", async () => {
+		it("preview: 'Got it, let's go' calls startPlaySession with the recap", async () => {
 			const onConfirm = vi.fn();
 			const playSession = makePlaySession();
 			mockStartMutateAsync.mockResolvedValue(playSession);
 
-			await renderPreviewBriefing(makeEntry(), { onConfirm });
+			await renderPreviewRecap(makeEntry(), { onConfirm });
 			fireEvent.click(screen.getByRole("button", { name: "Got it, let's go" }));
 
 			await waitFor(() => {
 				expect(mockStartMutateAsync).toHaveBeenCalledWith({
 					libraryEntryPublicId: "entry-1",
-					briefingText: QUICK_TEXT,
+					recapText: QUICK_TEXT,
 				});
 			});
 			await waitFor(() => {
@@ -599,7 +599,7 @@ describe("PlaySessionBriefingModal", () => {
 		});
 
 		it("preview: startPlaySession error shows notification", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			mockStartMutateAsync.mockRejectedValueOnce(new Error("Server error"));
 			fireEvent.click(screen.getByRole("button", { name: "Got it, let's go" }));
 
@@ -615,7 +615,7 @@ describe("PlaySessionBriefingModal", () => {
 		});
 
 		it("preview: startPlaySession with non-Error rejection shows fallback message", async () => {
-			await renderPreviewBriefing();
+			await renderPreviewRecap();
 			mockStartMutateAsync.mockRejectedValueOnce(42);
 			fireEvent.click(screen.getByRole("button", { name: "Got it, let's go" }));
 
@@ -630,8 +630,8 @@ describe("PlaySessionBriefingModal", () => {
 			});
 		});
 
-		it("preview: null briefing passes undefined to startPlaySession", async () => {
-			mockPreviewMutateAsync.mockResolvedValueOnce(makePreview({ briefingText: null }));
+		it("preview: null recap passes undefined to startPlaySession", async () => {
+			mockPreviewMutateAsync.mockResolvedValueOnce(makePreview({ recapText: null }));
 			renderPreviewMode();
 			fireEvent.click(screen.getByText("⚡ Quick recap"));
 			await screen.findByText(/No recap available/);
@@ -640,7 +640,7 @@ describe("PlaySessionBriefingModal", () => {
 			await waitFor(() => {
 				expect(mockStartMutateAsync).toHaveBeenCalledWith({
 					libraryEntryPublicId: "entry-1",
-					briefingText: undefined,
+					recapText: undefined,
 				});
 			});
 		});
@@ -651,7 +651,7 @@ describe("PlaySessionBriefingModal", () => {
 			const { rerender } = render(
 				<MantineProvider>
 					<MemoryRouter>
-						<PlaySessionBriefingModal
+						<PlaySessionRecapModal
 							mode="preview"
 							libraryEntry={makeEntry()}
 							libraryEntryPublicId="entry-1"
@@ -670,7 +670,7 @@ describe("PlaySessionBriefingModal", () => {
 			rerender(
 				<MantineProvider>
 					<MemoryRouter>
-						<PlaySessionBriefingModal
+						<PlaySessionRecapModal
 							mode="preview"
 							libraryEntry={makeEntry({ publicId: "entry-2" })}
 							libraryEntryPublicId="entry-2"

@@ -27,8 +27,8 @@ class Settings(BaseSettings):
     cache_enabled: bool = True
     # Per-user stats cached briefly, bust on play_session start/end/debrief (Epic 18).
     stats_cache_ttl_seconds: int = 300
-    # Deep briefings are content-addressed on the session context (Epic 18). 7d.
-    briefing_cache_ttl_seconds: int = 7 * 24 * 3600
+    # Deep recaps are content-addressed on the session context (Epic 18). 7d.
+    recap_cache_ttl_seconds: int = 7 * 24 * 3600
     research_cache_ttl_seconds: int = 6 * 3600  # web-research network-hop cache
     llm_cache_ttl_seconds: int = 24 * 3600  # idempotent LLM completions, by content
     reference_cache_ttl_seconds: int = 3600  # genre list etc. — tiny, hot
@@ -52,16 +52,16 @@ class Settings(BaseSettings):
     # Per-process cap on concurrent host-Ollama calls (avoids GPU thrash).
     ollama_max_concurrency: int = 2
 
-    # ── Agent / Deep Research Briefing (Epic 10) ─────────────────────────
+    # ── Agent / Deep Research Recap (Epic 10) ─────────────────────────
     agent_provider: str = "dummy"  # langgraph | dummy
     research_provider: str = "dummy"  # searxng | dummy
     searxng_base_url: str = "http://localhost:8888"
-    deep_briefing_deadline_seconds: int = 60
-    deep_briefing_max_refines: int = 2
-    deep_briefing_max_results: int = 6
+    deep_recap_deadline_seconds: int = 60
+    deep_recap_max_refines: int = 2
+    deep_recap_max_results: int = 6
     # Scrape the top-N result URLs into full text for grounding (0 = snippets
     # only). More specific, but adds latency/tokens + spoiler surface.
-    deep_briefing_scrape_top_n: int = 2
+    deep_recap_scrape_top_n: int = 2
 
     # ── Backlog Concierge (Epic 11) ──────────────────────────────────────
     concierge_provider: str = "dummy"  # langgraph | dummy
@@ -183,7 +183,7 @@ class Settings(BaseSettings):
     # conservatively for COST (each call is a paid Vertex/Bedrock request, and
     # the concierge fans out to several model calls per turn), not just abuse.
     rate_limit_concierge_chat_per_minute: int = 6
-    rate_limit_play_session_briefing_per_minute: int = 4
+    rate_limit_play_session_recap_per_minute: int = 4
     rate_limit_loadout_create_per_minute: int = 10
     rate_limit_capture_submit_per_minute: int = 15
     rate_limit_library_import_per_minute: int = 5

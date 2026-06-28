@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-	type BriefingMode,
 	endPlaySession,
 	getActivePlaySession,
 	getPlaySession,
 	listPlaySessions,
-	previewBriefing,
-	regenerateBriefing,
+	previewRecap,
+	type RecapMode,
+	regenerateRecap,
 	startPlaySession,
 	submitDebrief,
 	submitRetroactiveDebrief,
@@ -50,15 +50,14 @@ export function useActivePlaySession() {
 // Mutations
 // ---------------------------------------------------------------------------
 
-export function usePreviewBriefing() {
+export function usePreviewRecap() {
 	return useMutation({
 		mutationFn: (vars: {
 			libraryEntryPublicId: string;
 			positionOverride?: string;
-			mode?: BriefingMode;
+			mode?: RecapMode;
 			signal?: AbortSignal;
-		}) =>
-			previewBriefing(vars.libraryEntryPublicId, vars.positionOverride, vars.mode, vars.signal),
+		}) => previewRecap(vars.libraryEntryPublicId, vars.positionOverride, vars.mode, vars.signal),
 	});
 }
 
@@ -82,9 +81,9 @@ export function useStartPlaySession() {
 	return useMutation({
 		mutationFn: (vars: {
 			libraryEntryPublicId: string;
-			briefingText?: string;
-			skipBriefing?: boolean;
-		}) => startPlaySession(vars.libraryEntryPublicId, vars.briefingText, vars.skipBriefing),
+			recapText?: string;
+			skipRecap?: boolean;
+		}) => startPlaySession(vars.libraryEntryPublicId, vars.recapText, vars.skipRecap),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
 			queryClient.invalidateQueries({ queryKey: LIBRARY_KEY });
@@ -121,12 +120,12 @@ export function useEndPlaySession() {
 	});
 }
 
-export function useRegenerateBriefing() {
+export function useRegenerateRecap() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: (vars: { publicId: string; currentPosition?: string }) =>
-			regenerateBriefing(vars.publicId, vars.currentPosition),
+			regenerateRecap(vars.publicId, vars.currentPosition),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
 		},

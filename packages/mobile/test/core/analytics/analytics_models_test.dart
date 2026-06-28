@@ -76,7 +76,7 @@ Map<String, dynamic> _timelineEntryJson({
   String gameTitle = 'Elden Ring',
   String platformLabel = 'PlayStation 5',
   String playSessionType = 'regular',
-  String? briefingText = 'Time to explore!',
+  String? recapText = 'Time to explore!',
   String? debriefText = 'Great session.',
   String? endedVia = 'debrief',
   String startedAt = '2025-06-10T14:00:00Z',
@@ -87,7 +87,7 @@ Map<String, dynamic> _timelineEntryJson({
   'game_title': gameTitle,
   'platform_label': platformLabel,
   'play_session_type': playSessionType,
-  'briefing_text': briefingText,
+  'recap_text': recapText,
   'debrief_text': debriefText,
   'ended_via': endedVia,
   'started_at': startedAt,
@@ -587,7 +587,7 @@ void main() {
         expect(entry.gameTitle, 'Elden Ring');
         expect(entry.platformLabel, 'PlayStation 5');
         expect(entry.playSessionType, 'regular');
-        expect(entry.briefingText, 'Time to explore!');
+        expect(entry.recapText, 'Time to explore!');
         expect(entry.debriefText, 'Great session.');
         expect(entry.endedVia, 'debrief');
         expect(entry.startedAt, DateTime.utc(2025, 6, 10, 14));
@@ -597,7 +597,7 @@ void main() {
 
       test('parses JSON with null optional fields', () {
         final json = _timelineEntryJson(
-          briefingText: null,
+          recapText: null,
           debriefText: null,
           endedVia: null,
           endedAt: null,
@@ -609,7 +609,7 @@ void main() {
         expect(entry.gameTitle, 'Elden Ring');
         expect(entry.platformLabel, 'PlayStation 5');
         expect(entry.playSessionType, 'regular');
-        expect(entry.briefingText, isNull);
+        expect(entry.recapText, isNull);
         expect(entry.debriefText, isNull);
         expect(entry.endedVia, isNull);
         expect(entry.startedAt, DateTime.utc(2025, 6, 10, 14));
@@ -665,11 +665,11 @@ void main() {
         expect(a, isNot(equals(b)));
       });
 
-      test('instances with different briefingText '
+      test('instances with different recapText '
           'are not equal', () {
         final a = TimelineEntry.fromJson(_timelineEntryJson());
         final b = TimelineEntry.fromJson(
-          _timelineEntryJson(briefingText: 'Different'),
+          _timelineEntryJson(recapText: 'Different'),
         );
 
         expect(a, isNot(equals(b)));
@@ -730,7 +730,7 @@ void main() {
         final a = TimelineEntry.fromJson(_timelineEntryJson());
         final b = TimelineEntry.fromJson(
           _timelineEntryJson(
-            briefingText: null,
+            recapText: null,
             debriefText: null,
             endedVia: null,
             endedAt: null,

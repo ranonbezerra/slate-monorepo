@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 import { useConcierge } from "../hooks/useConcierge";
 import { useLibraryEntry } from "../hooks/useLibrary";
 import type { ChatMessage } from "../types/concierge";
-import { PlaySessionBriefingModal } from "./PlaySessionBriefingModal";
+import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
 
 const TYPING_DOTS = ["dot-0", "dot-1", "dot-2"];
 
@@ -34,7 +34,7 @@ const TOOL_LABELS: Record<string, string> = {
 	get_play_stats: "checking your stats",
 	estimate_session_fit: "sizing up the session",
 	start_play_session: "starting your session",
-	generate_briefing: "writing a recap",
+	generate_recap: "writing a recap",
 	submit_retroactive_debrief: "logging your session",
 	set_status: "updating your library",
 };
@@ -98,7 +98,7 @@ export function ConciergePage() {
 	const { messages, isStreaming, activeTool, send, cancel } = useConcierge();
 	const [input, setInput] = useState("");
 	// The recommended library entry the user tapped "Play" on — opens the
-	// briefing-choice dialog once the full entry loads.
+	// recap-choice dialog once the full entry loads.
 	const [playEntryId, setPlayEntryId] = useState<string | null>(null);
 	const { data: playEntry } = useLibraryEntry(playEntryId);
 	const navigate = useNavigate();
@@ -196,7 +196,7 @@ export function ConciergePage() {
 			</Box>
 
 			{playEntryId && playEntry && (
-				<PlaySessionBriefingModal
+				<PlaySessionRecapModal
 					mode="preview"
 					libraryEntry={playEntry}
 					libraryEntryPublicId={playEntryId}

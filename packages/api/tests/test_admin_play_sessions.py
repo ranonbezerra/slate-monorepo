@@ -77,7 +77,7 @@ async def _make_play_session(
             user_id=user.id,
             library_entry_id=entry.id,
             play_session_type="regular",
-            briefing_text="Go beat the boss",
+            recap_text="Go beat the boss",
             started_at=now - timedelta(hours=2),
             ended_at=now if ended else None,
             ended_via="debrief_completed" if ended else None,
@@ -140,7 +140,7 @@ class TestPlaySessionsModeration:
         body = resp.json()
         assert body["game_title"] == "Hades"
         assert body["platform_label"] == "PC"
-        assert body["briefing_text"] == "Go beat the boss"
+        assert body["recap_text"] == "Go beat the boss"
         assert body["status"] == "active"
 
         missing = await async_client.get(

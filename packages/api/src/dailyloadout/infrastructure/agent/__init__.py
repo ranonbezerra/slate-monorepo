@@ -1,1 +1,1 @@
-"""Agent port: the LangGraph deep-research briefing agent (Epic 10)."""
+"""Agent port: the LangGraph deep-research recap agent (Epic 10)."""

@@ -1,4 +1,4 @@
-"""State schema for the deep-research briefing LangGraph."""
+"""State schema for the deep-research recap LangGraph."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ class SearchResultDict(TypedDict):
 
 
 class PlaySessionContext(TypedDict, total=False):
-    """Grounding context for a briefing — the same data the quick path uses."""
+    """Grounding context for a recap — the same data the quick path uses."""
 
     game_title: str
     location: str | None
@@ -29,8 +29,8 @@ Grade = Literal["sufficient", "insufficient", "empty"]
 Source = Literal["deep_research", "quick_fallback"]
 
 
-class ResearchBriefingState(TypedDict, total=False):
-    """Working state threaded through the briefing graph."""
+class ResearchRecapState(TypedDict, total=False):
+    """Working state threaded through the recap graph."""
 
     # --- inputs (set once at invocation) ---
     context: PlaySessionContext
@@ -50,5 +50,5 @@ class ResearchBriefingState(TypedDict, total=False):
     suspicious: bool
 
     # --- output ---
-    briefing: str
+    recap: str
     source: Source

@@ -15,7 +15,7 @@ from datetime import datetime
 from dailyloadout.config import Settings
 from dailyloadout.config import settings as default_settings
 from dailyloadout.core.stats.service import StatsService
-from dailyloadout.infrastructure.agent.base import AbstractBriefingAgent
+from dailyloadout.infrastructure.agent.base import AbstractRecapAgent
 from dailyloadout.infrastructure.agent.concierge.base import (
     AbstractConciergeAgent,
     ConciergeRequest,
@@ -87,9 +87,9 @@ SYSTEM_PROMPT = (
     "\n"
     "You can also ACT on the player's library, but only when they clearly ask you to — never "
     "start, brief, or change anything just because you recommended it:\n"
-    "- start_play_session: begin a play session for a game (optionally briefing='quick'). "
+    "- start_play_session: begin a play session for a game (optionally recap='quick'). "
     "Only one play_session can be active at a time.\n"
-    "- generate_briefing: write a catch-up briefing for the active play_session.\n"
+    "- generate_recap: write a catch-up recap for the active play_session.\n"
     "- submit_retroactive_debrief: log a past session the player didn't track live.\n"
     "- set_status: move a game between backlog/playing/paused/completed/dropped.\n"
     "After acting, confirm what you did in one short sentence."
@@ -128,7 +128,7 @@ class ConciergeService:
         stats_service: StatsService,
         agent: AbstractConciergeAgent,
         llm_client: AbstractLLMClient,
-        briefing_agent: AbstractBriefingAgent | None = None,
+        recap_agent: AbstractRecapAgent | None = None,
         settings: Settings | None = None,
     ) -> None:
         self._library_repo = library_repo
@@ -136,7 +136,7 @@ class ConciergeService:
         self._stats_service = stats_service
         self._agent = agent
         self._llm_client = llm_client
-        self._briefing_agent = briefing_agent
+        self._recap_agent = recap_agent
         self._settings = settings or default_settings
 
     def _build_tools(
@@ -155,7 +155,7 @@ class ConciergeService:
                 library_repo=self._library_repo,
                 play_session_repo=self._play_session_repo,
                 llm_client=self._llm_client,
-                agent=self._briefing_agent,
+                agent=self._recap_agent,
                 settings=self._settings,
             )
         return tools

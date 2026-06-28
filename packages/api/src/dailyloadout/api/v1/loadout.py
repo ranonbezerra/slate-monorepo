@@ -90,7 +90,7 @@ async def start_loadout(
 ) -> LoadoutResponse:
     """AI-pick a game and immediately start a play_session for it (one tap).
 
-    Optionally include a pre-generated ``briefing_text`` to start briefed.
+    Optionally include a pre-generated ``recap_text`` to start briefed.
     Returns 422 if no eligible games, 409 if a play_session is already active.
     """
     loadout = await loadout_service.create_and_start(
@@ -99,7 +99,7 @@ async def start_loadout(
         available_minutes=body.available_minutes,
         mental_energy=body.mental_energy,
         context=body.context,
-        briefing_text=body.briefing_text,
+        recap_text=body.recap_text,
     )
     return LoadoutResponse.model_validate(loadout)
 
@@ -118,13 +118,13 @@ async def accept_loadout(
 ) -> LoadoutResponse:
     """Accept a loadout suggestion and start a play_session for the chosen game.
 
-    Optionally include a pre-generated ``briefing_text`` to start with a
-    briefing (the briefing stage is skippable — omit the body to start without).
+    Optionally include a pre-generated ``recap_text`` to start with a
+    recap (the recap stage is skippable — omit the body to start without).
     """
     loadout = await loadout_service.accept_loadout(
         user_id=current_user.id,
         loadout_public_id=public_id,
-        briefing_text=body.briefing_text if body else None,
+        recap_text=body.recap_text if body else None,
     )
     return LoadoutResponse.model_validate(loadout)
 

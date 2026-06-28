@@ -34,7 +34,7 @@ const mockPlaySession = {
 	publicId: "playSession-1",
 	libraryEntry: mockLibraryEntry,
 	playSessionType: "regular" as const,
-	briefingText: "Continue from Stormveil Castle.",
+	recapText: "Continue from Stormveil Castle.",
 	debriefText: null,
 	extractedState: null,
 	endedVia: null,
@@ -64,9 +64,9 @@ const mockPlaySessionListResponse = {
 	total: 1,
 };
 
-const mockBriefingPreview = {
+const mockRecapPreview = {
 	libraryEntry: mockLibraryEntry,
-	briefingText: "You are about to enter Stormveil Castle.",
+	recapText: "You are about to enter Stormveil Castle.",
 	lastSessionContext: {
 		location: "Limgrave",
 		nextAction: "Head to Stormveil",
@@ -79,7 +79,7 @@ vi.mock("../lib/play-session-api", () => ({
 	listPlaySessions: vi.fn(() => Promise.resolve(mockPlaySessionListResponse)),
 	getPlaySession: vi.fn(() => Promise.resolve(mockPlaySession)),
 	getActivePlaySession: vi.fn(() => Promise.resolve(mockPlaySession)),
-	previewBriefing: vi.fn(() => Promise.resolve(mockBriefingPreview)),
+	previewRecap: vi.fn(() => Promise.resolve(mockRecapPreview)),
 	startPlaySession: vi.fn(() => Promise.resolve(mockPlaySession)),
 	submitDebrief: vi.fn(() =>
 		Promise.resolve({ ...mockPlaySession, debriefText: "Defeated Godrick." }),
@@ -91,10 +91,10 @@ vi.mock("../lib/play-session-api", () => ({
 			endedAt: "2024-06-15T20:00:00Z",
 		}),
 	),
-	regenerateBriefing: vi.fn(() =>
-		Promise.resolve({ ...mockPlaySession, briefingText: "New briefing text." }),
+	regenerateRecap: vi.fn(() =>
+		Promise.resolve({ ...mockPlaySession, recapText: "New recap text." }),
 	),
-	submitRetroactiveDebrief: vi.fn(() => Promise.resolve(mockBriefingPreview)),
+	submitRetroactiveDebrief: vi.fn(() => Promise.resolve(mockRecapPreview)),
 }));
 
 import {
@@ -102,8 +102,8 @@ import {
 	getActivePlaySession,
 	getPlaySession,
 	listPlaySessions,
-	previewBriefing,
-	regenerateBriefing,
+	previewRecap,
+	regenerateRecap,
 	startPlaySession,
 	submitDebrief,
 	submitRetroactiveDebrief,
@@ -113,8 +113,8 @@ import {
 	useEndPlaySession,
 	usePlaySession,
 	usePlaySessions,
-	usePreviewBriefing,
-	useRegenerateBriefing,
+	usePreviewRecap,
+	useRegenerateRecap,
 	useRetroactiveDebrief,
 	useStartPlaySession,
 	useSubmitDebrief,
@@ -191,19 +191,19 @@ describe("useActivePlaySession", () => {
 // Mutation hooks
 // ---------------------------------------------------------------------------
 
-describe("usePreviewBriefing", () => {
-	it("calls previewBriefing with libraryEntryPublicId", async () => {
-		const { result } = renderHook(() => usePreviewBriefing(), {
+describe("usePreviewRecap", () => {
+	it("calls previewRecap with libraryEntryPublicId", async () => {
+		const { result } = renderHook(() => usePreviewRecap(), {
 			wrapper: createWrapper(),
 		});
 
 		await result.current.mutateAsync({ libraryEntryPublicId: "entry-1" });
 
-		expect(previewBriefing).toHaveBeenCalledWith("entry-1", undefined, undefined, undefined);
+		expect(previewRecap).toHaveBeenCalledWith("entry-1", undefined, undefined, undefined);
 	});
 
-	it("calls previewBriefing with optional positionOverride", async () => {
-		const { result } = renderHook(() => usePreviewBriefing(), {
+	it("calls previewRecap with optional positionOverride", async () => {
+		const { result } = renderHook(() => usePreviewRecap(), {
 			wrapper: createWrapper(),
 		});
 
@@ -212,7 +212,7 @@ describe("usePreviewBriefing", () => {
 			positionOverride: "Chapter 3",
 		});
 
-		expect(previewBriefing).toHaveBeenCalledWith("entry-1", "Chapter 3", undefined, undefined);
+		expect(previewRecap).toHaveBeenCalledWith("entry-1", "Chapter 3", undefined, undefined);
 	});
 });
 
@@ -227,25 +227,25 @@ describe("useStartPlaySession", () => {
 		expect(startPlaySession).toHaveBeenCalledWith("entry-1", undefined, undefined);
 	});
 
-	it("calls startPlaySession with optional briefingText", async () => {
+	it("calls startPlaySession with optional recapText", async () => {
 		const { result } = renderHook(() => useStartPlaySession(), {
 			wrapper: createWrapper(),
 		});
 
 		await result.current.mutateAsync({
 			libraryEntryPublicId: "entry-1",
-			briefingText: "Custom briefing",
+			recapText: "Custom recap",
 		});
 
-		expect(startPlaySession).toHaveBeenCalledWith("entry-1", "Custom briefing", undefined);
+		expect(startPlaySession).toHaveBeenCalledWith("entry-1", "Custom recap", undefined);
 	});
 
-	it("passes skipBriefing through to start with no briefing", async () => {
+	it("passes skipRecap through to start with no recap", async () => {
 		const { result } = renderHook(() => useStartPlaySession(), {
 			wrapper: createWrapper(),
 		});
 
-		await result.current.mutateAsync({ libraryEntryPublicId: "entry-1", skipBriefing: true });
+		await result.current.mutateAsync({ libraryEntryPublicId: "entry-1", skipRecap: true });
 
 		expect(startPlaySession).toHaveBeenCalledWith("entry-1", undefined, true);
 	});
@@ -291,19 +291,19 @@ describe("useEndPlaySession", () => {
 	});
 });
 
-describe("useRegenerateBriefing", () => {
-	it("calls regenerateBriefing with publicId", async () => {
-		const { result } = renderHook(() => useRegenerateBriefing(), {
+describe("useRegenerateRecap", () => {
+	it("calls regenerateRecap with publicId", async () => {
+		const { result } = renderHook(() => useRegenerateRecap(), {
 			wrapper: createWrapper(),
 		});
 
 		await result.current.mutateAsync({ publicId: "playSession-1" });
 
-		expect(regenerateBriefing).toHaveBeenCalledWith("playSession-1", undefined);
+		expect(regenerateRecap).toHaveBeenCalledWith("playSession-1", undefined);
 	});
 
-	it("calls regenerateBriefing with currentPosition", async () => {
-		const { result } = renderHook(() => useRegenerateBriefing(), {
+	it("calls regenerateRecap with currentPosition", async () => {
+		const { result } = renderHook(() => useRegenerateRecap(), {
 			wrapper: createWrapper(),
 		});
 
@@ -312,7 +312,7 @@ describe("useRegenerateBriefing", () => {
 			currentPosition: "Liurnia of the Lakes",
 		});
 
-		expect(regenerateBriefing).toHaveBeenCalledWith("playSession-1", "Liurnia of the Lakes");
+		expect(regenerateRecap).toHaveBeenCalledWith("playSession-1", "Liurnia of the Lakes");
 	});
 });
 

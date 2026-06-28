@@ -43,7 +43,7 @@ export interface TimelineEntry {
 	gameTitle: string;
 	platformLabel: string;
 	playSessionType: string;
-	briefingText: string | null;
+	recapText: string | null;
 	debriefText: string | null;
 	endedVia: string | null;
 	startedAt: string;

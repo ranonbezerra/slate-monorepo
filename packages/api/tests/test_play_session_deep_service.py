@@ -1,4 +1,4 @@
-"""Service-level tests for deep-briefing mode selection and fallback."""
+"""Service-level tests for deep-recap mode selection and fallback."""
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ from types import SimpleNamespace
 from uuid import uuid4
 
 from dailyloadout.config import Settings
-from dailyloadout.core.play_session.briefing import generate_briefing_for_mode
+from dailyloadout.core.play_session.recap import generate_recap_for_mode
 from dailyloadout.infrastructure.agent.base import (
-    AbstractBriefingAgent,
+    AbstractRecapAgent,
     BriefResult,
     DeepBriefRequest,
 )
-from dailyloadout.infrastructure.agent.dummy import DummyBriefingAgent
+from dailyloadout.infrastructure.agent.dummy import DummyRecapAgent
 from dailyloadout.infrastructure.llm.dummy import DummyLLMClient
 from dailyloadout.infrastructure.research.base import ResearchUnavailableError
 
@@ -25,7 +25,7 @@ class _FakePlaySessionRepo:
         return []
 
 
-class _RaisingAgent(AbstractBriefingAgent):
+class _RaisingAgent(AbstractRecapAgent):
     def __init__(self, exc: Exception) -> None:
         self._exc = exc
 
@@ -33,7 +33,7 @@ class _RaisingAgent(AbstractBriefingAgent):
         raise self._exc
 
 
-class _EmptyTextAgent(AbstractBriefingAgent):
+class _EmptyTextAgent(AbstractRecapAgent):
     async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
         return BriefResult(text="", source="deep_research", suspicious=False)
 
@@ -47,13 +47,13 @@ def _entry() -> SimpleNamespace:
     )
 
 
-async def _brief(agent: AbstractBriefingAgent | None, mode: str) -> str:
-    return await generate_briefing_for_mode(
+async def _brief(agent: AbstractRecapAgent | None, mode: str) -> str:
+    return await generate_recap_for_mode(
         _FakePlaySessionRepo(),  # type: ignore[arg-type]
         SimpleNamespace(),  # type: ignore[arg-type]  # library_repo unused on empty path
         DummyLLMClient(),
         agent,
-        Settings(deep_briefing_deadline_seconds=60),
+        Settings(deep_recap_deadline_seconds=60),
         _entry(),  # type: ignore[arg-type]
         mode,  # type: ignore[arg-type]
     )
@@ -64,13 +64,13 @@ def _is_quick(text: str) -> bool:
     return "first play_session" in low or "welcome" in low
 
 
-class TestDeepBriefingMode:
+class TestDeepRecapMode:
     async def test_deep_mode_uses_agent_text(self) -> None:
-        text = await _brief(DummyBriefingAgent(), "deep")
+        text = await _brief(DummyRecapAgent(), "deep")
         assert "Previously on Hollow Knight" in text
 
     async def test_quick_mode_skips_agent(self) -> None:
-        assert _is_quick(await _brief(DummyBriefingAgent(), "quick"))
+        assert _is_quick(await _brief(DummyRecapAgent(), "quick"))
 
     async def test_deep_without_agent_falls_back_to_quick(self) -> None:
         assert _is_quick(await _brief(None, "deep"))

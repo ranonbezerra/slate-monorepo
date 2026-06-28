@@ -1,6 +1,6 @@
 """Phase 2, Block 2 — LLM content safety.
 
-Covers (a) data-delimiting of untrusted user/shared/library text in the briefing
+Covers (a) data-delimiting of untrusted user/shared/library text in the recap
 and concierge prompts as a stored-prompt-injection defense, and (b) the
 concierge topic guard that stops the chat being used as a free general-purpose
 LLM proxy. Pure-function and rendered-prompt assertions — no real LLM (the Dummy
@@ -66,7 +66,7 @@ def test_wrap_user_data_stringifies_non_strings() -> None:
     assert wrap_user_data(None) == f"{USER_DATA_OPEN}{USER_DATA_CLOSE}"
 
 
-# -- briefing prompt structure --------------------------------------------------
+# -- recap prompt structure --------------------------------------------------
 
 
 def _render(name: str, **ctx: object) -> str:
@@ -79,9 +79,9 @@ def _render(name: str, **ctx: object) -> str:
     return _jinja_env.from_string(src).render(**ctx)
 
 
-def test_briefing_wraps_title_and_debrief_text() -> None:
+def test_recap_wraps_title_and_debrief_text() -> None:
     rendered = _render(
-        "briefing.j2",
+        "recap.j2",
         game_title=_INJECTION,
         previous_debriefs=[{"raw_text": _INJECTION}],
         current_next_action=None,
@@ -98,9 +98,9 @@ def test_briefing_wraps_title_and_debrief_text() -> None:
     assert rendered.replace(title_block, "").count(_INJECTION) == 0
 
 
-def test_briefing_breakout_title_cannot_escape_block() -> None:
+def test_recap_breakout_title_cannot_escape_block() -> None:
     rendered = _render(
-        "briefing.j2",
+        "recap.j2",
         game_title=_BREAKOUT,
         previous_debriefs=[],
         current_next_action=None,

@@ -166,14 +166,14 @@ class LoadoutService:
         available_minutes: int,
         mental_energy: str,
         context: str | None = None,
-        briefing_text: str | None = None,
+        recap_text: str | None = None,
         cooldown_hours: int = 12,
     ) -> Loadout:
         """AI-pick one game and start a play_session for it in a single step.
 
         The DECIDE=AI entrance to the unified pipeline (ROADMAP Epic 12):
         records the Loadout decision, then accepts it through the shared
-        orchestrator (optionally with a pre-generated *briefing_text*).
+        orchestrator (optionally with a pre-generated *recap_text*).
         """
         # Fail fast before spending an LLM pick if a play_session is already active.
         if await self._play_session_repo.get_active_for_user(user_id) is not None:
@@ -184,16 +184,16 @@ class LoadoutService:
         loadout = await self.create_loadout(
             user_id, mood, available_minutes, mental_energy, context, cooldown_hours
         )
-        return await self.accept_loadout(user_id, loadout.public_id, briefing_text=briefing_text)
+        return await self.accept_loadout(user_id, loadout.public_id, recap_text=recap_text)
 
     async def accept_loadout(
         self,
         user_id: int,
         loadout_public_id: UUID,
-        briefing_text: str | None = None,
+        recap_text: str | None = None,
     ) -> Loadout:
         """Accept a loadout and start a play_session via the shared orchestrator
-        (ROADMAP Epic 12), optionally with a pre-generated *briefing_text*."""
+        (ROADMAP Epic 12), optionally with a pre-generated *recap_text*."""
         loadout = await self._loadout_repo.get_by_public_id(loadout_public_id, user_id=user_id)
         if loadout is None:
             raise HTTPException(
@@ -227,7 +227,7 @@ class LoadoutService:
             library_repo=self._library_repo,
             user_id=user_id,
             entry=entry,
-            briefing_text=briefing_text,
+            recap_text=recap_text,
         )
 
         await self._loadout_repo.set_action(loadout.id, "accepted")

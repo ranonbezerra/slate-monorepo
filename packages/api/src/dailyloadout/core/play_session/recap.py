@@ -1,4 +1,4 @@
-"""Briefing helpers: preview, extraction fallback, and generation."""
+"""Recap helpers: preview, extraction fallback, and generation."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import structlog
 
 from dailyloadout.config import Settings
 from dailyloadout.config import settings as _settings
-from dailyloadout.core.play_session.anti_hallucination import validate_briefing
-from dailyloadout.infrastructure.agent.base import AbstractBriefingAgent, DeepBriefRequest
+from dailyloadout.core.play_session.anti_hallucination import validate_recap
+from dailyloadout.infrastructure.agent.base import AbstractRecapAgent, DeepBriefRequest
 from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
 from dailyloadout.infrastructure.db.models import LibraryEntry, PlaySession
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
@@ -20,7 +20,7 @@ from dailyloadout.infrastructure.research.base import ResearchUnavailableError
 
 logger = structlog.get_logger()
 
-BriefingMode = Literal["quick", "deep"]
+RecapMode = Literal["quick", "deep"]
 
 
 def _collect_previous_debriefs(recent_play_sessions: list[PlaySession]) -> list[dict[str, object]]:
@@ -43,9 +43,9 @@ async def build_play_session_context(
     llm_client: AbstractLLMClient,
     entry: LibraryEntry,
 ) -> PlaySessionContext:
-    """Assemble the grounding context for a deep briefing run.
+    """Assemble the grounding context for a deep recap run.
 
-    Mirrors the context ``generate_briefing`` uses: the last 3 debriefs plus
+    Mirrors the context ``generate_recap`` uses: the last 3 debriefs plus
     the most recent extracted location/quest/level and the entry's next action.
     """
     await ensure_extractions_complete(play_session_repo, library_repo, llm_client, entry.id)
@@ -73,16 +73,16 @@ async def build_preview(
     entry: LibraryEntry,
     position_override: str | None = None,
     *,
-    agent: AbstractBriefingAgent | None = None,
+    agent: AbstractRecapAgent | None = None,
     settings: Settings | None = None,
-    mode: BriefingMode = "quick",
+    mode: RecapMode = "quick",
 ) -> dict[str, object]:
-    """Build a briefing preview dict for a library entry.
+    """Build a recap preview dict for a library entry.
 
-    Shared by ``preview_briefing`` and ``submit_retroactive_debrief``. Does NOT
+    Shared by ``preview_recap`` and ``submit_retroactive_debrief``. Does NOT
     check for active play_sessions. When *mode* is ``deep`` and an *agent* is given,
     the deep web-researched path runs (falling back to quick on failure);
-    otherwise the quick single-shot briefing is used.
+    otherwise the quick single-shot recap is used.
     """
     await ensure_extractions_complete(play_session_repo, library_repo, llm_client, entry.id)
 
@@ -92,7 +92,7 @@ async def build_preview(
         last_context = recent_play_sessions[0].extracted_state
 
     if mode == "deep" and agent is not None:
-        briefing_text = await generate_briefing_for_mode(
+        recap_text = await generate_recap_for_mode(
             play_session_repo,
             library_repo,
             llm_client,
@@ -102,7 +102,7 @@ async def build_preview(
             "deep",
         )
     else:
-        briefing_text = await generate_briefing(
+        recap_text = await generate_recap(
             play_session_repo,
             library_repo,
             llm_client,
@@ -114,7 +114,7 @@ async def build_preview(
 
     return {
         "library_entry": entry,
-        "briefing_text": briefing_text or None,
+        "recap_text": recap_text or None,
         "last_session_context": last_context,
     }
 
@@ -128,7 +128,7 @@ async def ensure_extractions_complete(
     """Sync fallback: extract state for play_sessions with debrief but no extraction.
 
     This handles the case where the Taskiq worker failed or hasn't processed
-    the debrief yet. Called before briefing generation to ensure context is
+    the debrief yet. Called before recap generation to ensure context is
     available.
     """
     pending = await play_session_repo.get_pending_extractions(library_entry_id)
@@ -161,24 +161,24 @@ async def ensure_extractions_complete(
             )
 
 
-async def generate_briefing_for_mode(
+async def generate_recap_for_mode(
     play_session_repo: PlaySessionRepository,
     library_repo: LibraryRepository,
     llm_client: AbstractLLMClient,
-    agent: AbstractBriefingAgent | None,
+    agent: AbstractRecapAgent | None,
     settings: Settings,
     entry: LibraryEntry,
-    mode: BriefingMode,
+    mode: RecapMode,
 ) -> str:
-    """Produce a briefing for *mode*, degrading deep -> quick on any failure.
+    """Produce a recap for *mode*, degrading deep -> quick on any failure.
 
     The deep path runs the research agent under a hard wall-clock ceiling; any
     timeout, research outage, or unexpected error falls back to the quick
-    single-shot briefing, as does an empty deep result.
+    single-shot recap, as does an empty deep result.
     """
 
     async def _quick() -> str:
-        return await generate_briefing(
+        return await generate_recap(
             play_session_repo,
             library_repo,
             llm_client,
@@ -194,19 +194,19 @@ async def generate_briefing_for_mode(
     try:
         result = await asyncio.wait_for(
             agent.deep_brief(DeepBriefRequest(context=context, thread_id=str(entry.public_id))),
-            timeout=settings.deep_briefing_deadline_seconds + 5,
+            timeout=settings.deep_recap_deadline_seconds + 5,
         )
     except (TimeoutError, ResearchUnavailableError):
-        logger.warning("deep_briefing_fell_back_to_quick", library_entry_id=entry.id)
+        logger.warning("deep_recap_fell_back_to_quick", library_entry_id=entry.id)
         return await _quick()
     except Exception:
-        logger.warning("deep_briefing_failed", library_entry_id=entry.id, exc_info=True)
+        logger.warning("deep_recap_failed", library_entry_id=entry.id, exc_info=True)
         return await _quick()
 
     return result.text or await _quick()
 
 
-async def generate_briefing(
+async def generate_recap(
     play_session_repo: PlaySessionRepository,
     library_repo: LibraryRepository,
     llm_client: AbstractLLMClient,
@@ -215,7 +215,7 @@ async def generate_briefing(
     current_next_action: str | None,
     position_override: str | None = None,
 ) -> str:
-    """Generate a briefing from the last 3 debriefs.
+    """Generate a recap from the last 3 debriefs.
 
     If *position_override* is provided, it's passed to the LLM as the
     player's corrected current position.
@@ -231,17 +231,17 @@ async def generate_briefing(
     previous_debriefs = _collect_previous_debriefs(recent_play_sessions)
 
     try:
-        briefing = await llm_client.generate_briefing(
+        recap = await llm_client.generate_recap(
             game_title=game_title,
             previous_debriefs=previous_debriefs,
             current_next_action=current_next_action,
             position_override=position_override,
         )
     except Exception:
-        logger.warning("briefing_generation_failed", exc_info=True)
+        logger.warning("recap_generation_failed", exc_info=True)
         return ""
 
-    if not briefing:
+    if not recap:
         return ""
 
     # Anti-hallucination check.
@@ -255,11 +255,11 @@ async def generate_briefing(
             context_parts.append(position_override)
         context_text = " ".join(context_parts)
 
-        result = validate_briefing(briefing, context_text)
+        result = validate_recap(recap, context_text)
         if result.is_suspicious:
-            briefing += (
-                "\n\n\u26a0\ufe0f Note: This briefing may contain inaccuracies. "
+            recap += (
+                "\n\n\u26a0\ufe0f Note: This recap may contain inaccuracies. "
                 "Some details could not be verified against your session notes."
             )
 
-    return briefing
+    return recap

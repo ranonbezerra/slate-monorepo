@@ -1,1 +1,1 @@
-"""LangGraph state, nodes, and builder for the deep-research briefing."""
+"""LangGraph state, nodes, and builder for the deep-research recap."""

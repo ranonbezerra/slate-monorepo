@@ -219,7 +219,7 @@ export interface AdminPlaySessionList {
 
 export interface AdminPlaySessionDetail extends AdminPlaySessionSummary {
 	platformLabel: string | null;
-	briefingText: string | null;
+	recapText: string | null;
 	debriefText: string | null;
 	hasExtractedState: boolean;
 }

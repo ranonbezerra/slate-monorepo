@@ -126,7 +126,7 @@ class _ActivePlaySessionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final briefing = playSession.briefingText?.trim();
+    final recap = playSession.recapText?.trim();
 
     return Card(
       child: Padding(
@@ -161,10 +161,10 @@ class _ActivePlaySessionCard extends StatelessWidget {
                 color: colors.onSurfaceVariant,
               ),
             ),
-            if (briefing != null && briefing.isNotEmpty) ...[
+            if (recap != null && recap.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                briefing,
+                recap,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colors.onSurfaceVariant,
                 ),
@@ -178,7 +178,7 @@ class _ActivePlaySessionCard extends StatelessWidget {
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () => context.push(
-                      '/play-sessions/${playSession.publicId}/briefing',
+                      '/play-sessions/${playSession.publicId}/recap',
                     ),
                     icon: const Icon(Icons.article_outlined),
                     label: const Text('Recap'),

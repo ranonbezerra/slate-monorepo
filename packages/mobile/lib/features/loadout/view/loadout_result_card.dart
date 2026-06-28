@@ -11,11 +11,11 @@ class LoadoutResultCard extends StatelessWidget {
     required this.totalResults,
     required this.onAccept,
     required this.onReject,
-    required this.onGetBriefing,
-    required this.onStartWithBriefing,
+    required this.onGetRecap,
+    required this.onStartWithRecap,
     required this.isActioning,
-    required this.isGeneratingBriefing,
-    this.briefingText,
+    required this.isGeneratingRecap,
+    this.recapText,
     super.key,
   });
 
@@ -25,18 +25,18 @@ class LoadoutResultCard extends StatelessWidget {
   final VoidCallback onAccept;
   final VoidCallback onReject;
 
-  /// Requests a briefing for this game in the given mode ('quick' | 'deep').
-  final void Function(String mode) onGetBriefing;
+  /// Requests a recap for this game in the given mode ('quick' | 'deep').
+  final void Function(String mode) onGetRecap;
 
-  /// Starts the playSession carrying the generated [briefingText].
-  final VoidCallback onStartWithBriefing;
+  /// Starts the playSession carrying the generated [recapText].
+  final VoidCallback onStartWithRecap;
   final bool isActioning;
 
-  /// Whether a briefing is currently being generated for this card.
-  final bool isGeneratingBriefing;
+  /// Whether a recap is currently being generated for this card.
+  final bool isGeneratingRecap;
 
-  /// The generated briefing text, if any has been produced yet.
-  final String? briefingText;
+  /// The generated recap text, if any has been produced yet.
+  final String? recapText;
 
   String? get _rankLabel {
     if (totalResults <= 1) return null;
@@ -156,14 +156,14 @@ class LoadoutResultCard extends StatelessWidget {
       );
     }
 
-    final hasBriefing = briefingText != null && briefingText!.isNotEmpty;
-    final busy = isActioning || isGeneratingBriefing;
+    final hasRecap = recapText != null && recapText!.isNotEmpty;
+    final busy = isActioning || isGeneratingRecap;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Generated briefing preview.
-        if (hasBriefing) ...[
+        // Generated recap preview.
+        if (hasRecap) ...[
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
@@ -192,20 +192,20 @@ class LoadoutResultCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(briefingText!, style: theme.textTheme.bodyMedium),
+                Text(recapText!, style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
           const SizedBox(height: 12),
         ],
 
-        // Briefing options (until one is generated): quick vs deep.
-        if (!hasBriefing) ...[
+        // Recap options (until one is generated): quick vs deep.
+        if (!hasRecap) ...[
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: busy ? null : () => onGetBriefing('quick'),
+                  onPressed: busy ? null : () => onGetRecap('quick'),
                   icon: const Icon(Icons.bolt, size: 18),
                   label: const Text('Quick recap'),
                 ),
@@ -213,8 +213,8 @@ class LoadoutResultCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: busy ? null : () => onGetBriefing('deep'),
-                  icon: isGeneratingBriefing
+                  onPressed: busy ? null : () => onGetRecap('deep'),
+                  icon: isGeneratingRecap
                       ? const SizedBox(
                           width: 16,
                           height: 16,
@@ -243,13 +243,11 @@ class LoadoutResultCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        // Primary action: start (with briefing when one is present).
+        // Primary action: start (with recap when one is present).
         SizedBox(
           width: double.infinity,
           child: FilledButton.icon(
-            onPressed: busy
-                ? null
-                : (hasBriefing ? onStartWithBriefing : onAccept),
+            onPressed: busy ? null : (hasRecap ? onStartWithRecap : onAccept),
             style: FilledButton.styleFrom(
               backgroundColor: DLColors.green,
               foregroundColor: DLColors.bg,
@@ -267,7 +265,7 @@ class LoadoutResultCard extends StatelessWidget {
             label: Text(
               isActioning
                   ? 'Starting...'
-                  : hasBriefing
+                  : hasRecap
                   ? 'Start with recap'
                   : 'Just play',
             ),

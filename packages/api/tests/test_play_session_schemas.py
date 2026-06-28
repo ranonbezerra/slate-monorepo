@@ -11,9 +11,9 @@ from dailyloadout.core.library.schemas import (
     PlatformResponse,
 )
 from dailyloadout.core.play_session.schemas import (
-    BriefingPreviewResponse,
     ExtractedState,
     PlaySessionResponse,
+    RecapPreviewResponse,
 )
 
 
@@ -70,9 +70,9 @@ def test_play_session_response_coerces_dict_extracted_state() -> None:
 def test_preview_response_typed_last_session_context() -> None:
     raw = {
         "library_entry": _library_entry(),
-        "briefing_text": "Welcome back.",
+        "recap_text": "Welcome back.",
         "last_session_context": {"level": "12"},
     }
-    resp = BriefingPreviewResponse.model_validate(raw)
+    resp = RecapPreviewResponse.model_validate(raw)
     assert isinstance(resp.last_session_context, ExtractedState)
     assert resp.last_session_context.level == "12"

@@ -76,12 +76,12 @@ void main() {
     int rank = 0,
     int totalResults = 1,
     bool isActioning = false,
-    bool isGeneratingBriefing = false,
-    String? briefingText,
+    bool isGeneratingRecap = false,
+    String? recapText,
     VoidCallback? onAccept,
     VoidCallback? onReject,
-    void Function(String mode)? onGetBriefing,
-    VoidCallback? onStartWithBriefing,
+    void Function(String mode)? onGetRecap,
+    VoidCallback? onStartWithRecap,
   }) {
     return MaterialApp(
       home: Scaffold(
@@ -91,12 +91,12 @@ void main() {
             rank: rank,
             totalResults: totalResults,
             isActioning: isActioning,
-            isGeneratingBriefing: isGeneratingBriefing,
-            briefingText: briefingText,
+            isGeneratingRecap: isGeneratingRecap,
+            recapText: recapText,
             onAccept: onAccept ?? () {},
             onReject: onReject ?? () {},
-            onGetBriefing: onGetBriefing ?? (_) {},
-            onStartWithBriefing: onStartWithBriefing ?? () {},
+            onGetRecap: onGetRecap ?? (_) {},
+            onStartWithRecap: onStartWithRecap ?? () {},
           ),
         ),
       ),
@@ -243,7 +243,7 @@ void main() {
       expect(rejected, isTrue);
     });
 
-    testWidgets('shows Quick/Deep recap + Just play when no briefing yet', (
+    testWidgets('shows Quick/Deep recap + Just play when no recap yet', (
       tester,
     ) async {
       await tester.pumpWidget(buildSubject(loadout: _loadout));
@@ -253,12 +253,10 @@ void main() {
       expect(find.text('Just play'), findsOneWidget);
     });
 
-    testWidgets('Quick recap calls onGetBriefing with quick mode', (
-      tester,
-    ) async {
+    testWidgets('Quick recap calls onGetRecap with quick mode', (tester) async {
       String? mode;
       await tester.pumpWidget(
-        buildSubject(loadout: _loadout, onGetBriefing: (m) => mode = m),
+        buildSubject(loadout: _loadout, onGetRecap: (m) => mode = m),
       );
 
       await tester.tap(find.text('Quick recap'));
@@ -266,12 +264,10 @@ void main() {
       expect(mode, 'quick');
     });
 
-    testWidgets('Deep recap calls onGetBriefing with deep mode', (
-      tester,
-    ) async {
+    testWidgets('Deep recap calls onGetRecap with deep mode', (tester) async {
       String? mode;
       await tester.pumpWidget(
-        buildSubject(loadout: _loadout, onGetBriefing: (m) => mode = m),
+        buildSubject(loadout: _loadout, onGetRecap: (m) => mode = m),
       );
 
       await tester.tap(find.text('Deep recap'));
@@ -279,50 +275,50 @@ void main() {
       expect(mode, 'deep');
     });
 
-    testWidgets('shows a spinner and disables briefing while generating', (
+    testWidgets('shows a spinner and disables recap while generating', (
       tester,
     ) async {
       var requested = false;
       await tester.pumpWidget(
         buildSubject(
           loadout: _loadout,
-          isGeneratingBriefing: true,
-          onGetBriefing: (_) => requested = true,
+          isGeneratingRecap: true,
+          onGetRecap: (_) => requested = true,
         ),
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      // The briefing buttons are disabled mid-generation: tapping is a no-op.
+      // The recap buttons are disabled mid-generation: tapping is a no-op.
       await tester.tap(find.text('Quick recap'));
       expect(requested, isFalse);
     });
 
-    testWidgets('shows briefing text and "Start with recap" '
-        'once a briefing is present', (tester) async {
+    testWidgets('shows recap text and "Start with recap" '
+        'once a recap is present', (tester) async {
       await tester.pumpWidget(
         buildSubject(
           loadout: _loadout,
-          briefingText: 'Continue toward the Erdtree.',
+          recapText: 'Continue toward the Erdtree.',
         ),
       );
 
       expect(find.text('Continue toward the Erdtree.'), findsOneWidget);
       expect(find.text('Start with recap'), findsOneWidget);
-      // Briefing options are hidden once a briefing has been produced.
+      // Recap options are hidden once a recap has been produced.
       expect(find.text('Quick recap'), findsNothing);
       expect(find.text('Deep recap'), findsNothing);
       expect(find.text('Just play'), findsNothing);
     });
 
-    testWidgets('"Start with recap" calls onStartWithBriefing callback', (
+    testWidgets('"Start with recap" calls onStartWithRecap callback', (
       tester,
     ) async {
       var started = false;
       await tester.pumpWidget(
         buildSubject(
           loadout: _loadout,
-          briefingText: 'Continue toward the Erdtree.',
-          onStartWithBriefing: () => started = true,
+          recapText: 'Continue toward the Erdtree.',
+          onStartWithRecap: () => started = true,
         ),
       );
 

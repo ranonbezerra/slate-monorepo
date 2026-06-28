@@ -36,17 +36,17 @@ Map<String, dynamic> _playSessionJson({String publicId = 'playSession-001'}) {
     'public_id': publicId,
     'library_entry': _libraryEntryJson(),
     'play_session_type': 'story',
-    'briefing_text': 'Your playSession today...',
+    'recap_text': 'Your playSession today...',
     'started_at': '2025-06-20T18:00:00Z',
     'created_at': '2025-06-20T17:55:00Z',
     'updated_at': '2025-06-20T18:00:00Z',
   };
 }
 
-Map<String, dynamic> _briefingPreviewJson() {
+Map<String, dynamic> _recapPreviewJson() {
   return <String, dynamic>{
     'library_entry': _libraryEntryJson(),
-    'briefing_text': 'Welcome back, Tarnished.',
+    'recap_text': 'Welcome back, Tarnished.',
     'last_session_context': null,
   };
 }
@@ -75,8 +75,8 @@ void main() {
     repository = PlaySessionRepository(apiClient: apiClient);
   });
 
-  group('previewBriefing', () {
-    test('posts quick mode and parses BriefingPreview', () async {
+  group('previewRecap', () {
+    test('posts quick mode and parses RecapPreview', () async {
       when(
         () => dio.post<Map<String, dynamic>>(
           any(),
@@ -85,16 +85,14 @@ void main() {
           cancelToken: any(named: 'cancelToken'),
         ),
       ).thenAnswer(
-        (_) async => _response(
-          '/v1/play-sessions/preview-briefing',
-          _briefingPreviewJson(),
-        ),
+        (_) async =>
+            _response('/v1/play-sessions/preview-recap', _recapPreviewJson()),
       );
 
-      final preview = await repository.previewBriefing('entry-001');
+      final preview = await repository.previewRecap('entry-001');
 
-      expect(preview, isA<BriefingPreview>());
-      expect(preview.briefingText, 'Welcome back, Tarnished.');
+      expect(preview, isA<RecapPreview>());
+      expect(preview.recapText, 'Welcome back, Tarnished.');
       final captured = verify(
         () => dio.post<Map<String, dynamic>>(
           captureAny(),
@@ -103,7 +101,7 @@ void main() {
           cancelToken: any(named: 'cancelToken'),
         ),
       ).captured;
-      expect(captured[0], '/v1/play-sessions/preview-briefing');
+      expect(captured[0], '/v1/play-sessions/preview-recap');
       final body = captured[1] as Map<String, dynamic>;
       expect(body['library_entry_public_id'], 'entry-001');
       expect(body['mode'], 'quick');
@@ -119,13 +117,11 @@ void main() {
           cancelToken: any(named: 'cancelToken'),
         ),
       ).thenAnswer(
-        (_) async => _response(
-          '/v1/play-sessions/preview-briefing',
-          _briefingPreviewJson(),
-        ),
+        (_) async =>
+            _response('/v1/play-sessions/preview-recap', _recapPreviewJson()),
       );
 
-      await repository.previewBriefing(
+      await repository.previewRecap(
         'entry-002',
         mode: 'deep',
         positionOverride: 'Level 5',
@@ -155,20 +151,20 @@ void main() {
       ).thenThrow(DioException(requestOptions: RequestOptions(path: '/x')));
 
       expect(
-        () => repository.previewBriefing('entry-001'),
+        () => repository.previewRecap('entry-001'),
         throwsA(isA<DioException>()),
       );
     });
   });
 
   group('submitRetroactiveDebrief', () {
-    test('posts debrief and parses BriefingPreview', () async {
+    test('posts debrief and parses RecapPreview', () async {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
         (_) async => _response(
           '/v1/play-sessions/retroactive-debrief',
-          _briefingPreviewJson(),
+          _recapPreviewJson(),
         ),
       );
 
@@ -177,7 +173,7 @@ void main() {
         'Beat boss',
       );
 
-      expect(preview, isA<BriefingPreview>());
+      expect(preview, isA<RecapPreview>());
       final captured = verify(
         () => dio.post<Map<String, dynamic>>(
           captureAny(),
@@ -201,7 +197,7 @@ void main() {
 
       final playSession = await repository.startPlaySession(
         'entry-001',
-        briefingText: 'Go!',
+        recapText: 'Go!',
       );
 
       expect(playSession.publicId, 'playSession-001');
@@ -214,10 +210,10 @@ void main() {
       expect(captured[0], '/v1/play-sessions');
       final body = captured[1] as Map<String, dynamic>;
       expect(body['library_entry_public_id'], 'entry-001');
-      expect(body['briefing_text'], 'Go!');
+      expect(body['recap_text'], 'Go!');
     });
 
-    test('omits briefing_text when null', () async {
+    test('omits recap_text when null', () async {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
@@ -233,17 +229,17 @@ void main() {
         ),
       ).captured;
       final body = captured[0] as Map<String, dynamic>;
-      expect(body.containsKey('briefing_text'), isFalse);
+      expect(body.containsKey('recap_text'), isFalse);
     });
 
-    test('sends skip_briefing for the "just play" path', () async {
+    test('sends skip_recap for the "just play" path', () async {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
         (_) async => _response('/v1/play-sessions', _playSessionJson()),
       );
 
-      await repository.startPlaySession('entry-001', skipBriefing: true);
+      await repository.startPlaySession('entry-001', skipRecap: true);
 
       final captured = verify(
         () => dio.post<Map<String, dynamic>>(
@@ -252,8 +248,8 @@ void main() {
         ),
       ).captured;
       final body = captured[0] as Map<String, dynamic>;
-      expect(body['skip_briefing'], isTrue);
-      expect(body.containsKey('briefing_text'), isFalse);
+      expect(body['skip_recap'], isTrue);
+      expect(body.containsKey('recap_text'), isFalse);
     });
   });
 
@@ -427,7 +423,7 @@ void main() {
     });
   });
 
-  group('regenerateBriefing', () {
+  group('regenerateRecap', () {
     test('posts current position and parses PlaySession', () async {
       when(
         () => dio.post<Map<String, dynamic>>(
@@ -437,12 +433,12 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => _response(
-          '/v1/play-sessions/playSession-001/briefing/regenerate',
+          '/v1/play-sessions/playSession-001/recap/regenerate',
           _playSessionJson(),
         ),
       );
 
-      final playSession = await repository.regenerateBriefing(
+      final playSession = await repository.regenerateRecap(
         'playSession-001',
         currentPosition: 'Limgrave',
       );
@@ -455,10 +451,7 @@ void main() {
           options: any(named: 'options'),
         ),
       ).captured;
-      expect(
-        captured[0],
-        '/v1/play-sessions/playSession-001/briefing/regenerate',
-      );
+      expect(captured[0], '/v1/play-sessions/playSession-001/recap/regenerate');
       expect((captured[1] as Map)['current_position'], 'Limgrave');
     });
 
@@ -471,12 +464,12 @@ void main() {
         ),
       ).thenAnswer(
         (_) async => _response(
-          '/v1/play-sessions/playSession-001/briefing/regenerate',
+          '/v1/play-sessions/playSession-001/recap/regenerate',
           _playSessionJson(),
         ),
       );
 
-      await repository.regenerateBriefing('playSession-001');
+      await repository.regenerateRecap('playSession-001');
 
       final captured = verify(
         () => dio.post<Map<String, dynamic>>(

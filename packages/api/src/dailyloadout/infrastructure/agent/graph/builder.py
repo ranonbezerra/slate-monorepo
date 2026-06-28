@@ -1,4 +1,4 @@
-"""Wire the deep-research briefing graph: nodes, edges, router, checkpointer."""
+"""Wire the deep-research recap graph: nodes, edges, router, checkpointer."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
 from . import nodes
-from .state import ResearchBriefingState
+from .state import ResearchRecapState
 
 if TYPE_CHECKING:
     from dailyloadout.config import Settings
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from dailyloadout.infrastructure.research.base import AbstractResearchClient
 
 
-def route_after_grade(state: ResearchBriefingState, *, max_refines: int) -> str:
+def route_after_grade(state: ResearchRecapState, *, max_refines: int) -> str:
     """Decide where to go after grading: synthesize, refine, or fall back.
 
     Two independent stops keep the loop bounded: the wall-clock deadline and
@@ -40,13 +40,13 @@ def build_graph(
     research: AbstractResearchClient,
     settings: Settings,
 ) -> object:
-    """Compile the briefing graph with its dependencies bound to each node."""
-    graph: StateGraph[ResearchBriefingState] = StateGraph(ResearchBriefingState)
+    """Compile the recap graph with its dependencies bound to each node."""
+    graph: StateGraph[ResearchRecapState] = StateGraph(ResearchRecapState)
 
     graph.add_node("build_query", nodes.build_query)
     graph.add_node(
         "search",
-        partial(nodes.search, research=research, max_results=settings.deep_briefing_max_results),
+        partial(nodes.search, research=research, max_results=settings.deep_recap_max_results),
     )
     graph.add_node("grade_results", partial(nodes.grade_results, llm=llm))
     graph.add_node("refine_query", partial(nodes.refine_query, llm=llm))
@@ -56,7 +56,7 @@ def build_graph(
             nodes.synthesize,
             llm=llm,
             research=research,
-            scrape_top_n=settings.deep_briefing_scrape_top_n,
+            scrape_top_n=settings.deep_recap_scrape_top_n,
         ),
     )
     graph.add_node("spoiler_filter", partial(nodes.spoiler_filter, llm=llm))
@@ -68,7 +68,7 @@ def build_graph(
     graph.add_edge("search", "grade_results")
     graph.add_conditional_edges(
         "grade_results",
-        partial(route_after_grade, max_refines=settings.deep_briefing_max_refines),
+        partial(route_after_grade, max_refines=settings.deep_recap_max_refines),
         {
             "synthesize": "synthesize",
             "refine_query": "refine_query",

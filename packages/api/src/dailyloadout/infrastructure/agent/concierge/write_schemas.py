@@ -11,16 +11,16 @@ from pydantic import BaseModel, Field
 
 class StartPlaySessionArgs(BaseModel):
     library_entry_public_id: str = Field(..., description="The game's id (from search_library).")
-    briefing: str = Field(
+    recap: str = Field(
         "none",
-        description="'quick' to start with a short briefing, or 'none' to start without one.",
+        description="'quick' to start with a short recap, or 'none' to start without one.",
     )
 
 
-class GenerateBriefingArgs(BaseModel):
+class GenerateRecapArgs(BaseModel):
     mode: str = Field(
         "quick",
-        description="'quick' for a fast briefing, or 'deep' for web-researched (slower).",
+        description="'quick' for a fast recap, or 'deep' for web-researched (slower).",
     )
 
 

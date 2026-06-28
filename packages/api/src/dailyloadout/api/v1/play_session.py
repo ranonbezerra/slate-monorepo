@@ -10,15 +10,15 @@ from dailyloadout.api.v1._cost_guard import cost_guard
 from dailyloadout.api.v1._rate_limit import rate_limit
 from dailyloadout.config import settings
 from dailyloadout.core.play_session.schemas import (
-    BriefingPreviewRequest,
-    BriefingPreviewResponse,
     PlaySessionDebriefRequest,
     PlaySessionEndRequest,
     PlaySessionListItem,
     PlaySessionListResponse,
     PlaySessionResponse,
     PlaySessionStartRequest,
-    RegenerateBriefingRequest,
+    RecapPreviewRequest,
+    RecapPreviewResponse,
+    RegenerateRecapRequest,
     RetroactiveDebriefRequest,
 )
 from dailyloadout.deps import CurrentUserDep, RequireVerifiedUserDep
@@ -26,13 +26,13 @@ from dailyloadout.deps.play_session import PlaySessionServiceDep
 
 router = APIRouter(prefix="/v1/play-sessions", tags=["play_sessions"])
 
-# Per-user limiter shared by the LLM-heavy briefing routes (preview / deep
-# briefing / regenerate). Each call fans out to several model + web-research
+# Per-user limiter shared by the LLM-heavy recap routes (preview / deep
+# recap / regenerate). Each call fans out to several model + web-research
 # requests, so this is the most expensive surface to flood.
-_briefing_rate_limit = Depends(
+_recap_rate_limit = Depends(
     rate_limit(
-        "play_session_briefing",
-        settings.rate_limit_play_session_briefing_per_minute,
+        "play_session_recap",
+        settings.rate_limit_play_session_recap_per_minute,
         60,
         by="user",
         fail_closed=True,
@@ -52,7 +52,7 @@ _play_session_cost_guard = Depends(cost_guard("play_session"))
     "",
     response_model=PlaySessionResponse,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[_briefing_rate_limit, _play_session_cost_guard],
+    dependencies=[_recap_rate_limit, _play_session_cost_guard],
 )
 async def start_play_session(
     body: PlaySessionStartRequest,
@@ -61,47 +61,47 @@ async def start_play_session(
 ) -> PlaySessionResponse:
     """Start a new play_session for a library entry.
 
-    If ``briefing_text`` is provided (from a prior preview call), the LLM
-    briefing generation step is skipped. Returns 409 if the user already
+    If ``recap_text`` is provided (from a prior preview call), the LLM
+    recap generation step is skipped. Returns 409 if the user already
     has an active play_session.
     """
     play_session = await play_session_service.start_play_session(
         user_id=current_user.id,
         library_entry_public_id=body.library_entry_public_id,
-        briefing_text=body.briefing_text,
+        recap_text=body.recap_text,
         mode=body.mode,
-        skip_briefing=body.skip_briefing,
+        skip_recap=body.skip_recap,
     )
     return PlaySessionResponse.model_validate(play_session)
 
 
 # ---------------------------------------------------------------------------
-# Preview briefing (before starting a play_session)
+# Preview recap (before starting a play_session)
 # ---------------------------------------------------------------------------
 
 
 @router.post(
-    "/preview-briefing",
-    response_model=BriefingPreviewResponse,
-    dependencies=[_briefing_rate_limit, _play_session_cost_guard],
+    "/preview-recap",
+    response_model=RecapPreviewResponse,
+    dependencies=[_recap_rate_limit, _play_session_cost_guard],
 )
-async def preview_briefing(
-    body: BriefingPreviewRequest,
+async def preview_recap(
+    body: RecapPreviewRequest,
     current_user: RequireVerifiedUserDep,
     play_session_service: PlaySessionServiceDep,
-) -> BriefingPreviewResponse:
-    """Generate a briefing preview without creating a play_session.
+) -> RecapPreviewResponse:
+    """Generate a recap preview without creating a play_session.
 
-    Returns the briefing text and last session context so the user can
+    Returns the recap text and last session context so the user can
     review before committing to a play_session.
     """
-    result = await play_session_service.preview_briefing(
+    result = await play_session_service.preview_recap(
         user_id=current_user.id,
         library_entry_public_id=body.library_entry_public_id,
         position_override=body.position_override,
         mode=body.mode,
     )
-    return BriefingPreviewResponse.model_validate(result)
+    return RecapPreviewResponse.model_validate(result)
 
 
 # ---------------------------------------------------------------------------
@@ -111,25 +111,25 @@ async def preview_briefing(
 
 @router.post(
     "/retroactive-debrief",
-    response_model=BriefingPreviewResponse,
-    dependencies=[_briefing_rate_limit, _play_session_cost_guard],
+    response_model=RecapPreviewResponse,
+    dependencies=[_recap_rate_limit, _play_session_cost_guard],
 )
 async def submit_retroactive_debrief(
     body: RetroactiveDebriefRequest,
     current_user: RequireVerifiedUserDep,
     play_session_service: PlaySessionServiceDep,
-) -> BriefingPreviewResponse:
+) -> RecapPreviewResponse:
     """Record a debrief for a play session that wasn't tracked.
 
     Creates a pre-ended retroactive play_session, extracts state, and returns
-    an updated briefing preview that includes the new data.
+    an updated recap preview that includes the new data.
     """
     result = await play_session_service.submit_retroactive_debrief(
         user_id=current_user.id,
         library_entry_public_id=body.library_entry_public_id,
         debrief_text=body.debrief_text,
     )
-    return BriefingPreviewResponse.model_validate(result)
+    return RecapPreviewResponse.model_validate(result)
 
 
 # ---------------------------------------------------------------------------
@@ -198,28 +198,28 @@ async def end_play_session(
 
 
 # ---------------------------------------------------------------------------
-# Regenerate briefing
+# Regenerate recap
 # ---------------------------------------------------------------------------
 
 
 @router.post(
-    "/{public_id}/briefing/regenerate",
+    "/{public_id}/recap/regenerate",
     response_model=PlaySessionResponse,
-    dependencies=[_briefing_rate_limit, _play_session_cost_guard],
+    dependencies=[_recap_rate_limit, _play_session_cost_guard],
 )
-async def regenerate_briefing(
+async def regenerate_recap(
     public_id: UUID,
     current_user: RequireVerifiedUserDep,
     play_session_service: PlaySessionServiceDep,
-    body: RegenerateBriefingRequest | None = None,
+    body: RegenerateRecapRequest | None = None,
 ) -> PlaySessionResponse:
-    """Regenerate the briefing for an active play_session.
+    """Regenerate the recap for an active play_session.
 
     Optionally accepts a ``current_position`` field: the player's corrected
     in-game position, used when the previous session context is outdated.
     """
     position_override = body.current_position if body else None
-    play_session = await play_session_service.regenerate_briefing(
+    play_session = await play_session_service.regenerate_recap(
         user_id=current_user.id,
         play_session_public_id=public_id,
         position_override=position_override,

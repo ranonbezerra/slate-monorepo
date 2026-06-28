@@ -45,8 +45,8 @@ import { CaptureReviewModal } from "./CaptureReviewModal";
 import { CaptureTextModal } from "./CaptureTextModal";
 import { CaptureVoiceModal } from "./CaptureVoiceModal";
 import { ImageSourceModal } from "./ImageSourceModal";
-import { PlaySessionBriefingModal } from "./PlaySessionBriefingModal";
 import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
+import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
 
 dayjs.extend(relativeTime);
 
@@ -79,7 +79,7 @@ const PAGE_SIZE = 50;
 
 /**
  * Build a flat LibraryEntry (the shape the rest of the app — playSessions,
- * briefings — speaks) from a grouped game plus one of its platform states.
+ * recaps — speaks) from a grouped game plus one of its platform states.
  * This is a per-platform projection, NOT aggregation: each entry maps 1:1 to a
  * library row the backend already gave us.
  */
@@ -111,10 +111,10 @@ export function LibraryPage() {
 	const [imageChooserOpened, setImageChooserOpened] = useState(false);
 	const [reviewCaptureId, setReviewCaptureId] = useState<string | null>(null);
 
-	// View mode: viewing an existing playSession's briefing
-	const [briefingPlaySession, setBriefingPlaySession] = useState<PlaySession | null>(null);
+	// View mode: viewing an existing playSession's recap
+	const [recapPlaySession, setRecapPlaySession] = useState<PlaySession | null>(null);
 	// Preview mode: starting a playSession for a specific platform entry. The
-	// briefing is fetched inside the modal after the user picks quick vs deep.
+	// recap is fetched inside the modal after the user picks quick vs deep.
 	const [previewEntry, setPreviewEntry] = useState<LibraryEntry | null>(null);
 
 	const [debriefPlaySession, setDebriefPlaySession] = useState<PlaySession | null>(null);
@@ -207,13 +207,13 @@ export function LibraryPage() {
 							</Text>
 						</Group>
 						<Group gap="xs">
-							{activePlaySession.briefingText && (
+							{activePlaySession.recapText && (
 								<Button
 									size="xs"
 									variant="light"
-									onClick={() => setBriefingPlaySession(activePlaySession)}
+									onClick={() => setRecapPlaySession(activePlaySession)}
 								>
-									View briefing
+									View recap
 								</Button>
 							)}
 							<Button
@@ -374,9 +374,9 @@ export function LibraryPage() {
 			/>
 			<CaptureReviewModal captureId={reviewCaptureId} onClose={() => setReviewCaptureId(null)} />
 
-			{/* Preview mode: choosing briefing mode, then reviewing before starting */}
+			{/* Preview mode: choosing recap mode, then reviewing before starting */}
 			{previewEntry && (
-				<PlaySessionBriefingModal
+				<PlaySessionRecapModal
 					mode="preview"
 					libraryEntry={previewEntry}
 					libraryEntryPublicId={previewEntry.publicId}
@@ -385,13 +385,13 @@ export function LibraryPage() {
 				/>
 			)}
 
-			{/* View mode: viewing an existing playSession's briefing */}
-			{briefingPlaySession && (
-				<PlaySessionBriefingModal
+			{/* View mode: viewing an existing playSession's recap */}
+			{recapPlaySession && (
+				<PlaySessionRecapModal
 					mode="view"
-					playSession={briefingPlaySession}
-					onClose={() => setBriefingPlaySession(null)}
-					onPlaySessionUpdated={(updated) => setBriefingPlaySession(updated)}
+					playSession={recapPlaySession}
+					onClose={() => setRecapPlaySession(null)}
+					onPlaySessionUpdated={(updated) => setRecapPlaySession(updated)}
 				/>
 			)}
 

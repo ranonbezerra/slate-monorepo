@@ -17,8 +17,8 @@ import { IconBolt, IconCheck, IconDice3, IconSearch, IconX } from "@tabler/icons
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAcceptLoadout, useCreateLoadout, useRejectLoadout } from "../hooks/useLoadout";
-import { usePreviewBriefing } from "../hooks/usePlaySession";
-import type { BriefingMode } from "../lib/play-session-api";
+import { usePreviewRecap } from "../hooks/usePlaySession";
+import type { RecapMode } from "../lib/play-session-api";
 import { safeImageUrl } from "../lib/safe-image";
 import type { Loadout, LoadoutMood, MentalEnergy } from "../types/loadout";
 
@@ -50,9 +50,9 @@ function LoadoutResultCard({
 	loadout,
 	rank,
 	totalResults,
-	briefingText,
+	recapText,
 	isPreviewing,
-	onGetBriefing,
+	onGetRecap,
 	onAccept,
 	onReject,
 	isActioning,
@@ -60,10 +60,10 @@ function LoadoutResultCard({
 	loadout: Loadout;
 	rank: number;
 	totalResults: number;
-	briefingText?: string;
+	recapText?: string;
 	isPreviewing: boolean;
-	onGetBriefing: (mode: BriefingMode) => void;
-	onAccept: (briefingText?: string) => void;
+	onGetRecap: (mode: RecapMode) => void;
+	onAccept: (recapText?: string) => void;
 	onReject: () => void;
 	isActioning: boolean;
 }) {
@@ -123,22 +123,22 @@ function LoadoutResultCard({
 					</Text>
 				) : (
 					<Stack gap="sm">
-						{briefingText && (
+						{recapText && (
 							<Card withBorder p="sm" radius="sm">
 								<Text size="sm" fw={500} mb={4}>
 									Recap
 								</Text>
 								<Text size="sm" c="dimmed">
-									{briefingText}
+									{recapText}
 								</Text>
 							</Card>
 						)}
-						{briefingText ? (
+						{recapText ? (
 							<Group grow>
 								<Button
 									color="green"
 									leftSection={<IconCheck size={18} />}
-									onClick={() => onAccept(briefingText)}
+									onClick={() => onAccept(recapText)}
 									loading={isActioning}
 								>
 									Start with recap
@@ -159,7 +159,7 @@ function LoadoutResultCard({
 									<Button
 										variant="light"
 										leftSection={<IconBolt size={18} />}
-										onClick={() => onGetBriefing("quick")}
+										onClick={() => onGetRecap("quick")}
 										loading={isPreviewing}
 										disabled={isActioning || !loadout.libraryEntry}
 									>
@@ -168,7 +168,7 @@ function LoadoutResultCard({
 									<Button
 										variant="light"
 										leftSection={<IconSearch size={18} />}
-										onClick={() => onGetBriefing("deep")}
+										onClick={() => onGetRecap("deep")}
 										loading={isPreviewing}
 										disabled={isActioning || !loadout.libraryEntry}
 									>
@@ -213,16 +213,16 @@ export function LoadoutPage() {
 	const [context, setContext] = useState("");
 	const [multiMode, setMultiMode] = useState(false);
 	const [results, setResults] = useState<Loadout[]>([]);
-	const [briefings, setBriefings] = useState<Record<string, string>>({});
+	const [recaps, setRecaps] = useState<Record<string, string>>({});
 
 	const createLoadout = useCreateLoadout();
 	const acceptLoadout = useAcceptLoadout();
 	const rejectLoadout = useRejectLoadout();
-	const previewBriefing = usePreviewBriefing();
+	const previewRecap = usePreviewRecap();
 
 	const handleRoll = () => {
 		setResults([]);
-		setBriefings({});
+		setRecaps({});
 		createLoadout.mutate(
 			{
 				mood,
@@ -235,17 +235,17 @@ export function LoadoutPage() {
 		);
 	};
 
-	const handleGetBriefing = (loadout: Loadout, mode: BriefingMode) => {
+	const handleGetRecap = (loadout: Loadout, mode: RecapMode) => {
 		const entryId = loadout.libraryEntry?.publicId;
 		if (!entryId) return;
-		previewBriefing.mutate(
+		previewRecap.mutate(
 			{ libraryEntryPublicId: entryId, mode },
 			{
 				onSuccess: (preview) => {
-					if (preview.briefingText) {
-						setBriefings((prev) => ({
+					if (preview.recapText) {
+						setRecaps((prev) => ({
 							...prev,
-							[loadout.publicId]: preview.briefingText as string,
+							[loadout.publicId]: preview.recapText as string,
 						}));
 					}
 				},
@@ -253,9 +253,9 @@ export function LoadoutPage() {
 		);
 	};
 
-	const handleAccept = (publicId: string, briefingText?: string) => {
+	const handleAccept = (publicId: string, recapText?: string) => {
 		acceptLoadout.mutate(
-			{ publicId, briefingText },
+			{ publicId, recapText },
 			{
 				onSuccess: (data) => {
 					setResults((prev) => prev.map((r) => (r.publicId === data.publicId ? data : r)));
@@ -374,13 +374,13 @@ export function LoadoutPage() {
 						loadout={loadout}
 						rank={index}
 						totalResults={results.length}
-						briefingText={briefings[loadout.publicId]}
+						recapText={recaps[loadout.publicId]}
 						isPreviewing={
-							previewBriefing.isPending &&
-							previewBriefing.variables?.libraryEntryPublicId === loadout.libraryEntry?.publicId
+							previewRecap.isPending &&
+							previewRecap.variables?.libraryEntryPublicId === loadout.libraryEntry?.publicId
 						}
-						onGetBriefing={(mode) => handleGetBriefing(loadout, mode)}
-						onAccept={(briefingText) => handleAccept(loadout.publicId, briefingText)}
+						onGetRecap={(mode) => handleGetRecap(loadout, mode)}
+						onAccept={(recapText) => handleAccept(loadout.publicId, recapText)}
 						onReject={() => handleReject(loadout.publicId)}
 						isActioning={isActioning}
 					/>

@@ -25,13 +25,13 @@ async def create_play_session_for_entry(
     library_repo: LibraryRepository,
     user_id: int,
     entry: LibraryEntry,
-    briefing_text: str | None = None,
+    recap_text: str | None = None,
 ) -> PlaySession:
-    """Create an active play_session for *entry*, with an optional briefing.
+    """Create an active play_session for *entry*, with an optional recap.
 
     Maps the one-active-play_session DB constraint to a clean 409 and stamps the
     entry's ``last_played_at``. Callers load the entry and run any pre-checks
-    (e.g. an early active-play_session check to avoid wasting an LLM briefing call).
+    (e.g. an early active-play_session check to avoid wasting an LLM recap call).
 
     This is the single seam every start path funnels through (direct start,
     accepted Loadout, Concierge), so invalidating the user's stats here covers
@@ -41,7 +41,7 @@ async def create_play_session_for_entry(
         play_session = await play_session_repo.create(
             user_id=user_id,
             library_entry_id=entry.id,
-            briefing_text=briefing_text or None,
+            recap_text=recap_text or None,
         )
     except IntegrityError:
         raise HTTPException(

@@ -1,7 +1,7 @@
 """Input sanitization helpers shared across request schemas.
 
 These guard user-supplied strings that later flow, unescaped, into LLM prompts
-(concierge / briefing) and the canonical catalog. Control characters and
+(concierge / recap) and the canonical catalog. Control characters and
 newlines are the key prompt-injection vector — a title like
 ``"Doom\\n\\nIGNORE PREVIOUS INSTRUCTIONS"`` would otherwise be injected
 verbatim into a prompt — so they are stripped/rejected at the edge.

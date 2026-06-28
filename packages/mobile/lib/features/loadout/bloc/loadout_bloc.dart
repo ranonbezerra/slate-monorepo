@@ -19,7 +19,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     on<CreateLoadout>(_onCreateLoadout);
     on<AcceptLoadout>(_onAcceptLoadout);
     on<RejectLoadout>(_onRejectLoadout);
-    on<GenerateLoadoutBriefing>(_onGenerateLoadoutBriefing);
+    on<GenerateLoadoutRecap>(_onGenerateLoadoutRecap);
     on<LoadLoadouts>(_onLoadLoadouts);
     on<LoadLatestLoadout>(_onLoadLatestLoadout);
   }
@@ -59,7 +59,7 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     try {
       final loadout = await _loadoutRepository.acceptLoadout(
         event.publicId,
-        briefingText: event.briefingText,
+        recapText: event.recapText,
       );
       emit(LoadoutAccepted(loadout: loadout));
     } on DioException catch (e) {
@@ -69,21 +69,21 @@ class LoadoutBloc extends Bloc<LoadoutEvent, LoadoutState> {
     }
   }
 
-  Future<void> _onGenerateLoadoutBriefing(
-    GenerateLoadoutBriefing event,
+  Future<void> _onGenerateLoadoutRecap(
+    GenerateLoadoutRecap event,
     Emitter<LoadoutState> emit,
   ) async {
-    emit(LoadoutBriefingLoading(publicId: event.publicId));
+    emit(LoadoutRecapLoading(publicId: event.publicId));
 
     try {
-      final preview = await _playSessionRepository.previewBriefing(
+      final preview = await _playSessionRepository.previewRecap(
         event.libraryEntryPublicId,
         mode: event.mode,
       );
       emit(
-        LoadoutBriefingReady(
+        LoadoutRecapReady(
           publicId: event.publicId,
-          briefingText: preview.briefingText ?? '',
+          recapText: preview.recapText ?? '',
         ),
       );
     } on DioException catch (e) {

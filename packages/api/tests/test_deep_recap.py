@@ -1,4 +1,4 @@
-"""Tests for the deep-research briefing agent: nodes, router, graph, agent."""
+"""Tests for the deep-research recap agent: nodes, router, graph, agent."""
 
 from __future__ import annotations
 
@@ -8,12 +8,12 @@ import pytest
 
 from dailyloadout.config import Settings
 from dailyloadout.infrastructure.agent.base import BriefResult, DeepBriefRequest
-from dailyloadout.infrastructure.agent.dummy import DummyBriefingAgent
-from dailyloadout.infrastructure.agent.factory import get_briefing_agent
+from dailyloadout.infrastructure.agent.dummy import DummyRecapAgent
+from dailyloadout.infrastructure.agent.factory import get_recap_agent
 from dailyloadout.infrastructure.agent.graph import nodes
 from dailyloadout.infrastructure.agent.graph.builder import build_graph, route_after_grade
 from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
-from dailyloadout.infrastructure.agent.langgraph_agent import LangGraphBriefingAgent
+from dailyloadout.infrastructure.agent.langgraph_agent import LangGraphRecapAgent
 from dailyloadout.infrastructure.llm.dummy import DummyLLMClient
 from dailyloadout.infrastructure.research.base import AbstractResearchClient
 from dailyloadout.infrastructure.research.dummy import DummyResearchClient, EmptyResearchClient
@@ -47,7 +47,7 @@ class ScriptedLLM(DummyLLMClient):
         self._grades = list(grades or [])
         self._draft = draft
         self._filtered = filtered
-        self.briefing_calls = 0
+        self.recap_calls = 0
 
     async def complete(self, prompt: str, *, role: str = "fast", json: bool = False) -> str:  # type: ignore[override]
         low = prompt.lower()
@@ -62,16 +62,16 @@ class ScriptedLLM(DummyLLMClient):
             return self._draft
         return "ok"
 
-    async def generate_briefing(self, *args: object, **kwargs: object) -> str:  # type: ignore[override]
-        self.briefing_calls += 1
-        return "QUICK FALLBACK BRIEFING"
+    async def generate_recap(self, *args: object, **kwargs: object) -> str:  # type: ignore[override]
+        self.recap_calls += 1
+        return "QUICK FALLBACK RECAP"
 
 
 def _settings(**kw: object) -> Settings:
     defaults: dict[str, object] = {
-        "deep_briefing_max_refines": 2,
-        "deep_briefing_max_results": 6,
-        "deep_briefing_deadline_seconds": 60,
+        "deep_recap_max_refines": 2,
+        "deep_recap_max_results": 6,
+        "deep_recap_deadline_seconds": 60,
     }
     defaults.update(kw)
     return Settings(**defaults)
@@ -188,7 +188,7 @@ class TestNodes:
         out = await nodes.anti_hallucination(state)
         assert out["suspicious"] is False
         assert out["source"] == "deep_research"
-        assert "Heads up" not in out["briefing"]
+        assert "Heads up" not in out["recap"]
 
     async def test_anti_hallucination_ungrounded_appends_disclaimer(self) -> None:
         state = {
@@ -198,14 +198,14 @@ class TestNodes:
         }
         out = await nodes.anti_hallucination(state)
         assert out["suspicious"] is True
-        assert "Heads up" in out["briefing"]
+        assert "Heads up" in out["recap"]
 
-    async def test_fallback_quick_uses_generate_briefing(self) -> None:
+    async def test_fallback_quick_uses_generate_recap(self) -> None:
         llm = ScriptedLLM()
         out = await nodes.fallback_quick({"context": _ctx()}, llm=llm)
         assert out["source"] == "quick_fallback"
-        assert out["briefing"] == "QUICK FALLBACK BRIEFING"
-        assert llm.briefing_calls == 1
+        assert out["recap"] == "QUICK FALLBACK RECAP"
+        assert llm.recap_calls == 1
 
 
 # ---------------------------------------------------------------------------
@@ -259,19 +259,19 @@ class TestGraphIntegration:
     async def test_happy_path_deep_research(self) -> None:
         final = await _run(DummyLLMClient(), DummyResearchClient(), _settings())
         assert final["source"] == "deep_research"
-        assert final["briefing"]
+        assert final["recap"]
 
     async def test_refine_once_then_succeed(self) -> None:
         llm = ScriptedLLM(grades=["insufficient", "sufficient"])
-        final = await _run(llm, DummyResearchClient(), _settings(deep_briefing_max_refines=2))
+        final = await _run(llm, DummyResearchClient(), _settings(deep_recap_max_refines=2))
         assert final["source"] == "deep_research"
         assert final["refine_count"] == 1
 
     async def test_refine_exhausted_falls_back(self) -> None:
         llm = ScriptedLLM(grades=["insufficient", "insufficient"])
-        final = await _run(llm, DummyResearchClient(), _settings(deep_briefing_max_refines=1))
+        final = await _run(llm, DummyResearchClient(), _settings(deep_recap_max_refines=1))
         assert final["source"] == "quick_fallback"
-        assert final["briefing"] == "QUICK FALLBACK BRIEFING"
+        assert final["recap"] == "QUICK FALLBACK RECAP"
 
     async def test_empty_results_fall_back(self) -> None:
         final = await _run(DummyLLMClient(), EmptyResearchClient(), _settings())
@@ -287,14 +287,14 @@ class TestGraphIntegration:
         assert final["source"] == "quick_fallback"
 
     async def test_spoiler_filter_output_is_used_not_draft(self) -> None:
-        """The final briefing comes from the filtered text, never the raw draft."""
+        """The final recap comes from the filtered text, never the raw draft."""
         llm = ScriptedLLM(
             draft="Defeat the Hollow Knight boss in the Black Egg Temple",
             filtered="Head to the temple area and continue exploring Greenpath",
         )
         final = await _run(llm, DummyResearchClient(), _settings())
-        assert "boss" not in final["briefing"]
-        assert "Head to the temple" in final["briefing"]
+        assert "boss" not in final["recap"]
+        assert "Head to the temple" in final["recap"]
 
 
 # ---------------------------------------------------------------------------
@@ -304,7 +304,7 @@ class TestGraphIntegration:
 
 class TestAgents:
     async def test_langgraph_agent_returns_brief_result(self) -> None:
-        agent = LangGraphBriefingAgent(
+        agent = LangGraphRecapAgent(
             llm=DummyLLMClient(), research=DummyResearchClient(), settings=_settings()
         )
         result = await agent.deep_brief(DeepBriefRequest(context=_ctx(), thread_id="m1"))
@@ -313,7 +313,7 @@ class TestAgents:
         assert result.text
 
     async def test_dummy_agent_returns_canned(self) -> None:
-        result = await DummyBriefingAgent().deep_brief(
+        result = await DummyRecapAgent().deep_brief(
             DeepBriefRequest(context=_ctx(), thread_id="m1")
         )
         assert result.source == "deep_research"
@@ -321,19 +321,19 @@ class TestAgents:
         assert result.suspicious is False
 
     def test_factory_dummy(self) -> None:
-        agent = get_briefing_agent(Settings(agent_provider="dummy"), DummyLLMClient())
-        assert isinstance(agent, DummyBriefingAgent)
+        agent = get_recap_agent(Settings(agent_provider="dummy"), DummyLLMClient())
+        assert isinstance(agent, DummyRecapAgent)
 
     def test_factory_langgraph(self) -> None:
-        # The langgraph agent is wrapped in the Epic 18 briefing cache.
-        from dailyloadout.infrastructure.agent.cached import CachedBriefingAgent
+        # The langgraph agent is wrapped in the Epic 18 recap cache.
+        from dailyloadout.infrastructure.agent.cached import CachedRecapAgent
 
-        agent = get_briefing_agent(
+        agent = get_recap_agent(
             Settings(agent_provider="langgraph", research_provider="dummy"), DummyLLMClient()
         )
-        assert isinstance(agent, CachedBriefingAgent)
-        assert isinstance(agent._inner, LangGraphBriefingAgent)
+        assert isinstance(agent, CachedRecapAgent)
+        assert isinstance(agent._inner, LangGraphRecapAgent)
 
     def test_factory_unknown_raises(self) -> None:
         with pytest.raises(ValueError, match="Unknown agent provider"):
-            get_briefing_agent(Settings(agent_provider="bogus"), DummyLLMClient())
+            get_recap_agent(Settings(agent_provider="bogus"), DummyLLMClient())

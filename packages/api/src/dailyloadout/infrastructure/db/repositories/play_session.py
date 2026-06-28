@@ -24,13 +24,13 @@ class PlaySessionRepository:
         self,
         user_id: int,
         library_entry_id: int,
-        briefing_text: str | None = None,
+        recap_text: str | None = None,
     ) -> PlaySession:
         """Insert a new play_session and return it."""
         play_session = PlaySession(
             user_id=user_id,
             library_entry_id=library_entry_id,
-            briefing_text=briefing_text,
+            recap_text=recap_text,
         )
         self._session.add(play_session)
         await self._session.flush()
@@ -234,15 +234,15 @@ class PlaySessionRepository:
             play_session.ended_at = ended_at or datetime.now(UTC)
             await self._session.flush()
 
-    async def set_briefing(
+    async def set_recap(
         self,
         play_session_id: int,
-        briefing_text: str,
+        recap_text: str,
     ) -> None:
-        """Update the briefing text of a play_session."""
+        """Update the recap text of a play_session."""
         play_session = await self._session.get(PlaySession, play_session_id)
         if play_session is not None:
-            play_session.briefing_text = briefing_text
+            play_session.recap_text = recap_text
             await self._session.flush()
 
     async def get_pending_extractions(
@@ -252,7 +252,7 @@ class PlaySessionRepository:
         """Return ended play_sessions with debrief text but no extracted state.
 
         These are play_sessions where the async extraction task hasn't completed
-        (or failed). Used by the sync fallback before briefing generation.
+        (or failed). Used by the sync fallback before recap generation.
         """
         stmt = (
             select(PlaySession)

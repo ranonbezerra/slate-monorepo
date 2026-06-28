@@ -205,7 +205,7 @@ describe("fetchTimeline", () => {
 					game_title: "Hades",
 					platform_label: "PC",
 					play_session_type: "regular",
-					briefing_text: "Continue from Asphodel",
+					recap_text: "Continue from Asphodel",
 					debrief_text: "Defeated Theseus",
 					ended_via: "debrief_completed",
 					started_at: "2024-06-01T10:00:00Z",
@@ -223,7 +223,7 @@ describe("fetchTimeline", () => {
 		expect(result.items[0].gameTitle).toBe("Hades");
 		expect(result.items[0].platformLabel).toBe("PC");
 		expect(result.items[0].playSessionType).toBe("regular");
-		expect(result.items[0].briefingText).toBe("Continue from Asphodel");
+		expect(result.items[0].recapText).toBe("Continue from Asphodel");
 		expect(result.items[0].debriefText).toBe("Defeated Theseus");
 		expect(result.items[0].endedVia).toBe("debrief_completed");
 		expect(result.items[0].startedAt).toBe("2024-06-01T10:00:00Z");
@@ -239,7 +239,7 @@ describe("fetchTimeline", () => {
 					game_title: "Celeste",
 					platform_label: "Switch",
 					play_session_type: "regular",
-					briefing_text: null,
+					recap_text: null,
 					debrief_text: null,
 					ended_via: null,
 					started_at: "2024-06-01T10:00:00Z",
@@ -253,7 +253,7 @@ describe("fetchTimeline", () => {
 
 		const result = await fetchTimeline();
 
-		expect(result.items[0].briefingText).toBeNull();
+		expect(result.items[0].recapText).toBeNull();
 		expect(result.items[0].debriefText).toBeNull();
 		expect(result.items[0].endedVia).toBeNull();
 		expect(result.items[0].endedAt).toBeNull();

@@ -63,9 +63,9 @@ final _loadoutListItem = LoadoutListItem(
 
 final _listResponse = LoadoutListResponse(items: [_loadoutListItem], total: 1);
 
-final _briefingPreview = BriefingPreview(
+final _recapPreview = RecapPreview(
   libraryEntry: _entry,
-  briefingText: 'Continue toward the Erdtree.',
+  recapText: 'Continue toward the Erdtree.',
 );
 
 // -----------------------------------------------------------------
@@ -282,7 +282,7 @@ void main() {
           when(
             () => mockLoadoutRepository.acceptLoadout(
               'loadout-001',
-              briefingText: any(named: 'briefingText'),
+              recapText: any(named: 'recapText'),
             ),
           ).thenAnswer((_) async => _loadout);
         },
@@ -296,7 +296,7 @@ void main() {
           final captured = verify(
             () => mockLoadoutRepository.acceptLoadout(
               'loadout-001',
-              briefingText: captureAny(named: 'briefingText'),
+              recapText: captureAny(named: 'recapText'),
             ),
           ).captured;
           expect(captured.single, isNull);
@@ -304,12 +304,12 @@ void main() {
       );
 
       blocTest<LoadoutBloc, LoadoutState>(
-        'forwards briefingText to repository when provided',
+        'forwards recapText to repository when provided',
         setUp: () {
           when(
             () => mockLoadoutRepository.acceptLoadout(
               any(),
-              briefingText: any(named: 'briefingText'),
+              recapText: any(named: 'recapText'),
             ),
           ).thenAnswer((_) async => _loadout);
         },
@@ -317,7 +317,7 @@ void main() {
         act: (bloc) => bloc.add(
           const AcceptLoadout(
             publicId: 'loadout-001',
-            briefingText: 'Beware the boss ahead.',
+            recapText: 'Beware the boss ahead.',
           ),
         ),
         expect: () => [
@@ -328,7 +328,7 @@ void main() {
           verify(
             () => mockLoadoutRepository.acceptLoadout(
               'loadout-001',
-              briefingText: 'Beware the boss ahead.',
+              recapText: 'Beware the boss ahead.',
             ),
           ).called(1);
         },
@@ -341,7 +341,7 @@ void main() {
           when(
             () => mockLoadoutRepository.acceptLoadout(
               any(),
-              briefingText: any(named: 'briefingText'),
+              recapText: any(named: 'recapText'),
             ),
           ).thenThrow(
             DioException(
@@ -369,7 +369,7 @@ void main() {
           when(
             () => mockLoadoutRepository.acceptLoadout(
               any(),
-              briefingText: any(named: 'briefingText'),
+              recapText: any(named: 'recapText'),
             ),
           ).thenThrow(Exception('network down'));
         },
@@ -383,74 +383,74 @@ void main() {
     });
 
     // -------------------------------------------------------------
-    // GenerateLoadoutBriefing
+    // GenerateLoadoutRecap
     // -------------------------------------------------------------
-    group('GenerateLoadoutBriefing', () {
+    group('GenerateLoadoutRecap', () {
       blocTest<LoadoutBloc, LoadoutState>(
-        'emits [LoadoutBriefingLoading, LoadoutBriefingReady] '
+        'emits [LoadoutRecapLoading, LoadoutRecapReady] '
         'on success',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
               cancelToken: any(named: 'cancelToken'),
             ),
-          ).thenAnswer((_) async => _briefingPreview);
+          ).thenAnswer((_) async => _recapPreview);
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'loadout-001',
             libraryEntryPublicId: 'lib-001',
           ),
         ),
         expect: () => const [
-          LoadoutBriefingLoading(publicId: 'loadout-001'),
-          LoadoutBriefingReady(
+          LoadoutRecapLoading(publicId: 'loadout-001'),
+          LoadoutRecapReady(
             publicId: 'loadout-001',
-            briefingText: 'Continue toward the Erdtree.',
+            recapText: 'Continue toward the Erdtree.',
           ),
         ],
         verify: (_) {
           verify(
-            () => mockPlaySessionRepository.previewBriefing('lib-001'),
+            () => mockPlaySessionRepository.previewRecap('lib-001'),
           ).called(1);
         },
       );
 
       blocTest<LoadoutBloc, LoadoutState>(
-        'emits empty briefing text when preview has none',
+        'emits empty recap text when preview has none',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
               cancelToken: any(named: 'cancelToken'),
             ),
-          ).thenAnswer((_) async => BriefingPreview(libraryEntry: _entry));
+          ).thenAnswer((_) async => RecapPreview(libraryEntry: _entry));
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'loadout-001',
             libraryEntryPublicId: 'lib-001',
           ),
         ),
         expect: () => const [
-          LoadoutBriefingLoading(publicId: 'loadout-001'),
-          LoadoutBriefingReady(publicId: 'loadout-001', briefingText: ''),
+          LoadoutRecapLoading(publicId: 'loadout-001'),
+          LoadoutRecapReady(publicId: 'loadout-001', recapText: ''),
         ],
       );
 
       blocTest<LoadoutBloc, LoadoutState>(
-        'emits [LoadoutBriefingLoading, LoadoutError] '
+        'emits [LoadoutRecapLoading, LoadoutError] '
         'on DioException',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
@@ -469,23 +469,23 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'loadout-001',
             libraryEntryPublicId: 'lib-001',
           ),
         ),
         expect: () => const [
-          LoadoutBriefingLoading(publicId: 'loadout-001'),
+          LoadoutRecapLoading(publicId: 'loadout-001'),
           LoadoutError(message: 'LLM unavailable'),
         ],
       );
 
       blocTest<LoadoutBloc, LoadoutState>(
-        'emits [LoadoutBriefingLoading, LoadoutError] '
+        'emits [LoadoutRecapLoading, LoadoutError] '
         'on generic Exception',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.previewBriefing(
+            () => mockPlaySessionRepository.previewRecap(
               any(),
               positionOverride: any(named: 'positionOverride'),
               mode: any(named: 'mode'),
@@ -495,13 +495,13 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'loadout-001',
             libraryEntryPublicId: 'lib-001',
           ),
         ),
         expect: () => const [
-          LoadoutBriefingLoading(publicId: 'loadout-001'),
+          LoadoutRecapLoading(publicId: 'loadout-001'),
           LoadoutError(message: 'Exception: boom'),
         ],
       );
@@ -810,7 +810,7 @@ void main() {
           when(
             () => mockLoadoutRepository.acceptLoadout(
               any(),
-              briefingText: any(named: 'briefingText'),
+              recapText: any(named: 'recapText'),
             ),
           ).thenThrow(
             DioException(

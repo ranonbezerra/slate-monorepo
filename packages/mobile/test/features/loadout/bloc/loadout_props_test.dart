@@ -101,19 +101,19 @@ void main() {
       expect(a, isNot(const AcceptLoadout(publicId: 'l-2')));
     });
 
-    test('AcceptLoadout differs when briefingText differs', () {
-      const a = AcceptLoadout(publicId: 'l-1', briefingText: 'go left');
-      const b = AcceptLoadout(publicId: 'l-1', briefingText: 'go right');
+    test('AcceptLoadout differs when recapText differs', () {
+      const a = AcceptLoadout(publicId: 'l-1', recapText: 'go left');
+      const b = AcceptLoadout(publicId: 'l-1', recapText: 'go right');
       expect(a, isNot(b));
       expect(a.props, ['l-1', 'go left']);
     });
 
-    test('GenerateLoadoutBriefing supports value equality and props', () {
-      const a = GenerateLoadoutBriefing(
+    test('GenerateLoadoutRecap supports value equality and props', () {
+      const a = GenerateLoadoutRecap(
         publicId: 'l-1',
         libraryEntryPublicId: 'e-1',
       );
-      const b = GenerateLoadoutBriefing(
+      const b = GenerateLoadoutRecap(
         publicId: 'l-1',
         libraryEntryPublicId: 'e-1',
       );
@@ -122,7 +122,7 @@ void main() {
       expect(
         a,
         isNot(
-          const GenerateLoadoutBriefing(
+          const GenerateLoadoutRecap(
             publicId: 'l-1',
             libraryEntryPublicId: 'e-1',
             mode: 'deep',
@@ -187,22 +187,22 @@ void main() {
       expect(a.props, [_loadout]);
     });
 
-    test('LoadoutBriefingLoading supports value equality and props', () {
-      const a = LoadoutBriefingLoading(publicId: 'l-1');
-      const b = LoadoutBriefingLoading(publicId: 'l-1');
+    test('LoadoutRecapLoading supports value equality and props', () {
+      const a = LoadoutRecapLoading(publicId: 'l-1');
+      const b = LoadoutRecapLoading(publicId: 'l-1');
       expect(a, b);
       expect(a.props, ['l-1']);
-      expect(a, isNot(const LoadoutBriefingLoading(publicId: 'l-2')));
+      expect(a, isNot(const LoadoutRecapLoading(publicId: 'l-2')));
     });
 
-    test('LoadoutBriefingReady supports value equality and props', () {
-      const a = LoadoutBriefingReady(publicId: 'l-1', briefingText: 'go');
-      const b = LoadoutBriefingReady(publicId: 'l-1', briefingText: 'go');
+    test('LoadoutRecapReady supports value equality and props', () {
+      const a = LoadoutRecapReady(publicId: 'l-1', recapText: 'go');
+      const b = LoadoutRecapReady(publicId: 'l-1', recapText: 'go');
       expect(a, b);
       expect(a.props, ['l-1', 'go']);
       expect(
         a,
-        isNot(const LoadoutBriefingReady(publicId: 'l-1', briefingText: 'no')),
+        isNot(const LoadoutRecapReady(publicId: 'l-1', recapText: 'no')),
       );
     });
 

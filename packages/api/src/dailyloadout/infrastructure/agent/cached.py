@@ -1,4 +1,4 @@
-"""Caching decorator for the deep-research briefing agent (ROADMAP Epic 18).
+"""Caching decorator for the deep-research recap agent (ROADMAP Epic 18).
 
 Caches the *entire* graph run (~4 LLM calls + web research), addressed by a
 digest of the grounding ``PlaySessionContext``. Because that context includes the
@@ -16,18 +16,16 @@ from dataclasses import asdict
 from typing import Any
 
 from dailyloadout.infrastructure.cache.base import AbstractCache
-from dailyloadout.infrastructure.cache.keys import NS_BRIEFING, briefing_key
+from dailyloadout.infrastructure.cache.keys import NS_RECAP, recap_key
 from dailyloadout.infrastructure.cache.layer import cached_call
 
-from .base import AbstractBriefingAgent, BriefResult, DeepBriefRequest
+from .base import AbstractRecapAgent, BriefResult, DeepBriefRequest
 
 
-class CachedBriefingAgent(AbstractBriefingAgent):
-    """An ``AbstractBriefingAgent`` that caches results around an inner agent."""
+class CachedRecapAgent(AbstractRecapAgent):
+    """An ``AbstractRecapAgent`` that caches results around an inner agent."""
 
-    def __init__(
-        self, inner: AbstractBriefingAgent, cache: AbstractCache, ttl_seconds: int
-    ) -> None:
+    def __init__(self, inner: AbstractRecapAgent, cache: AbstractCache, ttl_seconds: int) -> None:
         self._inner = inner
         self._cache = cache
         self._ttl = ttl_seconds
@@ -35,9 +33,9 @@ class CachedBriefingAgent(AbstractBriefingAgent):
     async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
         return await cached_call(
             cache=self._cache,
-            key=briefing_key("deep", req.context),
+            key=recap_key("deep", req.context),
             ttl_seconds=self._ttl,
-            namespace=NS_BRIEFING,
+            namespace=NS_RECAP,
             compute=lambda: self._inner.deep_brief(req),
             loads=lambda d: BriefResult(**d),
             dumps=_to_dict,
