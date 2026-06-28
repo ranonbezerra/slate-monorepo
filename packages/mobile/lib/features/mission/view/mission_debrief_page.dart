@@ -141,7 +141,7 @@ class _MissionDebriefPageState extends State<MissionDebriefPage> {
                     height: 48,
                     child: FilledButton(
                       onPressed: _onSubmitDebrief,
-                      child: const Text('Save note'),
+                      child: const Text('Save wrap-up'),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -151,7 +151,7 @@ class _MissionDebriefPageState extends State<MissionDebriefPage> {
                     width: double.infinity,
                     child: TextButton(
                       onPressed: _onSkipDebrief,
-                      child: const Text('Skip note'),
+                      child: const Text('Skip wrap-up'),
                     ),
                   ),
                 ],

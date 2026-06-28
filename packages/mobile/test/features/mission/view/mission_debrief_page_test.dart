@@ -132,15 +132,15 @@ void main() {
       expect(find.byType(TextFormField), findsOneWidget);
     });
 
-    testWidgets('shows Save note and Skip note buttons', (tester) async {
+    testWidgets('shows Save wrap-up and Skip wrap-up buttons', (tester) async {
       when(
         () => missionBloc.state,
       ).thenReturn(ActiveMissionLoaded(mission: _sampleMission));
 
       await tester.pumpWidget(buildSubject());
 
-      expect(find.widgetWithText(FilledButton, 'Save note'), findsOneWidget);
-      expect(find.widgetWithText(TextButton, 'Skip note'), findsOneWidget);
+      expect(find.widgetWithText(FilledButton, 'Save wrap-up'), findsOneWidget);
+      expect(find.widgetWithText(TextButton, 'Skip wrap-up'), findsOneWidget);
     });
 
     testWidgets('validation shows error when input is empty', (tester) async {
@@ -151,7 +151,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       // Tap Submit without entering text.
-      await tester.tap(find.widgetWithText(FilledButton, 'Save note'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save wrap-up'));
       await tester.pumpAndSettle();
 
       expect(find.text('Please enter at least 3 characters'), findsOneWidget);
@@ -168,7 +168,7 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField), 'ab');
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save note'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save wrap-up'));
       await tester.pumpAndSettle();
 
       expect(find.text('Please enter at least 3 characters'), findsOneWidget);
@@ -188,7 +188,7 @@ void main() {
         'Beat the Soul Master boss',
       );
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Save note'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Save wrap-up'));
       await tester.pumpAndSettle();
 
       verify(
@@ -201,7 +201,7 @@ void main() {
       ).called(1);
     });
 
-    testWidgets('dispatches EndMission when Skip note is tapped', (
+    testWidgets('dispatches EndMission when Skip wrap-up is tapped', (
       tester,
     ) async {
       when(
@@ -210,7 +210,7 @@ void main() {
 
       await tester.pumpWidget(buildSubject());
 
-      await tester.tap(find.widgetWithText(TextButton, 'Skip note'));
+      await tester.tap(find.widgetWithText(TextButton, 'Skip wrap-up'));
       await tester.pumpAndSettle();
 
       verify(

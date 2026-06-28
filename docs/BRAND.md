@@ -137,7 +137,7 @@ Talk like the friend who knows your backlog. Concise. A little dry. Never hype, 
 | Library / backlog | Mission log |
 | Session | Mission (in UI) |
 | Recap / "Previously on..." | Briefing / intel |
-| Your note / where you left off | Debrief |
+| Your wrap-up / where you left off | Debrief |
 | Set aside | Dropped / abandoned |
 
 ### Rules

@@ -24,14 +24,14 @@ export function MissionDebriefModal({ mission, onClose }: MissionDebriefModalPro
 			});
 			notifications.show({
 				title: "Session complete",
-				message: "Your note has been saved. See you next session!",
+				message: "Your wrap-up has been saved. See you next session!",
 				color: "green",
 			});
 			setDebriefText("");
 			onClose();
 		} catch (err) {
 			notifications.show({
-				title: "Couldn't save your note",
+				title: "Couldn't save your wrap-up",
 				message: err instanceof Error ? err.message : "An unexpected error occurred",
 				color: "red",
 			});
@@ -43,7 +43,7 @@ export function MissionDebriefModal({ mission, onClose }: MissionDebriefModalPro
 			await endMission.mutateAsync({ publicId: mission.publicId });
 			notifications.show({
 				title: "Session ended",
-				message: "Session ended without a note.",
+				message: "Session ended without a wrap-up.",
 				color: "yellow",
 			});
 			setDebriefText("");
@@ -66,7 +66,8 @@ export function MissionDebriefModal({ mission, onClose }: MissionDebriefModalPro
 		>
 			<Stack gap="md">
 				<Text size="sm">
-					What happened this session? Jot a quick note so your next recap knows where you left off.
+					What happened this session? Jot a quick wrap-up so your next recap knows where you left
+					off.
 				</Text>
 
 				<Textarea
@@ -85,14 +86,14 @@ export function MissionDebriefModal({ mission, onClose }: MissionDebriefModalPro
 						onClick={handleEndWithoutDebrief}
 						loading={endMission.isPending}
 					>
-						Skip note
+						Skip wrap-up
 					</Button>
 					<Button
 						onClick={handleDebrief}
 						loading={submitDebrief.isPending}
 						disabled={debriefText.trim().length < 3}
 					>
-						Save note
+						Save wrap-up
 					</Button>
 				</Group>
 			</Stack>

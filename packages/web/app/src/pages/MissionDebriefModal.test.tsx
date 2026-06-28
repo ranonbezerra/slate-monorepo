@@ -191,17 +191,17 @@ describe("MissionDebriefModal", () => {
 		expect(screen.getByPlaceholderText(/Beat the Mantis Lords/)).toBeInTheDocument();
 	});
 
-	it("renders 'Skip note' and 'Save note' buttons", () => {
+	it("renders 'Skip wrap-up' and 'Save wrap-up' buttons", () => {
 		renderModal(makeMission());
 
-		expect(screen.getByRole("button", { name: /Skip note/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /Save note/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Skip wrap-up/i })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /Save wrap-up/i })).toBeInTheDocument();
 	});
 
 	it("submit debrief button is disabled when text is shorter than 3 characters", () => {
 		renderModal(makeMission());
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		expect(submitButton).toBeDisabled();
 	});
 
@@ -211,7 +211,7 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Got the cloak" } });
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		expect(submitButton).not.toBeDisabled();
 	});
 
@@ -221,14 +221,14 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "   " } });
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		expect(submitButton).toBeDisabled();
 	});
 
 	it("skip debrief button is not disabled even without text", () => {
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip note/i });
+		const skipButton = screen.getByRole("button", { name: /Skip wrap-up/i });
 		expect(skipButton).not.toBeDisabled();
 	});
 
@@ -240,7 +240,7 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip note/i });
+		const skipButton = screen.getByRole("button", { name: /Skip wrap-up/i });
 		expect(skipButton).toHaveAttribute("data-loading");
 	});
 
@@ -252,11 +252,11 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		expect(submitButton).toHaveAttribute("data-loading");
 	});
 
-	// --- Save note flow ---
+	// --- Save wrap-up flow ---
 
 	it("calls submitDebrief.mutateAsync on submit and shows success notification", async () => {
 		const mutateAsyncFn = vi.fn().mockResolvedValueOnce(undefined);
@@ -271,7 +271,7 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Beat the Mantis Lords and got the cloak" } });
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
@@ -307,13 +307,13 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Some debrief text" } });
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "Couldn't save your note",
+					title: "Couldn't save your wrap-up",
 					message: "Server error",
 					color: "red",
 				}),
@@ -333,13 +333,13 @@ describe("MissionDebriefModal", () => {
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
 		fireEvent.change(textarea, { target: { value: "Some debrief text" } });
 
-		const submitButton = screen.getByRole("button", { name: /Save note/i });
+		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
 			expect(notifications.show).toHaveBeenCalledWith(
 				expect.objectContaining({
-					title: "Couldn't save your note",
+					title: "Couldn't save your wrap-up",
 					message: "An unexpected error occurred",
 					color: "red",
 				}),
@@ -347,7 +347,7 @@ describe("MissionDebriefModal", () => {
 		});
 	});
 
-	// --- Skip note flow ---
+	// --- Skip wrap-up flow ---
 
 	it("calls endMission.mutateAsync on skip and shows notification", async () => {
 		const mutateAsyncFn = vi.fn().mockResolvedValueOnce(undefined);
@@ -359,7 +359,7 @@ describe("MissionDebriefModal", () => {
 		const onClose = vi.fn();
 		renderModal(makeMission(), onClose);
 
-		const skipButton = screen.getByRole("button", { name: /Skip note/i });
+		const skipButton = screen.getByRole("button", { name: /Skip wrap-up/i });
 		fireEvent.click(skipButton);
 
 		await waitFor(() => {
@@ -389,7 +389,7 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip note/i });
+		const skipButton = screen.getByRole("button", { name: /Skip wrap-up/i });
 		fireEvent.click(skipButton);
 
 		await waitFor(() => {
@@ -412,7 +412,7 @@ describe("MissionDebriefModal", () => {
 
 		renderModal(makeMission());
 
-		const skipButton = screen.getByRole("button", { name: /Skip note/i });
+		const skipButton = screen.getByRole("button", { name: /Skip wrap-up/i });
 		fireEvent.click(skipButton);
 
 		await waitFor(() => {
