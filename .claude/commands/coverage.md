@@ -27,7 +27,7 @@ cd packages/api && poetry run pytest tests/test_$ARGUMENTS.py --cov=src/slate/$A
 After the report, analyze and report:
 
 1. **Current overall coverage** (target: >= 90%)
-2. **Coverage by domain** (core/play-session, core/library, core/capture, core/loadout, core/stats)
+2. **Coverage by domain** (core/play-session, core/library, core/capture, core/pick, core/stats)
 3. **Infrastructure coverage** (LLM client, repositories, tasks)
 4. **Top 5 uncovered lines** most important (error branches, LLM validation, edge cases)
 5. **Suggestion for next tests** to write to reach targets

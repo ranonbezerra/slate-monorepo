@@ -60,7 +60,7 @@ packages/api/
 │   │   ├── auth.py                          # Auth endpoints
 │   │   ├── capture.py                       # Voice/photo/text captures
 │   │   ├── library.py                       # Game library CRUD
-│   │   ├── loadout.py                       # Daily loadout suggestions
+│   │   ├── pick.py                          # Daily Pick suggestions
 │   │   ├── play session.py                       # PlaySession recap/wrap-up
 │   │   └── stats.py                         # Analytics endpoints
 │   ├── core/
@@ -86,7 +86,7 @@ packages/api/
 │   │   └── *.j2                             # Jinja2 LLM prompt templates
 │   └── workers/
 │       ├── play_session_auto_clamp.py
-│       └── loadout_auto_ignore.py
+│       └── pick_auto_ignore.py
 ├── alembic/
 │   └── versions/
 └── tests/

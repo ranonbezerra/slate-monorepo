@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from slate.infrastructure.db.models.capture import Capture
     from slate.infrastructure.db.models.library import LibraryEntry
-    from slate.infrastructure.db.models.loadout import Loadout
+    from slate.infrastructure.db.models.pick import Pick
     from slate.infrastructure.db.models.play_session import PlaySession
 
 from sqlalchemy import (
@@ -61,7 +61,7 @@ class User(SoftDeleteMixin, TimestampMixin, Base):
     library_entries: Mapped[list["LibraryEntry"]] = relationship(back_populates="user")
     captures: Mapped[list["Capture"]] = relationship(back_populates="user")
     play_sessions: Mapped[list["PlaySession"]] = relationship(back_populates="user")
-    loadouts: Mapped[list["Loadout"]] = relationship(back_populates="user")
+    picks: Mapped[list["Pick"]] = relationship(back_populates="user")
 
     __table_args__ = (
         Index(

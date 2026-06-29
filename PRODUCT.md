@@ -40,7 +40,7 @@ Slate solves this with three core ideas:
 
 2. **PlaySession recap.** Before each gaming session, the app generates a personalized "previously on...": what you were doing, your objective, suggested next action. Like a TV series recap.
 
-3. **Daily Loadout.** Three quick questions (mood, available time, mental energy) → one game suggestion. You don't choose; the app does. Indecision drops to zero.
+3. **Daily Pick.** Three quick questions (mood, available time, mental energy) → one game suggestion. You don't choose; the app does. Indecision drops to zero.
 
 ### Central thesis
 
@@ -48,7 +48,7 @@ The gaming backlog is not an organization problem — it's a **decision** proble
 
 ### Product metaphor
 
-Each gaming session is a **play session**. The app is your **tactical operator** — it keeps a sheet on each active operation, recaps you before the play session, wraps you up after. The "daily loadout" is the gear (game) selected for today's play session.
+Each gaming session is a **play session**. The app is your **tactical operator** — it keeps a sheet on each active operation, recaps you before the play session, wraps you up after. The "daily Pick" is the game selected for today's play session.
 
 ### Inspiration
 
@@ -60,7 +60,7 @@ Each gaming session is a **play session**. The app is your **tactical operator**
 
 1. Zero-friction capture (voice + photo + text).
 2. Personalized LLM recap based on past sessions.
-3. Daily Loadout removes indecision.
+3. Daily Pick removes indecision.
 4. **No guilt mechanics** — no streaks, no "you haven't played X days", no hours ranking. Dropping a game is a legitimate decision, not a failure.
 5. **No Steam/PSN/Nintendo integration.** Deliberate decision — APIs are restrictive, require platform login that breaks UX, and aggravate the problem (importing 200 games you never opened). Capture is manual with AI assistance.
 
@@ -91,7 +91,7 @@ These distinctions are precise — don't conflate them.
 
 - **Recap exists only inside a PlaySession.** It's not a standalone artifact. It's the "previously on" generated before play.
 
-- **Loadout = daily suggestion. Loadout ≠ PlaySession.** User accepts a Loadout → it creates a PlaySession.
+- **Pick = daily suggestion. Pick ≠ PlaySession.** User accepts a Pick → it creates a PlaySession.
 
 - **Capture = the operation of adding a Game.** Not the Game itself. Has a state machine: `queued → processing → review → (partially_committed | committed | failed | cancelled)`.
 
@@ -167,20 +167,20 @@ These distinctions are precise — don't conflate them.
    - Updates `library_entries.play_session_next_action` (denormalized for fast read)
 6. Next recap for this LibraryEntry uses this wrap-up as context.
 
-### 3.7 Daily Loadout
+### 3.7 Daily Pick
 
 1. User taps "What's the move?" on home screen.
 2. App asks three questions:
    - **Mood**: focused / tired / social / creative
    - **Time available**: 15min / 30min / 1h / 2h+ / open-ended
    - **Mental energy**: low / medium / high
-3. App POSTs to `/v1/loadouts`.
+3. App POSTs to `/v1/picks`.
 4. Backend:
    - Lists eligible LibraryEntries (status in backlog/playing/paused, no ended play session < 12h ago for that entry)
    - LLM picks one with reasoning
    - **Validates returned public_id exists in candidate list.** If not, reroll once. Second failure → 422.
 5. App shows result: game card + reasoning. "Hollow Knight — you have 1h, your mental energy is high, and you stopped right before a boss fight. Good moment to push through."
-6. User accepts → play session auto-starts with recap. Rejects → loadout marked `action='rejected'`.
+6. User accepts → play session auto-starts with recap. Rejects → pick marked `action='rejected'`.
 
 ### 3.8 Auto-clamp of forgotten play sessions
 
@@ -257,7 +257,7 @@ The vitrine (showcase) is ready to announce when:
 - [ ] Text capture and manual entry work. Manual entry creates Game with `metadata_source='manual'` and dedupes by slug.
 - [ ] Capture review supports partial commit: user resolves some candidates, exits, comes back later.
 - [ ] Recap is coherent in 90% of cases (manual evaluation of 20 samples with real wrap-ups). Suspicious terms are logged.
-- [ ] Daily Loadout produces sensible suggestions (human validates 20 cases). 100% of returned UUIDs exist in user's library.
+- [ ] Daily Pick produces sensible suggestions (human validates 20 cases). 100% of returned UUIDs exist in user's library.
 - [ ] PlaySession lifecycle complete: start → wrap-up → next recap uses context.
 - [ ] One-active-play session constraint enforced at the database level (not just the app).
 - [ ] `play_session_auto_clamp_8h` job works: forgotten play session > 8h is closed with `ended_via='auto_clamp_8h'`.

@@ -113,10 +113,10 @@ describe("PlayPage", () => {
 		expect(screen.queryByText("Ask")).not.toBeInTheDocument();
 	});
 
-	it("navigates to /play/loadout from the 'What's the move?' door", () => {
+	it("navigates to /play/pick from the 'What's the move?' door", () => {
 		renderPage();
 		fireEvent.click(screen.getByText("What's the move?"));
-		expect(mockNavigate).toHaveBeenCalledWith("/play/loadout");
+		expect(mockNavigate).toHaveBeenCalledWith("/play/pick");
 	});
 
 	it("navigates to /library from the 'I'll choose' door", () => {

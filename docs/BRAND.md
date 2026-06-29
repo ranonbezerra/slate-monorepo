@@ -18,7 +18,7 @@ Slate is the companion that knows your backlog and hands you the right game for 
 
 ### A deliberate non-military stance
 
-The product borrows one word from gaming's tactical vocabulary — **loadout** — because it's now universal across gaming. The dictionary roots are military, but the *brand* is not. Slate is **not a war room**: no camouflage, crosshairs/reticles, "operator / deploy / soldier" theatrics, or dog tags. That register excludes the exact person this is for — someone settling in at night to continue a story-driven game. What we keep from "loadout" is *a deliberate pick for the moment*; what we drop is everything that reads as combat or hierarchy. The feeling is a **good game-night host**, not a commander. The warm lexicon (§5) is the default; the tactical flavor survives only as an opt-in easter egg (see the TODO in §5).
+Slate keeps one idea from gaming culture — *a deliberate pick for the moment* — without the military baggage that idea usually drags along. The instinct is right; the war-room register is not. Slate is **not a war room**: no camouflage, crosshairs/reticles, "operator / deploy / soldier" theatrics, or dog tags. That register excludes the exact person this is for — someone settling in at night to continue a story-driven game. What we keep is *a deliberate pick for the moment*; what we drop is everything that reads as combat or hierarchy. The feeling is a **good game-night host**, not a commander. The warm lexicon (§5) is the default; the tactical flavor survives only as an opt-in easter egg (see the TODO in §5).
 
 ---
 
@@ -121,7 +121,7 @@ All open-source. Loaded from Google Fonts on web; bundled or via `google_fonts` 
 
 ### The recap label
 
-Signature style: play glyph + uppercase, letter-spaced in Outfit. E.g. `PREVIOUSLY ON`, `TONIGHT'S LOADOUT`, `WHERE YOU LEFT OFF`.
+Signature style: play glyph + uppercase, letter-spaced in Outfit. E.g. `PREVIOUSLY ON`, `TONIGHT'S PICK`, `WHERE YOU LEFT OFF`.
 
 ---
 
@@ -133,7 +133,7 @@ Talk like the friend who knows your backlog. Concise. A little dry. Never hype, 
 
 | Prefer | Over |
 | --- | --- |
-| Loadout / tonight's pick | Deploy |
+| Daily Pick / tonight's pick | Deploy |
 | Library / backlog | PlaySession log |
 | Session | PlaySession (in UI) |
 | Recap / "Previously on..." | Recap / intel |

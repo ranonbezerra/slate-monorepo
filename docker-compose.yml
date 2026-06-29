@@ -23,6 +23,11 @@
 #   ports, so use `make up` for host development.
 #
 # Required env (see packages/api/.env.example): POSTGRES_PASSWORD, REDIS_PASSWORD.
+
+# Explicit project name — what Docker Desktop / `docker compose ls` show. Pinned
+# so it never falls back to the directory name (and never reverts to the old brand).
+name: slate-monorepo
+
 services:
   postgres:
     image: postgres:18-alpine

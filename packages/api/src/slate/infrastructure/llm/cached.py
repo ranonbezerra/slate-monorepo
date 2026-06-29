@@ -3,7 +3,7 @@
 Caches the generic ``complete()`` escape hatch — the deep-research graph renders
 its own prompts and fires the same grade/refine/synthesize prompts across runs,
 so identical (prompt, role, json) calls are de-duped. The structured methods
-(captures, recap, loadout, wrap_up extraction) pass straight through: their
+(captures, recap, pick, wrap_up extraction) pass straight through: their
 inputs vary per request and several are intentionally non-idempotent.
 
 Empty output (a backend failure returns "") is never cached.
@@ -20,7 +20,7 @@ from .base import (
     ExtractedGame,
     ExtractedState,
     LLMRole,
-    LoadoutPick,
+    PickSelection,
 )
 
 
@@ -64,14 +64,14 @@ class CachedLLMClient(AbstractLLMClient):
     async def extract_wrap_up_state(self, game_title: str, wrap_up_text: str) -> ExtractedState:
         return await self._inner.extract_wrap_up_state(game_title, wrap_up_text)
 
-    async def pick_loadout_game(
+    async def select_game(
         self,
         candidates: list[dict[str, object]],
         mood: str,
         available_minutes: int,
         mental_energy: str,
         context: str | None = None,
-    ) -> LoadoutPick:
-        return await self._inner.pick_loadout_game(
+    ) -> PickSelection:
+        return await self._inner.select_game(
             candidates, mood, available_minutes, mental_energy, context=context
         )

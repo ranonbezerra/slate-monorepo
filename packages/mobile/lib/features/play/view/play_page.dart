@@ -82,7 +82,7 @@ class _PlayPageState extends State<PlayPage> {
                       // Starting a new session is blocked while one is active
                       // or while we couldn't confirm there isn't one.
                       disabledHint: doorsDisabledHint,
-                      onTap: () => context.go('/play/loadout'),
+                      onTap: () => context.go('/play/pick'),
                     ),
                     const SizedBox(height: 12),
                     _DoorCard(

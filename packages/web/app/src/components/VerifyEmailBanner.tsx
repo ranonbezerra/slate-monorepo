@@ -70,7 +70,7 @@ export function VerifyEmailBanner() {
 		>
 			<Group justify="space-between" wrap="nowrap" gap="md">
 				<span>
-					Verify your email to unlock AI features (loadouts, recaps, and the concierge). Check your
+					Verify your email to unlock AI features (picks, recaps, and the concierge). Check your
 					inbox for the verification link.
 				</span>
 				<Button

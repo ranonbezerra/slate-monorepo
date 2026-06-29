@@ -139,7 +139,7 @@ export const DEFAULT_ROUTES: Record<string, Canned> = {
 		},
 	},
 	"GET /v1/stats/timeline": { status: 200, body: { items: [], total: 0 } },
-	"GET /v1/loadouts": { status: 200, body: { items: [], total: 0, limit: 20, offset: 0 } },
+	"GET /v1/picks": { status: 200, body: { items: [], total: 0, limit: 20, offset: 0 } },
 };
 
 // A small SSE stream for the concierge chat endpoint.

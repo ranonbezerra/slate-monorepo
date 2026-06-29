@@ -148,7 +148,7 @@ export function PlayPage() {
 					icon={<IconDice3 size={28} />}
 					accent
 					disabled={hasActivePlaySession}
-					onClick={() => navigate("/play/loadout")}
+					onClick={() => navigate("/play/pick")}
 				/>
 				<DoorCard
 					title="I'll choose"

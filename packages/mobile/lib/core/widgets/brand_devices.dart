@@ -47,7 +47,7 @@ class DLSlot extends StatelessWidget {
 }
 
 /// The lineup — a row of slots, one lit: "one chosen from many". Use for empty
-/// states, loading, and the loadout reveal. Exactly one slot is lit.
+/// states, loading, and the pick reveal. Exactly one slot is lit.
 class DLLineup extends StatelessWidget {
   const DLLineup({
     super.key,

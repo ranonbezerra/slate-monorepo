@@ -18,7 +18,7 @@ from slate.api.middleware import (
 )
 from slate.api.v1.admin import router as admin_router
 from slate.api.v1.admin_captures import router as admin_captures_router
-from slate.api.v1.admin_loadouts import router as admin_loadouts_router
+from slate.api.v1.admin_picks import router as admin_picks_router
 from slate.api.v1.admin_play_sessions import router as admin_play_sessions_router
 from slate.api.v1.auth import router as auth_router
 from slate.api.v1.auth_oauth import router as auth_oauth_router
@@ -27,7 +27,7 @@ from slate.api.v1.capture import router as capture_router
 from slate.api.v1.concierge import router as concierge_router
 from slate.api.v1.library import router as library_router
 from slate.api.v1.library_import import router as library_import_router
-from slate.api.v1.loadout import router as loadout_router
+from slate.api.v1.pick import router as pick_router
 from slate.api.v1.play_session import router as play_session_router
 from slate.api.v1.stats import router as stats_router
 from slate.config import settings
@@ -92,18 +92,18 @@ async def _auto_clamp_loop() -> None:
 
 
 async def _auto_ignore_loop() -> None:
-    """Periodically mark stale loadouts as ignored."""
-    from slate.infrastructure.db.repositories.loadout import LoadoutRepository
+    """Periodically mark stale picks as ignored."""
+    from slate.infrastructure.db.repositories.pick import PickRepository
     from slate.infrastructure.db.session import async_session_factory
-    from slate.workers.loadout_auto_ignore import auto_ignore_stale_loadouts
+    from slate.workers.pick_auto_ignore import auto_ignore_stale_picks
 
     while True:
         await asyncio.sleep(AUTO_IGNORE_INTERVAL_SECONDS)
         try:
             async with async_session_factory() as session:
-                repo = LoadoutRepository(session)
-                ignored = await auto_ignore_stale_loadouts(
-                    repo, max_hours=settings.loadout_auto_ignore_hours
+                repo = PickRepository(session)
+                ignored = await auto_ignore_stale_picks(
+                    repo, max_hours=settings.pick_auto_ignore_hours
                 )
                 await session.commit()
                 if ignored:
@@ -211,7 +211,7 @@ def create_app() -> FastAPI:
     application.include_router(admin_router)
     application.include_router(admin_captures_router)
     application.include_router(admin_play_sessions_router)
-    application.include_router(admin_loadouts_router)
+    application.include_router(admin_picks_router)
     application.include_router(auth_router)
     application.include_router(auth_oauth_router)
     application.include_router(cache_router)
@@ -219,7 +219,7 @@ def create_app() -> FastAPI:
     application.include_router(library_import_router)
     application.include_router(library_router)
     application.include_router(play_session_router)
-    application.include_router(loadout_router)
+    application.include_router(pick_router)
     application.include_router(stats_router)
     application.include_router(concierge_router)
 

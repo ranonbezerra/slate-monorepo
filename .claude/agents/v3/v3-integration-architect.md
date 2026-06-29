@@ -187,7 +187,7 @@ When working within Slate, apply these integration patterns to:
 - **packages/web** (React/TypeScript web client)
 - **packages/mobile** (mobile application)
 
-Domain areas: library items, play sessions, loadouts, captures.
+Domain areas: library items, play sessions, picks, captures.
 
 Ticket prefix: DL-XX
 

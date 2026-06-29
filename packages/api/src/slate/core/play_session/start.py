@@ -1,7 +1,7 @@
 """Shared play_session-start orchestration (ROADMAP Epic 12 — Unified PlaySession Pipeline).
 
 The single place a PlaySession is created, regardless of how the game was chosen —
-a direct start, an accepted Loadout, or (later) the Concierge. Centralising it
+a direct start, an accepted Pick, or (later) the Concierge. Centralising it
 keeps the "one active play_session per user" constraint mapping and the
 ``last_played_at`` stamp consistent across every entrance to the play loop.
 """
@@ -36,7 +36,7 @@ async def create_play_session_for_entry(
     (e.g. an early active-play_session check to avoid wasting an LLM recap call).
 
     This is the single seam every start path funnels through (direct start,
-    accepted Loadout, Concierge), so invalidating the user's stats here covers
+    accepted Pick, Concierge), so invalidating the user's stats here covers
     them all.
     """
     try:

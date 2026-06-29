@@ -42,7 +42,7 @@ tests/
 ├── test_auth.py                 # Authentication tests
 ├── test_capture.py              # Capture flow tests
 ├── test_library.py              # Library CRUD tests
-├── test_loadout.py              # Loadout suggestion tests
+├── test_pick.py                 # Pick suggestion tests
 ├── test_play_session.py              # PlaySession lifecycle tests
 ├── test_stats.py                # Analytics tests
 └── test_wrap_up_task.py         # Async task tests

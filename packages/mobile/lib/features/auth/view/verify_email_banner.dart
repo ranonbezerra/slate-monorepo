@@ -9,7 +9,7 @@ abstract final class VerifyEmailStrings {
   static const String title = 'Verify your email';
   static const String body =
       'Check your inbox and tap the verification link to unlock '
-      'AI features like loadouts, recaps and the concierge.';
+      'AI features like picks, recaps and the concierge.';
   static const String resend = 'Resend email';
   static const String refresh = "I've verified — refresh";
   static const String resentFallback =

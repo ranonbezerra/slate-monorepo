@@ -286,7 +286,7 @@ graph TB
         LIBRARY_SVC[Library Service]
         PLAY_SESSION_SVC[PlaySession Service]
         CAPTURE_SVC[Capture Service]
-        LOADOUT_SVC[Loadout Service]
+        PICK_SVC[Pick Service]
     end
 
     subgraph "Infrastructure Layer"
@@ -303,7 +303,7 @@ graph TB
     subgraph "Background Workers"
         TASKIQ[Taskiq Workers]
         AUTO_CLAMP[PlaySession Auto-Clamp]
-        AUTO_IGNORE[Loadout Auto-Ignore]
+        AUTO_IGNORE[Pick Auto-Ignore]
     end
 
     WEB --> FASTAPI
@@ -312,7 +312,7 @@ graph TB
     FASTAPI --> LIBRARY_SVC
     FASTAPI --> PLAY_SESSION_SVC
     FASTAPI --> CAPTURE_SVC
-    FASTAPI --> LOADOUT_SVC
+    FASTAPI --> PICK_SVC
 
     LIBRARY_SVC --> REPO
     PLAY_SESSION_SVC --> REPO
@@ -320,8 +320,8 @@ graph TB
     CAPTURE_SVC --> REPO
     CAPTURE_SVC --> LLM
     CAPTURE_SVC --> STT
-    LOADOUT_SVC --> REPO
-    LOADOUT_SVC --> LLM
+    PICK_SVC --> REPO
+    PICK_SVC --> LLM
 
     REPO --> POSTGRES
     TASKIQ --> REDIS
@@ -625,7 +625,7 @@ llm_architecture:
       name: "gemma3:12b"
       use_cases:
         - play_session_recap_generation
-        - loadout_suggestion_picks
+        - pick_selection
         - wrap_up_emotional_extraction
 
     vision:
@@ -675,10 +675,10 @@ background_jobs:
       purpose: "End play sessions older than 24h"
       query: "SELECT play sessions WHERE status='active' AND started_at < now() - interval '24h'"
 
-    loadout_auto_ignore:
+    pick_auto_ignore:
       trigger: "Periodic (hourly)"
-      purpose: "Ignore stale loadout suggestions after 24h"
-      query: "SELECT loadouts WHERE status='pending' AND created_at < now() - interval '24h'"
+      purpose: "Ignore stale pick suggestions after 24h"
+      query: "SELECT picks WHERE status='pending' AND created_at < now() - interval '24h'"
 
   monitoring:
     - task_duration_seconds

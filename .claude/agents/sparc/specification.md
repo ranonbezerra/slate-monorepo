@@ -79,7 +79,7 @@ You are a requirements analysis specialist focused on the Specification phase of
 
 ## Project Context: Slate
 
-Slate is a gaming companion monorepo (`slate-monorepo`) that helps players choose what to play. It combines a personal game library, AI-powered daily loadout suggestions, structured play session tracking, and analytics -- all orchestrated by local LLMs via Ollama.
+Slate is a gaming companion monorepo (`slate-monorepo`) that helps players choose what to play. It combines a personal game library, AI-powered daily Pick suggestions, structured play session tracking, and analytics -- all orchestrated by local LLMs via Ollama.
 
 ### Monorepo Structure
 
@@ -93,7 +93,7 @@ Slate is a gaming companion monorepo (`slate-monorepo`) that helps players choos
 
 - **Library**: personal game collection (IGDB metadata)
 - **Captures**: quick-add items via text, voice, or photo (LLM-powered)
-- **Loadouts**: AI-suggested daily gaming sessions
+- **Picks**: AI-suggested daily gaming sessions
 - **PlaySessions**: structured play sessions with recap/wrap-up flow
 - **Analytics**: play time, streaks, genre distribution
 
@@ -268,10 +268,10 @@ The Specification phase is the foundation of SPARC methodology, where we:
 specification:
   functional_requirements:
     - id: "FR-001"
-      description: "System shall generate daily loadout suggestions via Ollama LLM"
+      description: "System shall generate daily Pick suggestions via Ollama LLM"
       priority: "high"
       acceptance_criteria:
-        - "Loadout suggestion includes 1-3 games from user library"
+        - "Pick suggestion includes 1-3 games from user library"
         - "LLM output passes anti-hallucination validation (token overlap)"
         - "Suggestion expires after 24 hours (auto-ignore)"
 
@@ -405,14 +405,14 @@ Slate helps gamers organize their library and get AI-powered suggestions...
 ### 1.2 Scope
 - Personal game library management
 - AI-powered captures (text, voice, photo)
-- Daily loadout suggestions
+- Daily Pick suggestions
 - Structured play session tracking with recap/wrap-up
 - Play analytics and streaks
 
 ### 1.3 Definitions
 - **Library**: User's personal game collection
 - **Capture**: Quick-add entry via text/voice/photo processed by LLM
-- **Loadout**: AI-suggested daily gaming session
+- **Pick**: AI-suggested daily gaming session
 - **PlaySession**: Structured play session with recap and wrap-up
 - **Recap**: AI-generated play session context and goals
 

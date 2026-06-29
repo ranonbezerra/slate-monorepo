@@ -29,8 +29,8 @@ class ExtractedState:
 
 
 @dataclass
-class LoadoutPick:
-    """LLM's game pick for a daily loadout."""
+class PickSelection:
+    """LLM's game selection for a Pick."""
 
     library_entry_public_id: str
     reasoning: str
@@ -70,14 +70,14 @@ class AbstractLLMClient(ABC):
         ...
 
     @abstractmethod
-    async def pick_loadout_game(
+    async def select_game(
         self,
         candidates: list[dict[str, object]],
         mood: str,
         available_minutes: int,
         mental_energy: str,
         context: str | None = None,
-    ) -> LoadoutPick:
+    ) -> PickSelection:
         """Pick a game from *candidates* based on the user's current state."""
         ...
 

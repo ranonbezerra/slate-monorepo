@@ -42,7 +42,7 @@ Synchronize AI swarms with GitHub Projects for visual task management, progress 
 
 ## Slate Context
 - **Monorepo**: packages/api, packages/web, packages/mobile
-- **EPIC tracking**: EPICs organized by feature area (Library, PlaySessions, Loadouts, Captures)
+- **EPIC tracking**: EPICs organized by feature area (Library, PlaySessions, Picks, Captures)
 - **Stack**: FastAPI (Python 3.14, uv), React+Mantine (Bun, Biome), Flutter
 - **Coverage target**: 90% minimum
 
@@ -265,7 +265,7 @@ npx claude-flow@v3alpha github epic-track \
 ## Best Practices
 
 ### 1. Board Organization
-- Organize by EPICs (Library, PlaySessions, Loadouts, Captures)
+- Organize by EPICs (Library, PlaySessions, Picks, Captures)
 - Track package-level progress (api, web, app)
 - Monitor coverage compliance (90% target)
 - Regular board grooming
@@ -279,7 +279,7 @@ npx claude-flow@v3alpha github epic-track \
 ### 3. Slate-Specific Labels
 - `packages/api`, `packages/web`, `packages/mobile` for package tracking
 - `epic/N` for EPIC association
-- `play session`, `loadout`, `capture`, `library` for domain areas
+- `play session`, `pick`, `capture`, `library` for domain areas
 - `coverage-pass`, `coverage-fail` for test compliance
 
 ## Metrics & KPIs

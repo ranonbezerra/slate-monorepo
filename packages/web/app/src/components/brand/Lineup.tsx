@@ -13,7 +13,7 @@ export interface LineupProps {
 /**
  * The lineup — a row of slots, one lit (BRAND.md §9): the literal picture of
  * "one chosen from many". Use for empty states, loading, splash, and the
- * loadout reveal. Exactly one slot is lit (the single coral focal point).
+ * pick reveal. Exactly one slot is lit (the single coral focal point).
  */
 export function Lineup({ count = 5, litIndex, size = 40, gap = 10 }: LineupProps) {
 	const lit = litIndex ?? Math.floor(count / 2);

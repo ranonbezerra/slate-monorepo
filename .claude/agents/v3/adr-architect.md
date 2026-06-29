@@ -41,7 +41,7 @@ ADRs within Slate cover decisions for:
 - **packages/web**: Frontend architecture (React, TypeScript)
 - **packages/mobile**: Mobile architecture
 - **Infrastructure**: PostgreSQL, Redis, Ollama LLM
-- **Domain**: Library management, play session workflow, loadout system, capture pipeline
+- **Domain**: Library management, play session workflow, pick system, capture pipeline
 
 Ticket prefix: DL-XX
 

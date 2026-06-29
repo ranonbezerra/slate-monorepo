@@ -93,7 +93,7 @@ Intelligent issue management and project coordination for the Slate monorepo wit
 
 ## Slate Context
 - **Monorepo packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/mobile (Flutter)
-- **Domain concepts**: Library (gear/equipment), PlaySessions (recap/wrap-up), Loadouts (gear selection/packing), Captures (voice/photo/text with AI)
+- **Domain concepts**: Library (gear/equipment), PlaySessions (recap/wrap-up), Picks (daily game suggestion), Captures (voice/photo/text with AI)
 - **EPIC structure**: Issues organized by EPICs (e.g., EPIC/6 PlaySession Recap, EPIC/5 Capture Photo)
 - **Coverage target**: 90% minimum test coverage
 
@@ -234,8 +234,8 @@ mcp__claude-flow__agent_spawn { type: "coder", name: "Implementation Planner" }
 mcp__github__create_issue {
   owner: "ranonbezerra",
   repo: "slate-monorepo",
-  title: "EPIC/7: Loadout Auto-Picker with AI-powered gear selection",
-  body: `## Loadout Auto-Picker Feature
+  title: "EPIC/7: Pick Auto-Selector with AI-powered gear selection",
+  body: `## Pick Auto-Selector Feature
 
   ### Overview
   AI-powered gear selection based on play session recap and library contents.
@@ -244,18 +244,18 @@ mcp__github__create_issue {
   - [ ] Parse play session recap to extract gear requirements
   - [ ] Query library for matching equipment
   - [ ] LLM-based selection with Ollama integration
-  - [ ] Loadout confirmation UI with Mantine components
+  - [ ] Pick confirmation UI with Mantine components
 
   ### Packages Affected
-  - packages/api: New Taskiq worker for loadout generation
-  - packages/web: Loadout picker modal with Mantine
-  - packages/mobile: Flutter loadout confirmation screen
+  - packages/api: New Taskiq worker for pick generation
+  - packages/web: Pick modal with Mantine
+  - packages/mobile: Flutter pick confirmation screen
 
   ### Acceptance Criteria
   - Test coverage >= 90%
   - Biome lint passes
   - Alembic migration included`,
-  labels: ["epic", "feature", "loadout"],
+  labels: ["epic", "feature", "pick"],
   assignees: ["ranonbezerra"]
 }
 

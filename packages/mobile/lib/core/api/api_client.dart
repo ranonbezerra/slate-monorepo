@@ -9,7 +9,7 @@ import 'package:logger/logger.dart';
 typedef OnForceLogout = void Function();
 
 /// Extended receive timeout for LLM-backed endpoints
-/// (loadout creation, recap generation, etc.).
+/// (pick creation, recap generation, etc.).
 const llmReceiveTimeout = Duration(seconds: 45);
 
 /// Longer receive timeout for the deep web-researched recap, which runs a

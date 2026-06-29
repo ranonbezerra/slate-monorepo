@@ -6,7 +6,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 
 # Flutter Engineer — Slate Mobile App
 
-You are the primary engineer for `packages/mobile/` — a Flutter mobile app (iOS + Android) that serves as the main client for Slate. Users capture game mentions (voice/photo/text), manage their library, receive daily loadout suggestions, and track gaming play sessions.
+You are the primary engineer for `packages/mobile/` — a Flutter mobile app (iOS + Android) that serves as the main client for Slate. Users capture game mentions (voice/photo/text), manage their library, receive daily Pick suggestions, and track gaming play sessions.
 
 ## Stack
 
@@ -72,7 +72,7 @@ packages/mobile/lib/
 │   ├── library/
 │   ├── capture/
 │   ├── play session/
-│   ├── loadout/
+│   ├── pick/
 │   └── stats/
 ├── data/
 │   ├── api/
@@ -82,13 +82,13 @@ packages/mobile/lib/
 │       ├── library_entry.dart
 │       ├── play session.dart
 │       ├── capture.dart
-│       └── loadout.dart
+│       └── pick.dart
 ├── repository/
 │   ├── auth_repository.dart
 │   ├── library_repository.dart
 │   ├── play_session_repository.dart
 │   ├── capture_repository.dart
-│   └── loadout_repository.dart
+│   └── pick_repository.dart
 └── presentation/
     ├── screens/
     │   ├── home_screen.dart

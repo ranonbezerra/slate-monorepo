@@ -39,7 +39,7 @@ Transform GitHub Issues into intelligent swarm tasks for the Slate monorepo, ena
 - **Monorepo**: ranonbezerra/slate-monorepo
 - **Packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/mobile (Flutter)
 - **EPIC structure**: Issues organized by EPICs (PlaySession Recap, Capture Photo, etc.)
-- **Domain**: Library, PlaySessions, Loadouts, Captures
+- **Domain**: Library, PlaySessions, Picks, Captures
 - **Tooling**: uv, bun, Alembic, Taskiq, Biome
 - **Coverage target**: 90% minimum
 
@@ -95,7 +95,7 @@ body:
       options:
         - library
         - play sessions
-        - loadouts
+        - picks
         - captures
   - type: checkboxes
     id: packages
@@ -134,7 +134,7 @@ body:
       "agents": ["architect", "coder", "tester"]
     },
     {
-      "keywords": ["loadout", "gear", "equipment", "library"],
+      "keywords": ["pick", "gear", "equipment", "library"],
       "labels": ["library", "swarm-feature"],
       "agents": ["coder", "tester"]
     },
@@ -322,7 +322,7 @@ mcp__claude-flow__task_orchestrate {
 - Include complexity estimates
 
 ### 2. Label Strategy
-- Domain labels: play session, loadout, capture, library
+- Domain labels: play session, pick, capture, library
 - Package labels: packages/api, packages/web, packages/mobile
 - Status labels: in-progress, review, blocked
 - Priority indicators for swarm

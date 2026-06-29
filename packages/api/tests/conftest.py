@@ -29,7 +29,7 @@ from slate.infrastructure.db.models import (  # noqa: F401  — ensure models re
     CaptureCandidate,
     Game,
     LibraryEntry,
-    Loadout,
+    Pick,
     Platform,
     PlaySession,
     User,
@@ -146,7 +146,7 @@ _SQLITE_INCOMPATIBLE_INDEXES = {
     "idx_captures_created",  # created_at DESC expression
     "idx_play_sessions_user_active",  # partial unique (WHERE ended_at IS NULL)
     "idx_play_sessions_entry_ended",  # DESC expression
-    "idx_loadouts_user_created",  # DESC expression
+    "idx_picks_user_created",  # DESC expression
     "idx_users_email_active",  # partial (WHERE deleted_at IS NULL)
     "idx_refresh_user_active",  # partial (WHERE revoked_at IS NULL)
 }

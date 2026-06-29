@@ -46,7 +46,7 @@ Orchestrate complex software releases using AI swarms that handle everything fro
 - **Monorepo packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/mobile (Flutter)
 - **Tooling**: uv, bun, Alembic, Taskiq, Biome
 - **Coverage target**: 90% minimum
-- **Domain**: Library, PlaySessions, Loadouts, Captures
+- **Domain**: Library, PlaySessions, Picks, Captures
 
 ## Core Features
 
@@ -92,7 +92,7 @@ CHANGELOG=$(gh api repos/ranonbezerra/slate-monorepo/compare/${LAST_TAG}...HEAD 
 # Create release draft
 gh release create v1.1.0 \
   --draft \
-  --title "Release v1.1.0 - PlaySession Recap & Loadout Features" \
+  --title "Release v1.1.0 - PlaySession Recap & Pick Features" \
   --notes "$CHANGELOG" \
   --target main
 

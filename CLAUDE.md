@@ -4,7 +4,7 @@ This file is auto-loaded by Claude Code for every task. It defines the rules, pa
 
 ## Product Summary
 
-Slate is a gaming companion that helps players choose what to play. It combines a personal game library, AI-powered daily loadout suggestions, structured play session tracking, and analytics — all orchestrated by local LLMs via Ollama.
+Slate is a gaming companion that helps players choose what to play. It combines a personal game library, AI-powered daily Pick suggestions, structured play session tracking, and analytics — all orchestrated by local LLMs via Ollama.
 
 ## Stack
 
@@ -12,14 +12,14 @@ Slate is a gaming companion that helps players choose what to play. It combines 
 | --------- | ------ | ------- |
 | API | `packages/api/` | Python 3.14, FastAPI, SQLAlchemy 2.x async, Alembic, Pydantic v2, Taskiq + Redis, Ollama LLM, faster-whisper STT |
 | Mobile | `packages/mobile/` | Flutter 3.27+, Dart 3.6+, BLoC, go_router, dio |
-| Web (workspace) | `packages/web/` | Bun workspace. Members below share `@dl/shared` (api client, case-convert). |
-| ↳ Shared | `packages/web/shared/` | `@dl/shared` — the cookie-auth API client + snake/camel converters used by both web apps |
+| Web (workspace) | `packages/web/` | Bun workspace. Members below share `@slate/shared` (api client, case-convert). |
+| ↳ Shared | `packages/web/shared/` | `@slate/shared` — the cookie-auth API client + snake/camel converters used by both web apps |
 | ↳ App (player) | `packages/web/app/` | The player web app. Bun, React 19, TypeScript, Mantine v7, TanStack Query v5, Biome |
 | ↳ Backoffice | `packages/web/backoffice/` | Internal admin app (separate from the player app). Same stack; talks to the API's `/internal/v1` |
 
 **Infrastructure:** PostgreSQL 18, Redis 7, Ollama (host), Taskiq worker (Docker)
 
-**Web workspace:** one `bun install` at `packages/web/` resolves all members. The player app and backoffice import the API client from `@dl/shared/api` and `@dl/shared/case-convert` (never duplicate them).
+**Web workspace:** one `bun install` at `packages/web/` resolves all members. The player app and backoffice import the API client from `@slate/shared/api` and `@slate/shared/case-convert` (never duplicate them).
 
 ## Commands
 
@@ -71,7 +71,7 @@ API v1 Routers -> Core Services -> Infrastructure Repositories -> DB Models
 1. **LLM outputs are untrusted** — always validate via anti-hallucination checks (token overlap threshold)
 2. **One active play session per user** — enforce at service level before creating new play sessions
 3. **Captures are immutable after processing** — status flows: `pending -> processing -> done | failed`
-4. **Loadout suggestions expire** — auto-ignored after `loadout_auto_ignore_hours` (24h default)
+4. **Pick suggestions expire** — auto-ignored after `pick_auto_ignore_hours` (24h default)
 5. **PlaySessions auto-clamp** — ended after `play_session_auto_clamp_hours` (24h default)
 6. **UUID v4 with public_id** — internal `id` is auto-increment, `public_id` is UUID exposed to API
 7. **All timestamps UTC** in DB; frontend displays in user timezone
@@ -102,7 +102,7 @@ Jinja2 template (prompts/*.j2)
 ```
 
 - **Fast model** (`gemma3:4b`): captures, quick extraction
-- **Smart model** (`gemma3:12b`): recaps, loadout picks
+- **Smart model** (`gemma3:12b`): recaps, Pick selections
 - **Vision model** (`qwen3-vl:4b`): photo captures
 - **Dummy provider**: testing (returns canned responses)
 
@@ -112,7 +112,7 @@ Jinja2 template (prompts/*.j2)
 | ------ | --------- | --------- |
 | `extract_wrap_up_state_task` | PlaySession wrap-up submitted | Extract emotional state from wrap-up text via LLM |
 | `play_session_auto_clamp` | Periodic | End play sessions older than 24h |
-| `loadout_auto_ignore` | Periodic | Ignore stale loadout suggestions |
+| `pick_auto_ignore` | Periodic | Ignore stale Pick suggestions |
 
 Retry policy: exponential backoff (2s -> 4s -> 8s), max 3 retries.
 

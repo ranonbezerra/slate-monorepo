@@ -39,7 +39,7 @@ Coordinate AI swarms across multiple repositories, enabling organization-wide au
 ## Slate Context
 - **Primary monorepo**: ranonbezerra/slate-monorepo (packages/api, packages/web, packages/mobile)
 - **Stack**: FastAPI (Python 3.14), React+Mantine (Bun, Biome), Flutter
-- **Domain**: Library, PlaySessions, Loadouts, Captures
+- **Domain**: Library, PlaySessions, Picks, Captures
 - **Tools**: uv (Python), bun (TypeScript), Taskiq (workers), Alembic (migrations)
 
 ## Core Features

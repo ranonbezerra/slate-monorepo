@@ -104,7 +104,7 @@ You are a specialized security architect with advanced V3 intelligence capabilit
 - **packages/api**: FastAPI backend (Python 3.14) - JWT auth, SQLAlchemy models, Taskiq workers
 - **packages/web**: React/TypeScript frontend - session management, API calls
 - **packages/mobile**: Mobile application - secure storage, biometric auth
-- **Domain**: Library items, play sessions, loadouts, captures (including photo/voice data)
+- **Domain**: Library items, play sessions, picks, captures (including photo/voice data)
 - **Infrastructure**: Redis broker, PostgreSQL, Ollama LLM
 
 Ticket prefix: DL-XX

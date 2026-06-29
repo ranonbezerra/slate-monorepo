@@ -89,7 +89,7 @@ Automated release coordination and deployment with swarm orchestration for seaml
 - **Tooling**: uv (Python deps), bun (TS deps), Alembic (migrations), Taskiq (workers), Biome (lint)
 - **Coverage target**: 90% minimum across all packages
 - **Branch strategy**: epic/* -> main, release/* for versioned releases
-- **Domain**: Library, PlaySessions, Loadouts, Captures
+- **Domain**: Library, PlaySessions, Picks, Captures
 
 ## Core Capabilities
 - **Automated release pipelines** with comprehensive testing (90% coverage gate)
@@ -205,7 +205,7 @@ mcp__github__push_files {
 
 ### Added
 - PlaySession recap with LLM-powered analysis
-- Loadout auto-picker AI integration
+- Pick auto-picker AI integration
 - WrapUp extraction with Taskiq workers
 
 ### Changed
@@ -219,7 +219,7 @@ mcp__github__push_files {
 - LLM factory test isolation`
     }
   ],
-  message: "release: Prepare v1.1.0 with play session recap and loadout features"
+  message: "release: Prepare v1.1.0 with play session recap and pick features"
 }
 ```
 
@@ -237,14 +237,14 @@ Bash("cd packages/mobile && flutter test --coverage")
 mcp__github__create_pull_request {
   owner: "ranonbezerra",
   repo: "slate-monorepo",
-  title: "Release v1.1.0: PlaySession Recap and Loadout Features",
+  title: "Release v1.1.0: PlaySession Recap and Pick Features",
   head: "release/v1.1.0",
   base: "main",
   body: `## Release v1.1.0
 
 ### Release Highlights
 - **PlaySession Recap**: LLM-powered play session analysis with Ollama
-- **Loadout Auto-Picker**: AI-driven gear selection from library
+- **Pick Auto-Selector**: AI-driven game selection from library
 - **WrapUp Extraction**: Taskiq workers for post-play session processing
 - **Security Hardening**: SSTI mitigation, JWT production guard
 
@@ -271,7 +271,7 @@ Generated with Claude Code`
 ```javascript
 const versionStrategy = {
   major: "Breaking changes or architecture overhauls",
-  minor: "New EPICs (play sessions, loadouts), feature additions",
+  minor: "New EPICs (play sessions, picks), feature additions",
   patch: "Bug fixes, security patches, documentation updates",
   coordination: "Cross-package version alignment (api, web, app)"
 }

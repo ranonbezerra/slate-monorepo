@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from slate.infrastructure.db.models.auth import User
-    from slate.infrastructure.db.models.loadout import Loadout
+    from slate.infrastructure.db.models.pick import Pick
     from slate.infrastructure.db.models.play_session import PlaySession
 
 from sqlalchemy import (
@@ -124,7 +124,7 @@ class LibraryEntry(TimestampMixin, Base):
     game: Mapped["Game"] = relationship(back_populates="library_entries")
     platform: Mapped["Platform"] = relationship(back_populates="library_entries")
     play_sessions: Mapped[list["PlaySession"]] = relationship(back_populates="library_entry")
-    loadouts: Mapped[list["Loadout"]] = relationship(back_populates="library_entry")
+    picks: Mapped[list["Pick"]] = relationship(back_populates="library_entry")
 
     __table_args__ = (
         UniqueConstraint(

@@ -2,7 +2,7 @@
 
 ![Slate](./docs/brand/readme-hero.png)
 
-> *Less deciding. More playing.* A self-hosted gaming companion and production-AI systems showcase. Voice/photo/text capture, structured play session state, "previously on..." recaps before each session, and a 3-question daily loadout that picks one game for you.
+> *Less deciding. More playing.* A self-hosted gaming companion and production-AI systems showcase. Voice/photo/text capture, structured play session state, "previously on..." recaps before each session, and a 3-question daily Pick that selects one game for you.
 
 [![CI – API](https://img.shields.io/badge/CI-API-blue)](https://github.com/ranonbezerra/slate-monorepo/actions/workflows/ci-api.yml)
 [![CI – App](https://img.shields.io/badge/CI-App-blue)](https://github.com/ranonbezerra/slate-monorepo/actions/workflows/ci-app.yml)
@@ -19,7 +19,7 @@ Slate treats the backlog as a **decision problem**, not a cataloging problem. Th
 
 1. **Frictionless capture.** Speak "got Hollow Knight on Switch" and the app fills the metadata. No forms.
 2. **PlaySession recaps.** Before each session, the app generates a "previously on..." paragraph from your past wrap-ups — like a TV show recap.
-3. **Daily Loadout.** Three quick questions (mood, time, mental energy) → one suggested game with reasoning. You don't choose; the app does.
+3. **Daily Pick.** Three quick questions (mood, time, mental energy) → one suggested game with reasoning. You don't choose; the app does.
 
 No streaks. No "X days without playing" guilt. Dropping a game is a legitimate decision, not a failure.
 
@@ -32,8 +32,8 @@ Slate is a production-style AI application wrapped in a real product I use: a fu
 This is not a prompt demo. The interesting parts are the reliability boundaries around probabilistic systems:
 
 - **Local-first AI with provider boundaries.** The API talks to an `AbstractLLMClient`; Ollama is the real local backend and `DummyLLMClient` keeps tests deterministic. Faster-Whisper handles speech-to-text locally.
-- **Structured outputs with deterministic guards.** Capture parsing, wrap-up extraction, and loadout picks are treated as untrusted model output. The app validates JSON shape, candidate IDs, user ownership, and context overlap before persisting or showing results.
-- **Anti-hallucination as a product feature.** Recaps are checked against the user's actual play session context. Suspicious output is flagged instead of silently trusted. Loadout suggestions must reference an existing library entry; invalid UUIDs trigger a reroll path.
+- **Structured outputs with deterministic guards.** Capture parsing, wrap-up extraction, and Pick selections are treated as untrusted model output. The app validates JSON shape, candidate IDs, user ownership, and context overlap before persisting or showing results.
+- **Anti-hallucination as a product feature.** Recaps are checked against the user's actual play session context. Suspicious output is flagged instead of silently trusted. Pick suggestions must reference an existing library entry; invalid UUIDs trigger a reroll path.
 - **State machines for AI workflows.** Captures cross three systems (LLM, optional IGDB, user review). They're modeled as an explicit state machine (`queued → processing → review → committed/partially_committed/failed/cancelled`), making retries and partial commits safe.
 - **Failure handling over happy paths.** Background wrap-up extraction has retry/backoff behavior and synchronous fallback before recap generation. Capture processing degrades to review/failed states instead of corrupting the library.
 
@@ -110,7 +110,7 @@ Detailed architecture in [ARCHITECTURE.md](./ARCHITECTURE.md).
 - [x] **PlaySession lifecycle** — start a session, write a wrap-up at the end
 - [x] **Recap generation** — LLM-generated "previously on..." with anti-hallucination validation
 - [x] **Structured wrap-up extraction** — async LLM extraction of next actions, location, quest, level, and notes
-- [x] **Daily Loadout** — 3 questions → 1 suggested game with reasoning
+- [x] **Daily Pick** — 3 questions → 1 suggested game with reasoning
 - [x] **Analytics dashboard** (web + mobile) — play heatmap, genre/platform distribution, play session timeline
 - [x] Single-user mode for personal self-hosting
 - [x] Mobile: iOS, Android
@@ -118,7 +118,7 @@ Detailed architecture in [ARCHITECTURE.md](./ARCHITECTURE.md).
 ### In Design / Next
 
 - [ ] **Deep Research Recap** — LangGraph graph over local SearXNG + Ollama, with bounded search/refine loops, spoiler filtering, anti-hallucination validation, and quick-recap fallback.
-- [ ] **Backlog Concierge** — optional tool-using conversational agent over the user's real library, preserving the same UUID validation guard as Daily Loadout.
+- [ ] **Backlog Concierge** — optional tool-using conversational agent over the user's real library, preserving the same UUID validation guard as Daily Pick.
 - [ ] **Cloud provider adapters** — the runtime is provider-shaped today; cloud LLM providers such as Bedrock belong behind the existing LLM port, not in product code.
 
 ### Out of scope (deliberate)

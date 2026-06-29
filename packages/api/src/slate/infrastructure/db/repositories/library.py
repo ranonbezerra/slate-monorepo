@@ -193,12 +193,12 @@ class LibraryRepository:
         stmt = delete(LibraryEntry).where(LibraryEntry.id == entry.id)
         await self._session.execute(stmt)
 
-    async def list_eligible_for_loadout(
+    async def list_eligible_for_pick(
         self,
         user_id: int,
         cooldown_hours: int = 12,
     ) -> list[LibraryEntry]:
-        """Return entries eligible for a daily loadout suggestion.
+        """Return entries eligible for a Pick.
 
         An entry is eligible when:
         - ``status`` is ``backlog``, ``playing``, or ``paused``

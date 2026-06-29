@@ -228,10 +228,10 @@ class TestVerifiedGate:
         assert resp.status_code == 403
         assert resp.json()["detail"] == "Email not verified"
 
-    async def test_loadout_create_blocked_when_unverified(self, async_client: AsyncClient) -> None:
+    async def test_pick_create_blocked_when_unverified(self, async_client: AsyncClient) -> None:
         headers = await self._unverified_headers(async_client)
         resp = await async_client.post(
-            "/v1/loadouts",
+            "/v1/picks",
             json={"mood": "chill", "available_minutes": 30, "mental_energy": "low"},
             headers=headers,
         )

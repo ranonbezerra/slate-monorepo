@@ -43,7 +43,7 @@ Within Slate, memory optimization applies to:
 
 - **packages/api**: SQLAlchemy session management, Redis caching (Taskiq broker), PostgreSQL query optimization
 - **packages/web**: React query cache, local state management
-- **Domain data**: Library item catalogs, play session histories, capture metadata, loadout configurations
+- **Domain data**: Library item catalogs, play session histories, capture metadata, pick configurations
 
 Ticket prefix: DL-XX
 

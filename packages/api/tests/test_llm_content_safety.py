@@ -122,10 +122,10 @@ def test_wrap_up_extract_wraps_wrap_up_text() -> None:
     assert f"{USER_DATA_OPEN}{_INJECTION}{USER_DATA_CLOSE}" in rendered
 
 
-def test_loadout_pick_wraps_candidate_titles_not_ids() -> None:
+def test_pick_selection_wraps_candidate_titles_not_ids() -> None:
     pid = "11111111-1111-4111-8111-111111111111"
     rendered = _render(
-        "loadout_pick.j2",
+        "pick_selection.j2",
         candidates=[
             {
                 "game_title": _INJECTION,

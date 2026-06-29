@@ -14,7 +14,7 @@ from slate.infrastructure.db.models.auth import (
 from slate.infrastructure.db.models.capture import Capture, CaptureCandidate
 from slate.infrastructure.db.models.config import AppConfig
 from slate.infrastructure.db.models.library import Game, LibraryEntry, Platform
-from slate.infrastructure.db.models.loadout import Loadout
+from slate.infrastructure.db.models.pick import Pick
 from slate.infrastructure.db.models.play_session import PlaySession
 from slate.infrastructure.db.models.usage import UsageCounter
 
@@ -26,8 +26,8 @@ __all__ = [
     "CaptureCandidate",
     "Game",
     "LibraryEntry",
-    "Loadout",
     "OAuthIdentity",
+    "Pick",
     "Platform",
     "PlaySession",
     "RefreshToken",

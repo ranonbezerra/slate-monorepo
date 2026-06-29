@@ -18,7 +18,7 @@ import 'package:app/features/library/view/add_game_page.dart';
 import 'package:app/features/library/view/library_detail_page.dart';
 import 'package:app/features/library/view/library_list_page.dart';
 import 'package:app/features/library_import/view/library_import_page.dart';
-import 'package:app/features/loadout/view/loadout_page.dart';
+import 'package:app/features/pick/view/pick_page.dart';
 import 'package:app/features/play/view/play_page.dart';
 import 'package:app/features/play_session/view/play_session_recap_page.dart';
 import 'package:app/features/play_session/view/play_session_wrap_up_page.dart';
@@ -70,7 +70,7 @@ GoRouter createRouter(
       GoRoute(path: '/', redirect: (context, state) => '/play'),
 
       // ---- Legacy path redirects (keep old deep links working) ----
-      GoRoute(path: '/loadout', redirect: (context, state) => '/play/loadout'),
+      GoRoute(path: '/pick', redirect: (context, state) => '/play/pick'),
       GoRoute(path: '/play-sessions', redirect: (context, state) => '/history'),
       GoRoute(
         path: '/concierge',
@@ -88,8 +88,8 @@ GoRouter createRouter(
                 PlayPage(conciergeEnabled: featureFlags.backlogConcierge),
             routes: [
               GoRoute(
-                path: 'loadout',
-                builder: (context, state) => const LoadoutPage(),
+                path: 'pick',
+                builder: (context, state) => const PickPage(),
               ),
               // Legacy nested path — the playSession log now lives at /history.
               GoRoute(

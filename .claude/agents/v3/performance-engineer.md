@@ -201,10 +201,10 @@ engine = create_async_engine(
 )
 
 # Optimized play session query with eager loading
-async def get_play_sessions_with_loadouts(session, user_id: str):
+async def get_play_sessions_with_picks(session, user_id: str):
     stmt = (
         select(PlaySession)
-        .options(selectinload(PlaySession.loadout_items))
+        .options(selectinload(PlaySession.pick_items))
         .where(PlaySession.user_id == user_id)
         .order_by(PlaySession.created_at.desc())
     )

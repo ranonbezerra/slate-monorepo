@@ -17,7 +17,7 @@ The repository is public from Epic 0 onward. Every commit and PR is part of the 
 | 5 | Capture (voice) | faster-whisper local |
 | 6 | Capture (photo) | Multimodal LLM (vision) |
 | 7 | PlaySession + Recap | **Anchor feature** — anti-hallucination |
-| 8 | Daily Loadout | Second AI feature with UUID validation |
+| 8 | Daily Pick | Second AI feature with UUID validation |
 | 8.5 | Async WrapUp (Taskiq) | Decouple LLM extraction from wrap-up flow |
 | 9 | Stats + Web analytics | Where the dashboard shines |
 | 10 | Polish + Launch | README final, demo GIF, announcement |
@@ -294,24 +294,24 @@ In interviews this becomes: *"How do you handle LLM hallucinations in production
 
 ---
 
-## Epic 7 — Daily Loadout (Weekend 8)
+## Epic 7 — Daily Pick (Weekend 8)
 
 **Goal:** second AI feature. 3 questions → 1 game + reasoning.
 
 ### Tasks
 
-- [ ] Schema: `loadouts` via migration
+- [ ] Schema: `picks` via migration
 - [ ] Endpoints:
-  - `POST /v1/loadouts` (input: mood, available_minutes, mental_energy)
-  - `POST /v1/loadouts/{public_id}/accept` (creates play session)
-  - `POST /v1/loadouts/{public_id}/reject`
+  - `POST /v1/picks` (input: mood, available_minutes, mental_energy)
+  - `POST /v1/picks/{public_id}/accept` (creates play session)
+  - `POST /v1/picks/{public_id}/reject`
 - [ ] Logic:
   - List eligible library_entries (backlog/playing/paused, no ended play session < 12h ago)
-  - Prompt `prompts/loadout.j2` with list + context
+  - Prompt `prompts/pick_selection.j2` with list + context
   - Smart LLM returns `{library_entry_public_id, reasoning}`
   - **UUID validation:** if returned public_id is not in candidate list → reroll. Second failure → 422
-- [ ] Cron: mark loadout `action='ignored'` after 24h without accept/reject
-- [ ] App: screens `LoadoutQuestionsPage` (3 sliders/radio groups), `LoadoutResultPage` (big game card + reasoning)
+- [ ] Cron: mark pick `action='ignored'` after 24h without accept/reject
+- [ ] App: screens `PickQuestionsPage` (3 sliders/radio groups), `PickResultPage` (big game card + reasoning)
 - [ ] Pytest with DummyLLM returning invalid UUID → test the reroll
 
 ### Definition of Done
@@ -323,7 +323,7 @@ In interviews this becomes: *"How do you handle LLM hallucinations in production
 
 ### Technical highlight
 
-> **Constraint: LLM must pick from existing library.** The loadout endpoint validates that the returned UUID exists in the user's eligible library entries. If not (the LLM hallucinated a UUID), reroll once, then 422. Same anti-hallucination pattern as recap, applied to structured output.
+> **Constraint: LLM must pick from existing library.** The pick endpoint validates that the returned UUID exists in the user's eligible library entries. If not (the LLM hallucinated a UUID), reroll once, then 422. Same anti-hallucination pattern as recap, applied to structured output.
 
 ---
 
@@ -418,7 +418,7 @@ This is the spot that connects Slate to Freeler narratively. A recruiter who rea
 ### Tasks
 
 - [ ] Final README.md with:
-  - Hook: demo GIF (voice capture → review → recap → loadout)
+  - Hook: demo GIF (voice capture → review → recap → pick)
   - Short problem/solution
   - Stack badges
   - "Why this exists" (vitrine + personal use)
@@ -525,11 +525,11 @@ It adds a Docker service (SearXNG), a new dependency (`langgraph`), two new hexa
 
 ## Epic 11 — Backlog Concierge (v1.1+)
 
-**Goal:** an optional, conversational, tool-using agent — the agentic evolution of Daily Loadout. Where the Loadout (Epic 7) is a rigid 3-question → 1-pick form, the Concierge is a multi-turn chat: "I've got an hour, I'm tired, what should I play?" → it calls tools over the real library and reasons across turns.
+**Goal:** an optional, conversational, tool-using agent — the agentic evolution of Daily Pick. Where the Pick (Epic 7) is a rigid 3-question → 1-pick form, the Concierge is a multi-turn chat: "I've got an hour, I'm tired, what should I play?" → it calls tools over the real library and reasons across turns.
 
 ### Product caveat (read before building)
 
-The product thesis is *"you don't choose, the app picks"* — zero friction, indecision killed. A chatty agent **reintroduces** that friction. So the Concierge is **not** a replacement for the one-tap Loadout; it is an opt-in "talk to the operator" mode for power users who want to discuss. The default home action stays the single-tap Loadout. If this caveat ever feels wrong in practice, cut the epic — the Loadout already covers the core need.
+The product thesis is *"you don't choose, the app picks"* — zero friction, indecision killed. A chatty agent **reintroduces** that friction. So the Concierge is **not** a replacement for the one-tap Pick; it is an opt-in "talk to the operator" mode for power users who want to discuss. The default home action stays the single-tap Pick. If this caveat ever feels wrong in practice, cut the epic — the Pick already covers the core need.
 
 ### Why LangGraph here
 
@@ -555,19 +555,19 @@ This is the genuinely agentic case: multi-turn, stateful (conversation threads v
 ### Definition of Done
 
 - Power-user can chat multi-turn and get a grounded recommendation that exists in their library
-- One-tap Loadout remains the default and is untouched
+- One-tap Pick remains the default and is untouched
 - Tool calls only read existing data; no new tables
 - Agent never recommends a non-existent entry (guard enforced)
 
 ### Technical highlight
 
-> **Tool-calling agent on a local model, with the product's guard rails intact.** The Concierge uses `ChatOllama.bind_tools` over read-only library tools, but the recommendation is still validated against the real library before it reaches the user (same UUID-existence guard as Epic 7). The harder decision is restraint: keeping it an opt-in mode so it complements, rather than fights, the zero-friction Loadout.
+> **Tool-calling agent on a local model, with the product's guard rails intact.** The Concierge uses `ChatOllama.bind_tools` over read-only library tools, but the recommendation is still validated against the real library before it reaches the user (same UUID-existence guard as Epic 7). The harder decision is restraint: keeping it an opt-in mode so it complements, rather than fights, the zero-friction Pick.
 
 ---
 
 ## Epic 12 — Unified PlaySession Pipeline (v1.1+)
 
-**Goal:** make **PlaySession the single spine** of the play loop and turn "deciding what to play" and "getting a recap" into independent, **skippable** stages that all converge on one `start_play_session` orchestrator. Today the same end state — an active play session — is reachable through three divergent, inconsistent code paths; this epic consolidates them and reframes Loadout and Concierge as *entrances* to the play session flow rather than separate destinations.
+**Goal:** make **PlaySession the single spine** of the play loop and turn "deciding what to play" and "getting a recap" into independent, **skippable** stages that all converge on one `start_play_session` orchestrator. Today the same end state — an active play session — is reachable through three divergent, inconsistent code paths; this epic consolidates them and reframes Pick and Concierge as *entrances* to the play session flow rather than separate destinations.
 
 ### The problem (what the code shows today)
 
@@ -575,37 +575,37 @@ A play session gets created three different ways, and they disagree:
 
 | Path | Game chosen by | Recap |
 | --- | --- | --- |
-| `LoadoutService.accept_loadout` (`/v1/loadouts/{id}/accept`) | AI (3-question form) | **none** — creates an *empty* play session |
+| `PickService.accept_pick` (`/v1/picks/{id}/accept`) | AI (3-question form) | **none** — creates an *empty* play session |
 | `PlaySessionService.start_play_session` (`POST /v1/play-sessions`) | user (already knows) | optional `quick` / `deep` / skip |
 | `submit_retroactive_wrap_up` (`/v1/play-sessions/retroactive-wrap-up`) | user | n/a (pre-ended "I played offline") |
 
-Accepting a Loadout yields a recap-less play session; starting one directly yields a recap — same outcome, two behaviours, duplicated active-play session guards. And the **Concierge dead-ends**: it recommends a game but cannot start it, recap it, or log a session, so it only *overlaps* Loadout without doing any real work.
+Accepting a Pick yields a recap-less play session; starting one directly yields a recap — same outcome, two behaviours, duplicated active-play session guards. And the **Concierge dead-ends**: it recommends a game but cannot start it, recap it, or log a session, so it only *overlaps* Pick without doing any real work.
 
 ### The model
 
 Every existing and desired flow is one point in a small cube:
 
 ```text
-START A PLAY_SESSION = DECIDE (self | AI one-tap loadout | conversational concierge)
+START A PLAY_SESSION = DECIDE (self | AI one-tap pick | conversational concierge)
                 × RECAP  (none | quick | deep)
                 × MODE   (live | retroactive)
 ```
 
-`PlaySession` is the aggregate root. `Loadout` stays a **decision record** (keep its accept-rate history + 24h auto-ignore), but its acceptance routes through the same orchestrator. The Concierge becomes the **conversational operator** of the whole pipeline, not a second recommender.
+`PlaySession` is the aggregate root. `Pick` stays a **decision record** (keep its accept-rate history + 24h auto-ignore), but its acceptance routes through the same orchestrator. The Concierge becomes the **conversational operator** of the whole pipeline, not a second recommender.
 
 ### Tasks
 
 - [x] Extract a single `start_play_session` orchestrator (`core/play-session/start.py::create_play_session_for_entry`, free function over repos, mirroring `recap.py`'s pattern); it owns the one-active-play session guard (409 backstop) and `last_played_at` update.
 - [x] Refactor `PlaySessionService.start_play_session` to delegate to it (no behaviour change — existing tests stay green).
-- [x] Refactor `LoadoutService.accept_loadout` to delegate to it, gaining an **optional recap stage** (`recap_text` on `LoadoutAcceptRequest`; backward-compatible default).
-- [x] Add a "let the AI pick" path (`LoadoutService.create_and_start` → `POST /v1/loadouts/start`): AI-pick a game and start a play session in one step, so DECIDE=AI and RECAP are independent.
+- [x] Refactor `PickService.accept_pick` to delegate to it, gaining an **optional recap stage** (`recap_text` on `PickAcceptRequest`; backward-compatible default).
+- [x] Add a "let the AI pick" path (`PickService.create_and_start` → `POST /v1/picks/start`): AI-pick a game and start a play session in one step, so DECIDE=AI and RECAP are independent.
 - [x] Give the Concierge **write tools** — `start_play_session`, `generate_recap`, `submit_retroactive_wrap_up`, `set_status` (`infrastructure/agent/concierge/tools_write.py`); gated by `concierge_write_tools_enabled`. Each is UUID-validated and respects the one-active-play session guard.
-- [x] Client nav restructure: collapsed Loadout + Concierge into one **Play** hub (active play session front-and-centre; three doors: "What's the move?" one-tap, "I'll choose", "Ask") on both the web sidebar (`pages/PlayPage.tsx`, `App.tsx`) and Flutter shell (`features/play/view/play_page.dart`, `shell_page.dart`, `routes.dart`). Nav is **Play / Library / History / Stats** — the play session log is its own **History** tab (`/history`); start doors disable while a play session is active; the loadout flow offers an optional recap before starting. Old paths redirect to `/play/*` / `/history`.
-- [x] Tests: orchestrator unit tests (`test_play_session_start.py`); loadout-accept-with-recap and `/start` (`test_loadout.py`); concierge write-tool guards (`test_concierge_tools_write.py`).
+- [x] Client nav restructure: collapsed Pick + Concierge into one **Play** hub (active play session front-and-centre; three doors: "What's the move?" one-tap, "I'll choose", "Ask") on both the web sidebar (`pages/PlayPage.tsx`, `App.tsx`) and Flutter shell (`features/play/view/play_page.dart`, `shell_page.dart`, `routes.dart`). Nav is **Play / Library / History / Stats** — the play session log is its own **History** tab (`/history`); start doors disable while a play session is active; the pick flow offers an optional recap before starting. Old paths redirect to `/play/*` / `/history`.
+- [x] Tests: orchestrator unit tests (`test_play_session_start.py`); pick-accept-with-recap and `/start` (`test_pick.py`); concierge write-tool guards (`test_concierge_tools_write.py`).
 
 ### Definition of Done
 
-- One `start_play_session` orchestrator; `accept_loadout`, direct start, and the Concierge all funnel through it.
+- One `start_play_session` orchestrator; `accept_pick`, direct start, and the Concierge all funnel through it.
 - Recap is a genuinely optional stage regardless of how the game was chosen.
 - The Concierge can start/recap/log a session, not just recommend.
 - Nav presents ~3 areas (Play / Library / Stats) instead of 5–6 tabs.
@@ -618,7 +618,7 @@ It's a cross-cutting refactor (service consolidation + new write surface + nav o
 ### Risks
 
 - **Wizardisation.** Turning a one-tap action into a multi-step flow would betray the core promise. Mitigation: defaults collapse the common path to one action; steps are opt-in.
-- **Losing Loadout's analytics/auto-ignore.** Keep the `Loadout` row as a decision record; only its *acceptance path* changes.
+- **Losing Pick's analytics/auto-ignore.** Keep the `Pick` row as a decision record; only its *acceptance path* changes.
 
 ---
 
@@ -711,7 +711,7 @@ Our two model roles map cleanly onto cloud tiers — a cheap tier for the freque
 | Role | Used by | Bedrock-Claude model |
 | --- | --- | --- |
 | `fast` | `grade`, `refine`, wrap-up extraction, captures | `anthropic.claude-haiku-4-5` |
-| `smart` | `synthesize`, `spoiler_filter`, quick recap, loadout pick | `anthropic.claude-sonnet-4-6` |
+| `smart` | `synthesize`, `spoiler_filter`, quick recap, pick selection | `anthropic.claude-sonnet-4-6` |
 | (optional max-quality `smart`) | recaps only, if quality demands | `anthropic.claude-opus-4-8` |
 
 Vertex/Gemini has an equivalent Flash (cheap) / Pro (premium) split.
@@ -745,7 +745,7 @@ A deep recap fires up to ~4 LLM calls (`grade` → `refine`×0–2 → `synthesi
 
 ### Definition of Done
 
-- `LLM_PROVIDER=bedrock` (or `vertex`) works end-to-end for captures, recaps (quick + deep), loadout, and wrap-up extraction; Ollama remains the OSS default; `dummy` still used in tests
+- `LLM_PROVIDER=bedrock` (or `vertex`) works end-to-end for captures, recaps (quick + deep), pick, and wrap-up extraction; Ollama remains the OSS default; `dummy` still used in tests
 - All `AbstractLLMClient` methods implemented on the new provider, including `complete()` with JSON mode and adaptive thinking
 - A documented cost comparison and a provider recommendation tied to expected volume
 - No regression to the local-first default path; test coverage at parity with the Ollama client
@@ -764,7 +764,7 @@ A deep recap fires up to ~4 LLM calls (`grade` → `refine`×0–2 → `synthesi
 
 ### Context
 
-The single biggest onboarding cliff is the empty library. Epic 5 added multimodal photo capture (covers + shelves, limit 12), but bulk import has a different shape: dozens of titles in one frame, and the **expensive, one-time** moment in a user's lifecycle. Library *additions* are free and unlimited across all tiers (only `deep recap` is gated to Pro, and free tier is one recap + one loadout/day), so the import path is pure CAC, not COGS — but only if it stays cheap. The cost spike here is OCR/vision, **not Whisper**: nobody dictates 100 games by voice, so STT (Epic 4) never enters this path. The thing that quietly turns cents into dollars is **retry from low accuracy** — bad extraction → user re-shoots and re-runs → multiplies both cost and friction. So accuracy is simultaneously the cost control and the friction control; they are the same problem.
+The single biggest onboarding cliff is the empty library. Epic 5 added multimodal photo capture (covers + shelves, limit 12), but bulk import has a different shape: dozens of titles in one frame, and the **expensive, one-time** moment in a user's lifecycle. Library *additions* are free and unlimited across all tiers (only `deep recap` is gated to Pro, and free tier is one recap + one pick/day), so the import path is pure CAC, not COGS — but only if it stays cheap. The cost spike here is OCR/vision, **not Whisper**: nobody dictates 100 games by voice, so STT (Epic 4) never enters this path. The thing that quietly turns cents into dollars is **retry from low accuracy** — bad extraction → user re-shoots and re-runs → multiplies both cost and friction. So accuracy is simultaneously the cost control and the friction control; they are the same problem.
 
 ### The decisive insight: text source beats image recognition
 
@@ -941,7 +941,7 @@ The app has several genuinely expensive, repeat-heavy operations — a **deep re
 | Target | Key | TTL / invalidation | Why |
 |---|---|---|---|
 | **Deep research recap** (Epic 10) | `(game_id, normalized session-state hash, mode)` | TTL (days) + **bust on new wrap-up** for that entry | The most expensive op (multi-LLM + web). Biggest single win. |
-| **LLM completions** (capture parse, loadout pick) | content-addressed `(model, prompt hash, json-mode)` | short TTL | De-dupes identical prompts; cheap correctness (idempotent inputs). |
+| **LLM completions** (capture parse, pick selection) | content-addressed `(model, prompt hash, json-mode)` | short TTL | De-dupes identical prompts; cheap correctness (idempotent inputs). |
 | **Web research / SearXNG** (Epic 10) | `normalized query` | TTL (hours) | Network hop; queries repeat across recaps. |
 | **Stats / analytics** (Epic 9) | `(user_id, window)` per overview/genre/platform | short TTL + **bust on play session start/end + wrap-up** | Recomputed on every dashboard load; per-user. |
 | **IGDB search** (Epic 17) | done | — | Already shipped as the seed. |
@@ -1062,7 +1062,7 @@ Two kinds of config, two mechanisms (do **not** put everything in one place):
 
 - [x] **Phase 4 — Backoffice web foundation + ready domains** (#47): a distinct admin shell (separate `/backoffice` area reusing the existing auth/session, visually marked as a backoffice) + admin guard; **Dashboard** (`GET /internal/v1/dashboard` aggregate endpoint: user/ban/verify/admin counts, active play sessions, catalogue size, config overrides, recent admin actions); **Users**, **Config**, and **Audit** management screens over the existing APIs.
 - [x] **Phase 5 — Games / catalogue admin** (this PR): `/internal/v1/games` (list/search with owner counts + provenance filters, detail, demote/promote — surfacing `demote_game.py` as a panel action — and metadata edit, all audited) + a **Catalogue** screen in the backoffice (table, source filters, demote/promote/edit, catalogue tallies). Catalogue *merge* (library-entry reassignment) deferred to a follow-up.
-- [ ] **Phase 6 — Other domains (moderation & data browse)**: play sessions (browse/force-clamp), captures (browse/reprocess/purge), loadouts, and basic read-only data browse across domains — each behind the same audited admin boundary.
+- [ ] **Phase 6 — Other domains (moderation & data browse)**: play sessions (browse/force-clamp), captures (browse/reprocess/purge), picks, and basic read-only data browse across domains — each behind the same audited admin boundary.
 
 ### Definition of Done
 
@@ -1079,7 +1079,7 @@ Two kinds of config, two mechanisms (do **not** put everything in one place):
 If at some point you feel you're pushing, these are the epics to defer to **v1.1** without destroying the vitrine:
 
 1. **Epic 5 (photo capture).** Keeping text + voice is already strong. Photo goes to v1.1.
-2. **Epic 7 (loadout).** Recap alone is already the anchor AI feature. Loadout can wait.
+2. **Epic 7 (pick).** Recap alone is already the anchor AI feature. Pick can wait.
 3. **Epic 8 (stats).** Web can ship with just the library data table for v1; stats moves to v1.1.
 
 **Don't skip:** Foundation, Auth, Library, Capture Text (Epic 3), PlaySession + Recap (Epic 6), Polish (Epic 9). These are the **core of the vitrine**.

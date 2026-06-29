@@ -21,7 +21,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    # NOTE: loadouts.context is created by b8d4e2f3a561 (create_loadouts_table).
+    # NOTE: picks.context is created by b8d4e2f3a561 (create_picks_table).
     # It was previously also added here, which double-added it on a from-scratch
     # `upgrade head` (existing DBs were unaffected). Removed — the create_table is
     # the column's single owner.

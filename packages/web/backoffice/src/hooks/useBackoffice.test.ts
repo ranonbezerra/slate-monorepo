@@ -14,8 +14,8 @@ vi.mock("../lib/backoffice-api", () => ({
 	fetchCapture: vi.fn(),
 	fetchPlaySessions: vi.fn(),
 	fetchPlaySession: vi.fn(),
-	fetchLoadouts: vi.fn(),
-	fetchLoadout: vi.fn(),
+	fetchPicks: vi.fn(),
+	fetchPick: vi.fn(),
 	banUser: vi.fn(),
 	unbanUser: vi.fn(),
 	verifyUser: vi.fn(),
@@ -40,8 +40,8 @@ import {
 	useDashboard,
 	useGameActions,
 	useGames,
-	useLoadout,
-	useLoadouts,
+	usePick,
+	usePicks,
 	usePlaySession,
 	usePlaySessionActions,
 	usePlaySessions,
@@ -113,15 +113,15 @@ describe("useBackoffice queries", () => {
 		expect(m.result.current.fetchStatus).toBe("idle");
 	});
 
-	it("useLoadouts passes params; useLoadout is disabled when id is null", async () => {
-		(api.fetchLoadouts as Mock).mockResolvedValue({ items: [], action_counts: [] });
+	it("usePicks passes params; usePick is disabled when id is null", async () => {
+		(api.fetchPicks as Mock).mockResolvedValue({ items: [], action_counts: [] });
 		const wrapper = createWrapper();
 
-		renderHook(() => useLoadouts({ action: "ignored" }), { wrapper });
-		const l = renderHook(() => useLoadout(null), { wrapper });
+		renderHook(() => usePicks({ action: "ignored" }), { wrapper });
+		const l = renderHook(() => usePick(null), { wrapper });
 
-		await waitFor(() => expect(api.fetchLoadouts).toHaveBeenCalledWith({ action: "ignored" }));
-		expect(api.fetchLoadout).not.toHaveBeenCalled();
+		await waitFor(() => expect(api.fetchPicks).toHaveBeenCalledWith({ action: "ignored" }));
+		expect(api.fetchPick).not.toHaveBeenCalled();
 		expect(l.result.current.fetchStatus).toBe("idle");
 	});
 });

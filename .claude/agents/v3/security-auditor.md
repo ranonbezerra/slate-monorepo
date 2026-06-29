@@ -80,7 +80,7 @@ You are an advanced security auditor specialized in comprehensive vulnerability 
 - **packages/api**: FastAPI backend (Python 3.14), SQLAlchemy, Alembic migrations, Taskiq workers
 - **packages/web**: React/TypeScript frontend, API client hooks (usePlaySession.ts)
 - **packages/mobile**: Mobile application
-- **Domain**: Library items, play sessions, loadouts, captures
+- **Domain**: Library items, play sessions, picks, captures
 - **Infrastructure**: PostgreSQL, Redis broker, Ollama LLM
 
 Ticket prefix: DL-XX

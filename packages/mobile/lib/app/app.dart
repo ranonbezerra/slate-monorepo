@@ -8,7 +8,7 @@ import 'package:app/features/capture/bloc/capture_bloc.dart';
 import 'package:app/features/concierge/bloc/concierge_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/library_import/bloc/library_import_bloc.dart';
-import 'package:app/features/loadout/bloc/loadout_bloc.dart';
+import 'package:app/features/pick/bloc/pick_bloc.dart';
 import 'package:app/features/play_session/bloc/play_session_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,7 +21,7 @@ class App extends StatefulWidget {
     required this.captureBloc,
     required this.libraryImportBloc,
     required this.playSessionBloc,
-    required this.loadoutBloc,
+    required this.pickBloc,
     required this.analyticsBloc,
     required this.conciergeBloc,
     required this.libraryRepository,
@@ -34,7 +34,7 @@ class App extends StatefulWidget {
   final CaptureBloc captureBloc;
   final LibraryImportBloc libraryImportBloc;
   final PlaySessionBloc playSessionBloc;
-  final LoadoutBloc loadoutBloc;
+  final PickBloc pickBloc;
   final AnalyticsBloc analyticsBloc;
   final ConciergeBloc conciergeBloc;
   final LibraryRepository libraryRepository;
@@ -73,7 +73,7 @@ class _AppState extends State<App> {
         BlocProvider<CaptureBloc>.value(value: widget.captureBloc),
         BlocProvider<LibraryImportBloc>.value(value: widget.libraryImportBloc),
         BlocProvider<PlaySessionBloc>.value(value: widget.playSessionBloc),
-        BlocProvider<LoadoutBloc>.value(value: widget.loadoutBloc),
+        BlocProvider<PickBloc>.value(value: widget.pickBloc),
         BlocProvider<AnalyticsBloc>.value(value: widget.analyticsBloc),
         BlocProvider<ConciergeBloc>.value(value: widget.conciergeBloc),
       ],

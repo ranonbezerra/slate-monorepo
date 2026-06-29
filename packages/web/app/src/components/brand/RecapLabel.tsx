@@ -8,7 +8,7 @@ export interface RecapLabelProps extends TextProps {
 /**
  * The recap label — "▸ PREVIOUSLY ON" (BRAND.md §8/§9). A play glyph plus an
  * uppercase, letter-spaced label in the display face. Editorial TV-recap, not a
- * code-terminal `//` comment. Use for "▸ PREVIOUSLY ON", "▸ TONIGHT'S LOADOUT",
+ * code-terminal `//` comment. Use for "▸ PREVIOUSLY ON", "▸ TONIGHT'S PICK",
  * "▸ WHERE YOU LEFT OFF".
  */
 export function RecapLabel({ children, style, ...rest }: RecapLabelProps) {

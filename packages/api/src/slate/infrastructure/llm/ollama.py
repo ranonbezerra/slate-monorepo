@@ -14,7 +14,7 @@ from slate.config import Settings
 from slate.config import settings as _settings
 from slate.core.sanitization import wrap_user_data
 
-from .base import AbstractLLMClient, ExtractedGame, ExtractedState, LLMRole, LoadoutPick
+from .base import AbstractLLMClient, ExtractedGame, ExtractedState, LLMRole, PickSelection
 from .parsers import _extract_json, _parse_game_list
 
 logger = structlog.get_logger()
@@ -48,7 +48,7 @@ _CAPTURE_PARSE_SRC = _load_prompt("capture_parse.j2")
 _CAPTURE_PARSE_VISION_SRC = _load_prompt("capture_parse_vision.j2")
 _RECAP_SRC = _load_prompt("recap.j2")
 _WRAP_UP_EXTRACT_SRC = _load_prompt("wrap_up_extract.j2")
-_LOADOUT_PICK_SRC = _load_prompt("loadout_pick.j2")
+_PICK_SELECTION_SRC = _load_prompt("pick_selection.j2")
 
 
 class OllamaClient(AbstractLLMClient):
@@ -235,16 +235,16 @@ class OllamaClient(AbstractLLMClient):
             logger.warning("ollama_wrap_up_parse_error", error=str(exc))
             return ExtractedState()
 
-    async def pick_loadout_game(
+    async def select_game(
         self,
         candidates: list[dict[str, object]],
         mood: str,
         available_minutes: int,
         mental_energy: str,
         context: str | None = None,
-    ) -> LoadoutPick:
+    ) -> PickSelection:
         """Pick a game from candidates using the smart LLM model."""
-        prompt = _jinja_env.from_string(_LOADOUT_PICK_SRC).render(
+        prompt = _jinja_env.from_string(_PICK_SELECTION_SRC).render(
             candidates=candidates,
             mood=mood,
             available_minutes=available_minutes,
@@ -258,22 +258,22 @@ class OllamaClient(AbstractLLMClient):
             "format": "json",
         }
 
-        resp = await self._call_generate(payload, "ollama_loadout_pick_failed")
+        resp = await self._call_generate(payload, "ollama_pick_selection_failed")
         if resp is None:
-            raise httpx.HTTPError("Ollama loadout pick request failed")
+            raise httpx.HTTPError("Ollama pick selection request failed")
 
         try:
             body = resp.json()
             raw_text = body.get("response", "")
             parsed = json.loads(raw_text)
 
-            return LoadoutPick(
+            return PickSelection(
                 library_entry_public_id=str(parsed["library_entry_public_id"]),
                 reasoning=str(parsed.get("reasoning", "")),
             )
         except (json.JSONDecodeError, KeyError, TypeError) as exc:
-            logger.warning("ollama_loadout_pick_parse_error", error=str(exc))
-            raise httpx.HTTPError("Failed to parse loadout pick response") from exc
+            logger.warning("ollama_pick_selection_parse_error", error=str(exc))
+            raise httpx.HTTPError("Failed to parse pick selection response") from exc
 
     async def complete(
         self,

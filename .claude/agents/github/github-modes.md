@@ -35,7 +35,7 @@ This document describes all GitHub integration modes available for the Slate mon
 - **packages/api**: FastAPI backend (Python 3.14, Alembic, Taskiq, Jinja2 LLM prompts)
 - **packages/web**: React frontend (TypeScript, Mantine UI, Bun, Biome linting)
 - **packages/mobile**: Flutter mobile app (Dart)
-- **Domain**: Library (gear/equipment), PlaySessions (recap/wrap-up), Loadouts (gear selection/packing), Captures (voice/photo/text with AI)
+- **Domain**: Library (gear/equipment), PlaySessions (recap/wrap-up), Picks (daily game suggestion), Captures (voice/photo/text with AI)
 - **Coverage target**: 90% minimum across all packages
 
 ## GitHub Workflow Modes
@@ -159,9 +159,9 @@ All GitHub modes support batch operations for maximum efficiency:
 ```javascript
 [Single Message with BatchTool]:
   Bash("gh issue create --title 'Feature: PlaySession Recap' --body '...'")
-  Bash("gh issue create --title 'Feature: Loadout Picker' --body '...'")
+  Bash("gh issue create --title 'Feature: Pick' --body '...'")
   Bash("gh pr create --title 'PR 1' --head 'epic/6-play session-recap' --base 'main'")
-  Bash("gh pr create --title 'PR 2' --head 'feature/loadout-picker' --base 'main'")
+  Bash("gh pr create --title 'PR 2' --head 'feature/pick' --base 'main'")
   TodoWrite { todos: [todo1, todo2, todo3] }
   Bash("git checkout main && git pull")
 ```

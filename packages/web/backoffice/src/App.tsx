@@ -7,8 +7,8 @@ import { CapturesPage } from "./pages/CapturesPage";
 import { ConfigPage } from "./pages/ConfigPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GamesPage } from "./pages/GamesPage";
-import { LoadoutsPage } from "./pages/LoadoutsPage";
 import { LoginPage } from "./pages/LoginPage";
+import { PicksPage } from "./pages/PicksPage";
 import { PlaySessionsPage } from "./pages/PlaySessionsPage";
 import { UsersPage } from "./pages/UsersPage";
 
@@ -23,7 +23,7 @@ function BackofficeApp() {
 					<Route path="games" element={<GamesPage />} />
 					<Route path="captures" element={<CapturesPage />} />
 					<Route path="play-sessions" element={<PlaySessionsPage />} />
-					<Route path="loadouts" element={<LoadoutsPage />} />
+					<Route path="picks" element={<PicksPage />} />
 					<Route path="config" element={<ConfigPage />} />
 					<Route path="audit" element={<AuditPage />} />
 					<Route path="*" element={<Navigate to="/" replace />} />

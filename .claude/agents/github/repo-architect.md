@@ -46,7 +46,7 @@ Repository structure optimization and monorepo management with swarm coordinatio
 - **Monorepo**: ranonbezerra/slate-monorepo
 - **Packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun, Biome), packages/mobile (Flutter)
 - **Tooling**: uv (Python), bun (TypeScript), Alembic (migrations), Taskiq (workers)
-- **Domain**: Library, PlaySessions, Loadouts, Captures
+- **Domain**: Library, PlaySessions, Picks, Captures
 - **Coverage**: 90% minimum
 
 ## Capabilities
@@ -115,7 +115,7 @@ slate-monorepo/
 │   │   │   └── versions/
 │   │   ├── src/slate/
 │   │   │   ├── api/v1/        # FastAPI routers
-│   │   │   ├── core/          # Business logic (auth, play session, capture, loadout)
+│   │   │   ├── core/          # Business logic (auth, play session, capture, pick)
 │   │   │   ├── infrastructure/
 │   │   │   │   ├── db/        # SQLAlchemy models, repositories
 │   │   │   │   └── llm/       # Ollama client, Jinja2 prompts

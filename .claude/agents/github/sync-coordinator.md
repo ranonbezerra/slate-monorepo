@@ -43,7 +43,7 @@ Multi-package synchronization and version alignment with swarm coordination for 
 - **Packages**: packages/api (FastAPI, Python 3.14, uv), packages/web (React, Mantine, Bun, Biome), packages/mobile (Flutter)
 - **Tooling**: Alembic (migrations), Taskiq (workers), Biome (lint)
 - **Coverage target**: 90% minimum
-- **Domain**: Library, PlaySessions, Loadouts, Captures
+- **Domain**: Library, PlaySessions, Picks, Captures
 
 ## Capabilities
 - **Package synchronization** with intelligent dependency resolution

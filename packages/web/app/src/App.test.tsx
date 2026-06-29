@@ -24,7 +24,7 @@ vi.mock("./contexts/AuthContext", () => ({
 
 vi.mock("./pages/PlayPage", () => ({ PlayPage: () => <div>PlayPage</div> }));
 vi.mock("./pages/LibraryPage", () => ({ LibraryPage: () => <div>LibraryPage</div> }));
-vi.mock("./pages/LoadoutPage", () => ({ LoadoutPage: () => <div>LoadoutPage</div> }));
+vi.mock("./pages/PickPage", () => ({ PickPage: () => <div>PickPage</div> }));
 vi.mock("./pages/PlaySessionsPage", () => ({
 	PlaySessionsPage: () => <div>PlaySessionsPage</div>,
 }));
@@ -150,9 +150,9 @@ describe("App - authenticated layout", () => {
 		expect(await screen.findByText("PlayPage")).toBeInTheDocument();
 	});
 
-	it("renders LoadoutPage at /play/loadout", async () => {
-		renderApp(["/play/loadout"]);
-		expect(await screen.findByText("LoadoutPage")).toBeInTheDocument();
+	it("renders PickPage at /play/pick", async () => {
+		renderApp(["/play/pick"]);
+		expect(await screen.findByText("PickPage")).toBeInTheDocument();
 	});
 
 	it("renders PlaySessionsPage (Session history) at /history", async () => {
@@ -160,9 +160,9 @@ describe("App - authenticated layout", () => {
 		expect(await screen.findByText("PlaySessionsPage")).toBeInTheDocument();
 	});
 
-	it("redirects the old /loadout route to /play/loadout", async () => {
-		renderApp(["/loadout"]);
-		expect(await screen.findByText("LoadoutPage")).toBeInTheDocument();
+	it("redirects the old /pick route to /play/pick", async () => {
+		renderApp(["/pick"]);
+		expect(await screen.findByText("PickPage")).toBeInTheDocument();
 	});
 
 	it("redirects the old /play-sessions route to /history", async () => {

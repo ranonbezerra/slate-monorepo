@@ -131,13 +131,13 @@ Content-Type: application/json
 | POST | `/{public_id}/recap/preview` | Preview recap before starting |
 | POST | `/{public_id}/recap/regenerate` | Regenerate recap |
 
-### Loadouts (`/v1/loadouts`)
+### Picks (`/v1/picks`)
 
 | Method | Path | Description |
 | --- | --- | --- |
-| POST | `/` | Create loadout suggestion(s) |
-| GET | `/` | List loadouts (paginated) |
-| GET | `/latest` | Get latest pending loadout |
+| POST | `/` | Create pick suggestion(s) |
+| GET | `/` | List picks (paginated) |
+| GET | `/latest` | Get latest pending pick |
 | POST | `/{public_id}/accept` | Accept and start play session |
 | POST | `/{public_id}/reject` | Reject suggestion |
 

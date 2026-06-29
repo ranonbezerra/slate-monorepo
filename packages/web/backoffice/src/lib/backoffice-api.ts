@@ -12,9 +12,9 @@ import type {
 	AdminCaptureList,
 	AdminGameDetail,
 	AdminGameList,
-	AdminLoadoutDetail,
-	AdminLoadoutList,
 	AdminMe,
+	AdminPickDetail,
+	AdminPickList,
 	AdminPlaySessionDetail,
 	AdminPlaySessionList,
 	AdminUserDetail,
@@ -26,7 +26,7 @@ import type {
 	DashboardSummary,
 	GameEdit,
 	GameListParams,
-	LoadoutListParams,
+	PickListParams,
 	PlaySessionListParams,
 	UserListParams,
 } from "../types/backoffice";
@@ -185,20 +185,20 @@ export async function clampPlaySession(publicId: string): Promise<AdminPlaySessi
 	);
 }
 
-export async function fetchLoadouts(params: LoadoutListParams = {}): Promise<AdminLoadoutList> {
+export async function fetchPicks(params: PickListParams = {}): Promise<AdminPickList> {
 	const sp = new URLSearchParams();
 	if (params.q) sp.set("q", params.q);
 	if (params.action) sp.set("action", params.action);
 	if (params.limit !== undefined) sp.set("limit", String(params.limit));
 	if (params.offset !== undefined) sp.set("offset", String(params.offset));
 	const qs = sp.toString();
-	return snakeToCamel<AdminLoadoutList>(
-		await apiFetch<unknown>(`${BASE}/loadouts${qs ? `?${qs}` : ""}`),
+	return snakeToCamel<AdminPickList>(
+		await apiFetch<unknown>(`${BASE}/picks${qs ? `?${qs}` : ""}`),
 	);
 }
 
-export async function fetchLoadout(publicId: string): Promise<AdminLoadoutDetail> {
-	return snakeToCamel<AdminLoadoutDetail>(await apiFetch<unknown>(`${BASE}/loadouts/${publicId}`));
+export async function fetchPick(publicId: string): Promise<AdminPickDetail> {
+	return snakeToCamel<AdminPickDetail>(await apiFetch<unknown>(`${BASE}/picks/${publicId}`));
 }
 
 export async function fetchAudit(

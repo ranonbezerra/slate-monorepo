@@ -310,12 +310,12 @@ CREATE INDEX idx_candidates_pending ON capture_candidates(capture_id) WHERE stat
 
 **Why a dedicated `capture_candidates` table** (instead of a JSONB column on `captures`): candidates need individual state — user may confirm some, skip others. The `partially_committed` status of a capture is derived from the mix of candidate statuses. JSONB would force application-level mutation logic and lose the indexability and integrity of per-candidate operations.
 
-### 3.9 `loadouts`
+### 3.9 `picks`
 
 ```sql
-CREATE TYPE loadout_action AS ENUM ('accepted', 'rejected', 'ignored', 'pending');
+CREATE TYPE pick_action AS ENUM ('accepted', 'rejected', 'ignored', 'pending');
 
-CREATE TABLE loadouts (
+CREATE TABLE picks (
     id                          BIGSERIAL PRIMARY KEY,
     public_id                   UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE,
     user_id                     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -324,13 +324,13 @@ CREATE TABLE loadouts (
     mental_energy               TEXT NOT NULL,
     suggested_library_entry_id  BIGINT REFERENCES library_entries(id),
     reasoning                   TEXT NOT NULL,
-    action                      loadout_action NOT NULL DEFAULT 'pending',
+    action                      pick_action NOT NULL DEFAULT 'pending',
     resulting_play_session_id        BIGINT REFERENCES play sessions(id),
     created_at                  TIMESTAMPTZ NOT NULL DEFAULT now(),
     resolved_at                 TIMESTAMPTZ
 );
 
-CREATE INDEX idx_loadouts_user_recent ON loadouts(user_id, created_at DESC);
+CREATE INDEX idx_picks_user_recent ON picks(user_id, created_at DESC);
 ```
 
 ### 3.10 `audit_log`
@@ -371,7 +371,7 @@ packages/api/
 │       │   ├── games.py
 │       │   ├── captures.py
 │       │   ├── play sessions.py
-│       │   ├── loadouts.py
+│       │   ├── picks.py
 │       │   ├── stats.py
 │       │   └── admin.py            # web dashboard endpoints
 │       ├── core/                   # domain layer
@@ -379,7 +379,7 @@ packages/api/
 │       │   ├── library/
 │       │   ├── capture/
 │       │   ├── play session/
-│       │   ├── loadout/
+│       │   ├── pick/
 │       │   └── stats/
 │       ├── infrastructure/
 │       │   ├── db/
@@ -414,7 +414,7 @@ packages/api/
 │           ├── capture_parse.j2
 │           ├── capture_parse_vision.j2
 │           ├── recap.j2
-│           ├── loadout.j2
+│           ├── pick_selection.j2
 │           └── wrap_up_extract.j2
 └── tests/
     ├── conftest.py
@@ -485,10 +485,10 @@ Client                  API                       arq worker            External
 
 **Why this is in the database, not just the application:** the partial unique index enforces "one active play session" at the storage layer. Even a buggy app or a malicious direct DB write cannot violate the invariant. The application logic is redundant defense, not the primary guard.
 
-### 5.3 Daily Loadout (UUID validation flow)
+### 5.3 Daily Pick (UUID validation flow)
 
 ```text
-1. POST /v1/loadouts {mood, available_minutes, mental_energy}
+1. POST /v1/picks {mood, available_minutes, mental_energy}
 2. API queries eligible library_entries:
        status IN ('backlog', 'playing', 'paused')
        AND NOT EXISTS (
@@ -496,13 +496,13 @@ Client                  API                       arq worker            External
            WHERE m.library_entry_id = library_entries.id
              AND m.ended_at > now() - interval '12 hours'
        )
-3. Render prompts/loadout.j2 with candidate list + user context.
+3. Render prompts/pick_selection.j2 with candidate list + user context.
 4. Call Ollama (smart model). Expect {"library_entry_public_id": "...", "reasoning": "..."}.
 5. VALIDATION:
        - Does returned public_id exist in candidate list?
        - If NO: reroll once with stricter prompt.
        - If second attempt also invalid: return 422 to client.
-6. If valid: create loadout row with action='pending'.
+6. If valid: create pick row with action='pending'.
 7. Return suggestion + reasoning to app.
 ```
 
@@ -555,7 +555,7 @@ These are the decisions worth a paragraph each, in order of "what differentiates
 LLM outputs are validated against context before persisting or surfacing to the user. Two layers:
 
 - **Token-overlap check** (recaps): tokenize both input and output for proper nouns and numbers; require ≥70% overlap. Below threshold → flag, disclaimer.
-- **UUID existence check** (loadouts, structured outputs): any UUID/ID the LLM returns must exist in the candidate set provided to it. Failure → reroll once → 422.
+- **UUID existence check** (picks, structured outputs): any UUID/ID the LLM returns must exist in the candidate set provided to it. Failure → reroll once → 422.
 
 These are deterministic safeguards on probabilistic outputs. No fine-tuning, no model retraining. Cheap to implement, dramatically reduces user-facing hallucination.
 
@@ -611,10 +611,10 @@ API_PORT=8100
 WEB_PORT=3200
 
 # Database
-POSTGRES_USER=slate
-POSTGRES_PASSWORD=slate
-POSTGRES_DB=slate
-DATABASE_URL=postgresql+asyncpg://slate:slate@localhost:5433/slate
+POSTGRES_USER=slateapp
+POSTGRES_PASSWORD=slateapp
+POSTGRES_DB=slateapp
+DATABASE_URL=postgresql+asyncpg://slateapp:slateapp@localhost:5433/slateapp
 REDIS_URL=redis://localhost:6380/0
 
 # Caching (Epic 18) — off => NullCache (behaves as "no caching")

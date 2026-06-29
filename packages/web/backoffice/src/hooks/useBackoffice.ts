@@ -17,8 +17,8 @@ import {
 	fetchConfig,
 	fetchDashboard,
 	fetchGames,
-	fetchLoadout,
-	fetchLoadouts,
+	fetchPick,
+	fetchPicks,
 	fetchPlaySession,
 	fetchPlaySessions,
 	fetchUser,
@@ -35,7 +35,7 @@ import type {
 	ConfigValue,
 	GameEdit,
 	GameListParams,
-	LoadoutListParams,
+	PickListParams,
 	PlaySessionListParams,
 	UserListParams,
 } from "../types/backoffice";
@@ -210,17 +210,17 @@ export function usePlaySessionActions() {
 	return { clamp };
 }
 
-export function useLoadouts(params: LoadoutListParams) {
+export function usePicks(params: PickListParams) {
 	return useQuery({
-		queryKey: [...BO, "loadouts", params],
-		queryFn: () => fetchLoadouts(params),
+		queryKey: [...BO, "picks", params],
+		queryFn: () => fetchPicks(params),
 	});
 }
 
-export function useLoadout(publicId: string | null) {
+export function usePick(publicId: string | null) {
 	return useQuery({
-		queryKey: [...BO, "loadout", publicId],
-		queryFn: () => fetchLoadout(publicId as string),
+		queryKey: [...BO, "pick", publicId],
+		queryFn: () => fetchPick(publicId as string),
 		enabled: !!publicId,
 	});
 }

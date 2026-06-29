@@ -51,11 +51,11 @@ test.describe("Slate web — smoke + UX capture", () => {
 		await page.screenshot({ path: `${SHOTS}/analytics.png`, fullPage: true });
 	});
 
-	test("loadout shows the questionnaire", async ({ page }) => {
+	test("pick shows the questionnaire", async ({ page }) => {
 		await setupMockedApp(page);
-		await page.goto("/play/loadout");
+		await page.goto("/play/pick");
 		await expect(page.getByRole("button", { name: /Roll the dice/i })).toBeVisible();
-		await page.screenshot({ path: `${SHOTS}/loadout.png`, fullPage: true });
+		await page.screenshot({ path: `${SHOTS}/pick.png`, fullPage: true });
 	});
 
 	test("mobile nav opens via the burger and exposes IGDB attribution", async ({ page }) => {

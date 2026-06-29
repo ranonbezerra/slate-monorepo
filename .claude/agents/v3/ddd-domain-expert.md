@@ -59,7 +59,7 @@ You are a **Domain-Driven Design Expert** responsible for strategic and tactical
 |  |  +-----------+  |         |  +-----------+  |                   |
 |  |                 |         |                 |                   |
 |  |  +-----------+  | Events  |  +-----------+  |                   |
-|  |  | Loadout   |--+-------->+--| Capture   |  |                   |
+|  |  | Pick   |--+-------->+--| Capture   |  |                   |
 |  |  | Lifecycle |  |         |  | Processing|  |                   |
 |  |  +-----------+  |         |  +-----------+  |                   |
 |  +-----------------+         +-----------------+                   |
@@ -84,7 +84,7 @@ You are a **Domain-Driven Design Expert** responsible for strategic and tactical
 | Context | Type | Responsibility |
 |---------|------|----------------|
 | **PlaySession** | Core | PlaySession recap, execution, wrap-up lifecycle |
-| **Loadout** | Core | Gear selection, loadout composition, optimization |
+| **Pick** | Core | Daily game selection, pick composition, optimization |
 | **Library** | Supporting | Item catalog, categories, metadata management |
 | **Capture** | Supporting | Photo/voice/text capture, AI processing |
 | **Auth** | Generic | Authentication, user identity, sessions |
@@ -100,7 +100,7 @@ class PlaySession:
     id: PlaySessionId
     status: PlaySessionStatus
     recap: Recap
-    loadout: LoadoutSelection
+    pick: PickSelection
 
     # Domain Events
     def raise_event(self, event: PlaySessionRecapped | PlaySessionStarted | PlaySessionWrappedUp) -> None: ...
@@ -116,10 +116,10 @@ class PlaySessionId:
         if not self._is_valid(value):
             raise InvalidPlaySessionIdError()
 
-# Entity: Loadout (identity matters)
-class Loadout:
-    id: LoadoutId
-    items: list[LoadoutItem]
+# Entity: Pick (identity matters)
+class Pick:
+    id: PickId
+    items: list[PickItem]
     play_session_id: PlaySessionId
 ```
 
@@ -138,7 +138,7 @@ class PlaySessionRecapped:
 class PlaySessionStarted:
     type: str = "PlaySessionStarted"
     play_session_id: str
-    loadout_id: str
+    pick_id: str
     timestamp: datetime
 
 @dataclass(frozen=True)
@@ -155,7 +155,7 @@ class CaptureProcessed:
 | Term | Definition |
 |------|------------|
 | **PlaySession** | A daily or scheduled task with recap, execution, and wrap-up phases |
-| **Loadout** | A curated set of gear items selected for a play session |
+| **Pick** | A game selected for a play session |
 | **Library** | The catalog of all available gear items |
 | **Capture** | A photo, voice, or text entry that records gear or field data |
 | **Recap** | The AI-generated play session preparation summary |
@@ -166,7 +166,7 @@ class CaptureProcessed:
 
 | Pattern | Use Case |
 |---------|----------|
-| **Partnership** | PlaySession <-> Loadout (tight collaboration) |
+| **Partnership** | PlaySession <-> Pick (tight collaboration) |
 | **Customer-Supplier** | PlaySession -> Library (play session defines gear needs) |
 | **Conformist** | packages/web conforms to packages/api REST API |
 | **Anti-Corruption Layer** | Capture shields core from LLM provider details |
@@ -177,11 +177,11 @@ class CaptureProcessed:
 
 When analyzing the Slate domain, produce:
 
-1. **Domain Events** (orange): PlaySessionRecapped, CaptureProcessed, LoadoutComposed
-2. **Commands** (blue): CreatePlaySession, AddToLoadout, ProcessCapture
-3. **Aggregates** (yellow): PlaySession, Loadout, LibraryItem, Capture
+1. **Domain Events** (orange): PlaySessionRecapped, CaptureProcessed, PickComposed
+2. **Commands** (blue): CreatePlaySession, AddToPick, ProcessCapture
+3. **Aggregates** (yellow): PlaySession, Pick, LibraryItem, Capture
 4. **Policies** (purple): AutoClampPlaySession, AIClassifyCapture
-5. **Read Models** (green): PlaySessionSummary, LoadoutOverview, LibraryCatalog
+5. **Read Models** (green): PlaySessionSummary, PickOverview, LibraryCatalog
 6. **External Systems** (pink): Ollama LLM, Object Storage
 
 ## Slate Project Structure
@@ -223,7 +223,7 @@ npx claude-flow@v3alpha ddd language-check
 mcp__claude-flow__memory_usage --action="store" \
   --namespace="architecture" \
   --key="domain:model" \
-  --value='{"contexts":["play session","loadout","library","capture","auth","llm"]}'
+  --value='{"contexts":["play session","pick","library","capture","auth","llm"]}'
 
 # Search domain patterns
 mcp__claude-flow__memory_search --pattern="ddd:aggregate:*" --namespace="architecture"

@@ -20,11 +20,11 @@ from .library import (
     LibraryServiceDep,
     PlatformRepoDep,
 )
-from .loadout import (
-    LoadoutRepoDep,
-    LoadoutServiceDep,
-)
 from .ocr import CaptureServiceDep
+from .pick import (
+    PickRepoDep,
+    PickServiceDep,
+)
 from .play_session import (
     PlaySessionRepoDep,
     PlaySessionServiceDep,
@@ -43,8 +43,8 @@ __all__ = [
     "LLMClientDep",
     "LibraryRepoDep",
     "LibraryServiceDep",
-    "LoadoutRepoDep",
-    "LoadoutServiceDep",
+    "PickRepoDep",
+    "PickServiceDep",
     "PlatformRepoDep",
     "PlaySessionRepoDep",
     "PlaySessionServiceDep",

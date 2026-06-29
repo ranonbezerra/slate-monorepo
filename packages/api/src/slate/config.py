@@ -167,8 +167,8 @@ class Settings(BaseSettings):
     capture_max_audio_mb: int = 5
     capture_max_games_per_shelf: int = 12
     play_session_auto_clamp_hours: int = 24
-    loadout_auto_ignore_hours: int = 24
-    loadout_cooldown_hours: int = 12
+    pick_auto_ignore_hours: int = 24
+    pick_cooldown_hours: int = 12
 
     # ── Rate limiting (Redis fixed-window, per-user / per-IP) ────────────
     # Master switch (False => rate_limit() is a no-op, used in tests). The
@@ -182,7 +182,7 @@ class Settings(BaseSettings):
     # the concierge fans out to several model calls per turn), not just abuse.
     rate_limit_concierge_chat_per_minute: int = 6
     rate_limit_play_session_recap_per_minute: int = 4
-    rate_limit_loadout_create_per_minute: int = 10
+    rate_limit_pick_create_per_minute: int = 10
     rate_limit_capture_submit_per_minute: int = 15
     rate_limit_library_import_per_minute: int = 5
     # POST /v1/games (LLM/IGDB resolve) + generous backstops on writes/reads.

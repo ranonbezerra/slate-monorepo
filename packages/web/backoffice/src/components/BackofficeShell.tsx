@@ -23,7 +23,7 @@ const NAV = [
 	{ path: "/games", label: "Catalogue", icon: IconDeviceGamepad2 },
 	{ path: "/captures", label: "Captures", icon: IconCamera },
 	{ path: "/play-sessions", label: "Sessions", icon: IconTargetArrow },
-	{ path: "/loadouts", label: "Loadouts", icon: IconBolt },
+	{ path: "/picks", label: "Picks", icon: IconBolt },
 	{ path: "/config", label: "Config", icon: IconSettings },
 	{ path: "/audit", label: "Audit log", icon: IconHistory },
 ];

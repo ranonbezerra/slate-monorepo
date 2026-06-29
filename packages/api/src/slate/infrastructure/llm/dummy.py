@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from uuid import uuid4
 
-from .base import AbstractLLMClient, ExtractedGame, ExtractedState, LLMRole, LoadoutPick
+from .base import AbstractLLMClient, ExtractedGame, ExtractedState, LLMRole, PickSelection
 
 # Well-known titles used for deterministic test matching.
 _KNOWN_TITLES: list[tuple[str, re.Pattern[str]]] = [
@@ -108,28 +108,28 @@ class DummyLLMClient(AbstractLLMClient):
             current_quest=None,
         )
 
-    async def pick_loadout_game(
+    async def select_game(
         self,
         candidates: list[dict[str, object]],
         mood: str,
         available_minutes: int,
         mental_energy: str,
         context: str | None = None,
-    ) -> LoadoutPick:
-        """Return a deterministic pick for tests.
+    ) -> PickSelection:
+        """Return a deterministic selection for tests.
 
         Special behaviour: if *mood* is ``"test_invalid_uuid"``, return a
         random UUID that is not in the candidates list, exercising the
         reroll / validation path.
         """
         if mood == "test_invalid_uuid":
-            return LoadoutPick(
+            return PickSelection(
                 library_entry_public_id=str(uuid4()),
                 reasoning="Test invalid pick",
             )
         if not candidates:
             raise ValueError("No candidates provided")
-        return LoadoutPick(
+        return PickSelection(
             library_entry_public_id=str(candidates[0]["public_id"]),
             reasoning=f"Picked {candidates[0]['game_title']} because it fits your {mood} mood.",
         )

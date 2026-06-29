@@ -231,44 +231,44 @@ export interface PlaySessionListParams {
 	offset?: number;
 }
 
-// ── Loadouts (read-only) ───────────────────────────────────────────────
+// ── Picks (read-only) ───────────────────────────────────────────────
 
-export type LoadoutAction = "pending" | "accepted" | "rejected" | "ignored";
+export type PickAction = "pending" | "accepted" | "rejected" | "ignored";
 
-export interface AdminLoadoutSummary {
+export interface AdminPickSummary {
 	publicId: string;
 	userEmail: string | null;
 	gameTitle: string | null;
-	action: LoadoutAction;
+	action: PickAction;
 	mood: string;
 	availableMinutes: number;
 	mentalEnergy: string;
 	createdAt: string;
 }
 
-export interface LoadoutActionCount {
+export interface PickActionCount {
 	action: string;
 	count: number;
 }
 
-export interface AdminLoadoutList {
-	items: AdminLoadoutSummary[];
+export interface AdminPickList {
+	items: AdminPickSummary[];
 	total: number;
 	limit: number;
 	offset: number;
-	actionCounts: LoadoutActionCount[];
+	actionCounts: PickActionCount[];
 }
 
-export interface AdminLoadoutDetail extends AdminLoadoutSummary {
+export interface AdminPickDetail extends AdminPickSummary {
 	platformLabel: string | null;
 	context: string | null;
 	reasoning: string | null;
 	ledToPlaySession: boolean;
 }
 
-export interface LoadoutListParams {
+export interface PickListParams {
 	q?: string;
-	action?: LoadoutAction;
+	action?: PickAction;
 	limit?: number;
 	offset?: number;
 }

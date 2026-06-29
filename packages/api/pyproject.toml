@@ -148,10 +148,5 @@ exclude_lines = [
 exclude_dirs = ["tests", "alembic"]
 skips = ["B101"]
 
-[tool.typos.default.extend-words]
-# Game-domain words that typos may flag
-loadout = "loadout"
-loadouts = "loadouts"
-
 [tool.typos.files]
 extend-exclude = ["*.lock", "alembic/versions/*"]

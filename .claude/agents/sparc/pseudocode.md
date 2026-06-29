@@ -89,7 +89,7 @@ Slate is a gaming companion monorepo. Key algorithm domains include:
 - **LLM Integration**: Prompt rendering (Jinja2), response parsing, anti-hallucination validation
 - **PlaySession Flow**: Recap generation, wrap-up extraction, auto-clamp scheduling
 - **Capture Pipeline**: Text/voice/photo input -> LLM extraction -> library enrichment
-- **Loadout Suggestions**: AI-powered daily game picks from user library
+- **Pick Suggestions**: AI-powered daily game selections from user library
 
 ### Architecture Layers (strict)
 
@@ -207,7 +207,7 @@ const coordinator = new AttentionCoordinator(attentionService);
 const algorithmOptions = [
   { approach: 'token-overlap', complexity: 'O(n)', space: 'O(n)', use: 'anti-hallucination' },
   { approach: 'async-pipeline', complexity: 'O(1)', space: 'O(1)', use: 'capture processing' },
-  { approach: 'priority-queue', complexity: 'O(log n)', space: 'O(n)', use: 'loadout ranking' }
+  { approach: 'priority-queue', complexity: 'O(log n)', space: 'O(n)', use: 'pick ranking' }
 ];
 
 const optimalAlgorithm = await coordinator.coordinateAgents(
@@ -327,10 +327,10 @@ CaptureQueue:
         - max_retries: 3
         - backoff: exponential (2s -> 4s -> 8s)
 
-LoadoutSuggestionCache:
+PickSuggestionCache:
     Type: Time-bounded cache with auto-expiry
-    TTL: 24 hours (loadout_auto_ignore_hours)
-    Purpose: Store daily loadout suggestions until accepted or expired
+    TTL: 24 hours (pick_auto_ignore_hours)
+    Purpose: Store daily pick suggestions until accepted or expired
 
     Operations:
         - suggest(user_id, games): O(n) where n = library size

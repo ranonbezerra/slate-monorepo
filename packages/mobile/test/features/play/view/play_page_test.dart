@@ -79,8 +79,8 @@ void main() {
           builder: (_, __) => PlayPage(conciergeEnabled: conciergeEnabled),
         ),
         GoRoute(
-          path: '/play/loadout',
-          builder: (_, __) => const Scaffold(body: Text('Loadout stub')),
+          path: '/play/pick',
+          builder: (_, __) => const Scaffold(body: Text('Pick stub')),
         ),
         GoRoute(
           path: '/play/play-sessions',
@@ -193,7 +193,7 @@ void main() {
 
       await tester.tap(find.text("What's the move?"));
       await tester.pumpAndSettle();
-      expect(find.text('Loadout stub'), findsNothing);
+      expect(find.text('Pick stub'), findsNothing);
     });
 
     testWidgets('tapping Retry on the error card re-dispatches '
@@ -303,7 +303,7 @@ void main() {
       // Tapping the disabled door does not navigate.
       await tester.tap(find.text("What's the move?"));
       await tester.pumpAndSettle();
-      expect(find.text('Loadout stub'), findsNothing);
+      expect(find.text('Pick stub'), findsNothing);
     });
 
     testWidgets('Ask door stays enabled while a playSession is active', (
@@ -335,7 +335,7 @@ void main() {
 
       await tester.tap(find.text("What's the move?"));
       await tester.pumpAndSettle();
-      expect(find.text('Loadout stub'), findsOneWidget);
+      expect(find.text('Pick stub'), findsOneWidget);
     });
 
     testWidgets("shows What's next section with the two default doors", (
@@ -379,7 +379,7 @@ void main() {
       expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
     });
 
-    testWidgets("tapping What's the move? navigates to /play/loadout", (
+    testWidgets("tapping What's the move? navigates to /play/pick", (
       tester,
     ) async {
       when(
@@ -391,7 +391,7 @@ void main() {
       await tester.tap(find.text("What's the move?"));
       await tester.pumpAndSettle();
 
-      expect(find.text('Loadout stub'), findsOneWidget);
+      expect(find.text('Pick stub'), findsOneWidget);
     });
 
     testWidgets("tapping I'll choose navigates to /library", (tester) async {

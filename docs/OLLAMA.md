@@ -11,7 +11,7 @@ Slate uses three model slots, configured via environment variables:
 | Slot | Default | Used for | Config var |
 | --- | --- | --- | --- |
 | **Fast** | `gemma3:4b` | Capture text parsing, wrap-up extraction | `OLLAMA_FAST_MODEL` |
-| **Smart** | `gemma3:12b` | Recaps, loadout reasoning | `OLLAMA_SMART_MODEL` |
+| **Smart** | `gemma3:12b` | Recaps, Pick reasoning | `OLLAMA_SMART_MODEL` |
 | **Vision** | `qwen3-vl:4b` | Photo capture (cover/shelf recognition) | `OLLAMA_VISION_MODEL` |
 
 The fast model handles structured extraction (JSON output) where speed matters more than nuance. The smart model handles free-text generation where quality matters. The vision model handles multimodal image input.
@@ -42,7 +42,7 @@ ollama pull qwen3-vl:4b
 | `gemma3:12b` | ~8 GB | ~10-20s |
 | `qwen3-vl:4b` | ~4 GB | ~5-10s per image |
 
-A machine with 16 GB RAM can run all three models (Ollama loads/unloads as needed). Recaps and loadout suggestions will be slower but functional.
+A machine with 16 GB RAM can run all three models (Ollama loads/unloads as needed). Recaps and Pick suggestions will be slower but functional.
 
 ### GPU (NVIDIA)
 
