@@ -382,33 +382,27 @@ export function PlaySessionRecapModal(props: PlaySessionRecapModalProps) {
 							<Text style={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{displayRecap}</Text>
 						) : (
 							<Text c="dimmed" fs="italic">
-								No recap available for this session. This is your first session for this game —
-								enjoy the adventure!
+								{isPreview
+									? "No recap available for this session. This is your first session for this game — enjoy the adventure!"
+									: "No recap was saved for this session."}
 							</Text>
 						)}
-						<Group justify="flex-end" wrap="wrap">
-							{isPreview ? (
-								<>
-									<Button variant="subtle" onClick={() => setStep("update")}>
-										Update this recap
-									</Button>
-									<Button
-										color="teal"
-										loading={startPlaySession.isPending}
-										onClick={handleConfirmStart}
-									>
-										Got it, let's go
-									</Button>
-								</>
-							) : (
-								<>
-									<Button variant="subtle" onClick={() => setStep("correct")}>
-										That's not right
-									</Button>
-									<Button onClick={props.onClose}>Got it, let's go</Button>
-								</>
-							)}
-						</Group>
+						{/* Preview = the accept/adjust flow before starting. View = the recap of an
+						    already-started session, which was accepted earlier — read-only. */}
+						{isPreview && (
+							<Group justify="flex-end" wrap="wrap">
+								<Button variant="subtle" onClick={() => setStep("update")}>
+									Update this recap
+								</Button>
+								<Button
+									color="teal"
+									loading={startPlaySession.isPending}
+									onClick={handleConfirmStart}
+								>
+									Got it, let's go
+								</Button>
+							</Group>
+						)}
 					</>
 				)}
 			</Stack>

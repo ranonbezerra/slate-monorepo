@@ -371,25 +371,16 @@ describe("PlaySessionRecapModal", () => {
 			expect(screen.queryByText("🔎 Deep recap (web)")).not.toBeInTheDocument();
 		});
 
-		it("shows 'That's not right' and 'Got it', no Cancel", () => {
+		it("is read-only — no accept/adjust buttons (the recap was already accepted)", () => {
 			renderViewMode();
-			expect(screen.getByRole("button", { name: "That's not right" })).toBeInTheDocument();
-			expect(screen.getByRole("button", { name: "Got it, let's go" })).toBeInTheDocument();
-			expect(screen.queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+			expect(screen.queryByRole("button", { name: "That's not right" })).not.toBeInTheDocument();
+			expect(screen.queryByRole("button", { name: "Got it, let's go" })).not.toBeInTheDocument();
+			expect(screen.queryByRole("button", { name: "Update this recap" })).not.toBeInTheDocument();
 		});
 
-		it("shows no recap message when recapText is null", () => {
+		it("shows a no-recap message when recapText is null", () => {
 			renderViewMode(makePlaySession({ recapText: null }));
-			expect(screen.getByText(/No recap available/)).toBeInTheDocument();
-		});
-
-		it("'That's not right' opens the correction form", () => {
-			renderViewMode();
-			fireEvent.click(screen.getByRole("button", { name: "That's not right" }));
-			expect(
-				screen.getByText("Tell us where you actually are so we can adjust the recap:"),
-			).toBeInTheDocument();
-			expect(screen.getByRole("button", { name: "Update & regenerate" })).toBeInTheDocument();
+			expect(screen.getByText(/No recap was saved/)).toBeInTheDocument();
 		});
 	});
 
@@ -463,29 +454,6 @@ describe("PlaySessionRecapModal", () => {
 						color: "red",
 					}),
 				);
-			});
-		});
-
-		it("view: correction calls regenerate with publicId and currentPosition", async () => {
-			const updatedPlaySession = makePlaySession({ recapText: "Regenerated view recap." });
-			mockRegenerateMutateAsync.mockResolvedValue(updatedPlaySession);
-			const onPlaySessionUpdated = vi.fn();
-
-			renderViewMode(makePlaySession(), { onPlaySessionUpdated });
-			fireEvent.click(screen.getByRole("button", { name: "That's not right" }));
-			fireEvent.change(screen.getByPlaceholderText(/I'm actually in City of Tears/), {
-				target: { value: "I'm at the Soul Master" },
-			});
-			fireEvent.click(screen.getByRole("button", { name: "Update & regenerate" }));
-
-			await waitFor(() => {
-				expect(mockRegenerateMutateAsync).toHaveBeenCalledWith({
-					publicId: "playSession-1",
-					currentPosition: "I'm at the Soul Master",
-				});
-			});
-			await waitFor(() => {
-				expect(onPlaySessionUpdated).toHaveBeenCalledWith(updatedPlaySession);
 			});
 		});
 	});
