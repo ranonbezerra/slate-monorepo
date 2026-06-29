@@ -91,10 +91,7 @@ class _PickPageState extends State<PickPage> {
   void _onStartWithRecap(Pick pick) {
     setState(() => _actioningId = pick.publicId);
     context.read<PickBloc>().add(
-      AcceptPick(
-        publicId: pick.publicId,
-        recapText: _recaps[pick.publicId],
-      ),
+      AcceptPick(publicId: pick.publicId, recapText: _recaps[pick.publicId]),
     );
   }
 

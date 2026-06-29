@@ -208,9 +208,7 @@ void main() {
 
     testWidgets('shows loading state when '
         'isActioning is true', (tester) async {
-      await tester.pumpWidget(
-        buildSubject(pick: _pick, isActioning: true),
-      );
+      await tester.pumpWidget(buildSubject(pick: _pick, isActioning: true));
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('Starting...'), findsOneWidget);
@@ -296,10 +294,7 @@ void main() {
     testWidgets('shows recap text and "Start with recap" '
         'once a recap is present', (tester) async {
       await tester.pumpWidget(
-        buildSubject(
-          pick: _pick,
-          recapText: 'Continue toward the Erdtree.',
-        ),
+        buildSubject(pick: _pick, recapText: 'Continue toward the Erdtree.'),
       );
 
       expect(find.text('Continue toward the Erdtree.'), findsOneWidget);

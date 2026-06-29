@@ -109,14 +109,8 @@ void main() {
     });
 
     test('GeneratePickRecap supports value equality and props', () {
-      const a = GeneratePickRecap(
-        publicId: 'l-1',
-        libraryEntryPublicId: 'e-1',
-      );
-      const b = GeneratePickRecap(
-        publicId: 'l-1',
-        libraryEntryPublicId: 'e-1',
-      );
+      const a = GeneratePickRecap(publicId: 'l-1', libraryEntryPublicId: 'e-1');
+      const b = GeneratePickRecap(publicId: 'l-1', libraryEntryPublicId: 'e-1');
       expect(a, b);
       expect(a.props, ['l-1', 'e-1', 'quick']);
       expect(
@@ -200,10 +194,7 @@ void main() {
       const b = PickRecapReady(publicId: 'l-1', recapText: 'go');
       expect(a, b);
       expect(a.props, ['l-1', 'go']);
-      expect(
-        a,
-        isNot(const PickRecapReady(publicId: 'l-1', recapText: 'no')),
-      );
+      expect(a, isNot(const PickRecapReady(publicId: 'l-1', recapText: 'no')));
     });
 
     test('PickListLoaded supports value equality and props', () {

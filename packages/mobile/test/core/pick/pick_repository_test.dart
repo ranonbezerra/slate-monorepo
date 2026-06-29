@@ -79,9 +79,7 @@ void main() {
           data: any(named: 'data'),
           options: any(named: 'options'),
         ),
-      ).thenAnswer(
-        (_) async => _response('/v1/picks', <dynamic>[_pickJson()]),
-      );
+      ).thenAnswer((_) async => _response('/v1/picks', <dynamic>[_pickJson()]));
 
       final picks = await repository.createPick(
         mood: 'chill',
@@ -116,9 +114,7 @@ void main() {
           data: any(named: 'data'),
           options: any(named: 'options'),
         ),
-      ).thenAnswer(
-        (_) async => _response('/v1/picks', <dynamic>[_pickJson()]),
-      );
+      ).thenAnswer((_) async => _response('/v1/picks', <dynamic>[_pickJson()]));
 
       await repository.createPick(
         mood: 'focused',
@@ -165,8 +161,7 @@ void main() {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
-        (_) async =>
-            _response('/v1/picks/pick-001/accept', _pickJson()),
+        (_) async => _response('/v1/picks/pick-001/accept', _pickJson()),
       );
 
       final pick = await repository.acceptPick('pick-001');
@@ -186,8 +181,7 @@ void main() {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
-        (_) async =>
-            _response('/v1/picks/pick-001/accept', _pickJson()),
+        (_) async => _response('/v1/picks/pick-001/accept', _pickJson()),
       );
 
       await repository.acceptPick(
@@ -209,8 +203,7 @@ void main() {
   group('rejectPick', () {
     test('posts to reject path and parses Pick', () async {
       when(() => dio.post<Map<String, dynamic>>(any())).thenAnswer(
-        (_) async =>
-            _response('/v1/picks/pick-001/reject', _pickJson()),
+        (_) async => _response('/v1/picks/pick-001/reject', _pickJson()),
       );
 
       final pick = await repository.rejectPick('pick-001');
@@ -254,9 +247,9 @@ void main() {
 
   group('getLatestPick', () {
     test('returns Pick when present', () async {
-      when(() => dio.get<Map<String, dynamic>>(any())).thenAnswer(
-        (_) async => _response('/v1/picks/latest', _pickJson()),
-      );
+      when(
+        () => dio.get<Map<String, dynamic>>(any()),
+      ).thenAnswer((_) async => _response('/v1/picks/latest', _pickJson()));
 
       final pick = await repository.getLatestPick();
 

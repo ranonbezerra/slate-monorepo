@@ -257,9 +257,7 @@ void main() {
       test('instances with different createdAt '
           'are not equal', () {
         final a = Pick.fromJson(_pickJson());
-        final b = Pick.fromJson(
-          _pickJson(createdAt: '2024-01-01T00:00:00Z'),
-        );
+        final b = Pick.fromJson(_pickJson(createdAt: '2024-01-01T00:00:00Z'));
 
         expect(a, isNot(equals(b)));
       });
@@ -267,9 +265,7 @@ void main() {
       test('instances with different updatedAt '
           'are not equal', () {
         final a = Pick.fromJson(_pickJson());
-        final b = Pick.fromJson(
-          _pickJson(updatedAt: '2024-01-01T00:00:00Z'),
-        );
+        final b = Pick.fromJson(_pickJson(updatedAt: '2024-01-01T00:00:00Z'));
 
         expect(a, isNot(equals(b)));
       });
@@ -375,9 +371,7 @@ void main() {
       test('instances with different mentalEnergy '
           'are not equal', () {
         final a = PickListItem.fromJson(_pickListItemJson());
-        final b = PickListItem.fromJson(
-          _pickListItemJson(mentalEnergy: 'low'),
-        );
+        final b = PickListItem.fromJson(_pickListItemJson(mentalEnergy: 'low'));
 
         expect(a, isNot(equals(b)));
       });
@@ -395,9 +389,7 @@ void main() {
       test('instances with different action '
           'are not equal', () {
         final a = PickListItem.fromJson(_pickListItemJson());
-        final b = PickListItem.fromJson(
-          _pickListItemJson(action: 'Different'),
-        );
+        final b = PickListItem.fromJson(_pickListItemJson(action: 'Different'));
 
         expect(a, isNot(equals(b)));
       });

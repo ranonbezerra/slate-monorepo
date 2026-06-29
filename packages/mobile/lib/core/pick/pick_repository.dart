@@ -57,10 +57,7 @@ class PickRepository {
   }
 
   /// Lists the user's pick history.
-  Future<PickListResponse> listPicks({
-    int limit = 20,
-    int offset = 0,
-  }) async {
+  Future<PickListResponse> listPicks({int limit = 20, int offset = 0}) async {
     final response = await _apiClient.dio.get<Map<String, dynamic>>(
       '/v1/picks',
       queryParameters: {'limit': limit, 'offset': offset},

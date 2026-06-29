@@ -288,10 +288,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(const AcceptPick(publicId: 'pick-001')),
-        expect: () => [
-          const PickLoading(),
-          PickAccepted(pick: _pick),
-        ],
+        expect: () => [const PickLoading(), PickAccepted(pick: _pick)],
         verify: (_) {
           final captured = verify(
             () => mockPickRepository.acceptPick(
@@ -320,10 +317,7 @@ void main() {
             recapText: 'Beware the boss ahead.',
           ),
         ),
-        expect: () => [
-          const PickLoading(),
-          PickAccepted(pick: _pick),
-        ],
+        expect: () => [const PickLoading(), PickAccepted(pick: _pick)],
         verify: (_) {
           verify(
             () => mockPickRepository.acceptPick(
@@ -521,10 +515,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(const RejectPick(publicId: 'pick-001')),
-        expect: () => [
-          const PickLoading(),
-          PickRejected(pick: _pick),
-        ],
+        expect: () => [const PickLoading(), PickRejected(pick: _pick)],
       );
 
       blocTest<PickBloc, PickState>(
@@ -616,10 +607,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(const LoadPicks()),
-        expect: () => const [
-          PickLoading(),
-          PickError(message: 'Server error'),
-        ],
+        expect: () => const [PickLoading(), PickError(message: 'Server error')],
       );
 
       blocTest<PickBloc, PickState>(
@@ -656,10 +644,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(const LoadLatestPick()),
-        expect: () => [
-          const PickLoading(),
-          LatestPickLoaded(pick: _pick),
-        ],
+        expect: () => [const PickLoading(), LatestPickLoaded(pick: _pick)],
       );
 
       blocTest<PickBloc, PickState>(
@@ -775,10 +760,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(const LoadPicks()),
-        expect: () => const [
-          PickLoading(),
-          PickError(message: 'bad response'),
-        ],
+        expect: () => const [PickLoading(), PickError(message: 'bad response')],
       );
 
       blocTest<PickBloc, PickState>(
@@ -850,10 +832,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(const RejectPick(publicId: 'pick-001')),
-        expect: () => const [
-          PickLoading(),
-          PickError(message: 'fallback msg'),
-        ],
+        expect: () => const [PickLoading(), PickError(message: 'fallback msg')],
       );
     });
   });

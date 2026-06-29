@@ -10,8 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockPickBloc extends MockBloc<PickEvent, PickState>
-    implements PickBloc {}
+class MockPickBloc extends MockBloc<PickEvent, PickState> implements PickBloc {}
 
 final _now = DateTime.utc(2025, 6);
 

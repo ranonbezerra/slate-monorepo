@@ -27,10 +27,7 @@ class PickBloc extends Bloc<PickEvent, PickState> {
   final PickRepository _pickRepository;
   final PlaySessionRepository _playSessionRepository;
 
-  Future<void> _onCreatePick(
-    CreatePick event,
-    Emitter<PickState> emit,
-  ) async {
+  Future<void> _onCreatePick(CreatePick event, Emitter<PickState> emit) async {
     emit(const PickLoading());
 
     try {
@@ -50,10 +47,7 @@ class PickBloc extends Bloc<PickEvent, PickState> {
     }
   }
 
-  Future<void> _onAcceptPick(
-    AcceptPick event,
-    Emitter<PickState> emit,
-  ) async {
+  Future<void> _onAcceptPick(AcceptPick event, Emitter<PickState> emit) async {
     emit(const PickLoading());
 
     try {
@@ -93,10 +87,7 @@ class PickBloc extends Bloc<PickEvent, PickState> {
     }
   }
 
-  Future<void> _onRejectPick(
-    RejectPick event,
-    Emitter<PickState> emit,
-  ) async {
+  Future<void> _onRejectPick(RejectPick event, Emitter<PickState> emit) async {
     emit(const PickLoading());
 
     try {
@@ -109,10 +100,7 @@ class PickBloc extends Bloc<PickEvent, PickState> {
     }
   }
 
-  Future<void> _onLoadPicks(
-    LoadPicks event,
-    Emitter<PickState> emit,
-  ) async {
+  Future<void> _onLoadPicks(LoadPicks event, Emitter<PickState> emit) async {
     emit(const PickLoading());
 
     try {
