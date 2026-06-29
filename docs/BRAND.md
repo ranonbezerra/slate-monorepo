@@ -30,17 +30,17 @@ A single lit slot with a **game controller**: the one game, chosen and ready to 
 
 | Asset | File | Use |
 | --- | --- | --- |
-| Mark (color) | `docs/brand/dailyloadout-mark.svg` | Primary mark |
-| Mark (mono) | `docs/brand/dailyloadout-mark-mono.svg` | Single-color contexts |
-| Wordmark | `docs/brand/dailyloadout-wordmark.svg` | Text-only branding |
-| Lockup (horizontal) | `docs/brand/dailyloadout-lockup-horizontal.svg` | Header, README, nav |
-| Lockup (stacked) | `docs/brand/dailyloadout-lockup-stacked.svg` | Square spaces, splash |
+| Mark (color) | `docs/brand/slate-mark.svg` | Primary mark |
+| Mark (mono) | `docs/brand/slate-mark-mono.svg` | Single-color contexts |
+| Wordmark | `docs/brand/slate-wordmark.svg` | Text-only branding |
+| Lockup (horizontal) | `docs/brand/slate-lockup-horizontal.svg` | Header, README, nav |
+| Lockup (stacked) | `docs/brand/slate-lockup-stacked.svg` | Square spaces, splash |
 | Lockup raster | `docs/brand/lockup-2x.png`, `lockup-stacked-2x.png` | Slides, social |
 | Mark raster | `docs/brand/mark-128.png`, `mark-256.png`, `mark-512.png` | Avatars, previews |
 
 ### Wordmark rules
 
-`dailyloadout` — always lowercase, one word. Set in **Outfit** with `daily` in Regular (400) and `loadout` in Bold (700).
+`slate` — always lowercase, one word. Set in **Outfit** Bold (700).
 
 ### Rules
 
@@ -151,7 +151,7 @@ The data model and code keep the tactical metaphor (`play session`, `recap`, `wr
 
 > **TODO (owner decision — pending):** "Operator mode" is the only place the brand deliberately embraces the tactical register. Decide whether to **keep** it (opt-in easter egg), **rename** it (a warmer label for the same toggle), or **remove** it. Not resolved here — needs the owner's sign-off.
 >
-> **TODO (owner decision — pending):** A possible **product rename** is under evaluation. Until it's decided, nothing is renamed — the wordmark and `dailyloadout` identifiers stay as-is.
+> **Resolved:** the product was renamed from DailyLoadout to **Slate**. The wordmark, package namespace, and all identifiers now use `slate`. The wordmark/lockup SVGs were re-typeset to "slate" but still need a proper design pass for kerning and sizing.
 
 ---
 
@@ -185,7 +185,7 @@ Configuration is in `pubspec.yaml` under `flutter_launcher_icons:`.
 
 #### Splash (not wired yet)
 
-A splash asset using the **lineup** device (one lit coral slot on Midnight) is exported to `docs/brand/splash.png` (source: `branding/social/dailyloadout-splash.svg`). To wire it with [`flutter_native_splash`](https://pub.dev/packages/flutter_native_splash) later — **not installed or generated yet; pending owner OK** — copy the PNG into the mobile package assets and add to `pubspec.yaml`:
+A splash asset using the **lineup** device (one lit coral slot on Midnight) is exported to `docs/brand/splash.png` (source: `branding/social/slate-splash.svg`). To wire it with [`flutter_native_splash`](https://pub.dev/packages/flutter_native_splash) later — **not installed or generated yet; pending owner OK** — copy the PNG into the mobile package assets and add to `pubspec.yaml`:
 
 ```yaml
 flutter_native_splash:
@@ -224,10 +224,10 @@ Tracked, canonical copies of brand assets for README, docs, and social:
 | `readme-hero.png` | README banner (1280x430) |
 | `readme-hero@2x.png` | Retina version |
 | `og-image.png` | Canonical OG image |
-| `dailyloadout-mark.svg` | Color mark |
-| `dailyloadout-mark-mono.svg` | Mono mark |
-| `dailyloadout-wordmark.svg` | Wordmark |
-| `dailyloadout-lockup-horizontal.svg` | Horizontal lockup |
+| `slate-mark.svg` | Color mark |
+| `slate-mark-mono.svg` | Mono mark |
+| `slate-wordmark.svg` | Wordmark |
+| `slate-lockup-horizontal.svg` | Horizontal lockup |
 | `lockup-2x.png` | Raster lockup for slides |
 | `mark-128.png`, `mark-256.png`, `mark-512.png` | Raster marks |
 

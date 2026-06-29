@@ -5,6 +5,6 @@ Requires=docker.service
 
 [Service]
 Type=oneshot
-EnvironmentFile=/etc/dailyloadout/backup.env
+EnvironmentFile=/etc/slate/backup.env
 # Adjust the path to wherever the repo is checked out on the host.
-ExecStart=/opt/dailyloadout/infra/backup/backup-db.sh
+ExecStart=/opt/slate/infra/backup/backup-db.sh

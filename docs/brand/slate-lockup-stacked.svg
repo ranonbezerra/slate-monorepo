@@ -1,4 +1,4 @@
-<svg width="380" height="190" viewBox="0 0 380 190" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="dailyloadout logo">
+<svg width="380" height="190" viewBox="0 0 380 190" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="slate logo">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&amp;display=swap');
     .wm { font-family: 'Outfit', system-ui, sans-serif; }
@@ -23,6 +23,6 @@
   <!-- Wordmark (start-anchored at a measured centered x; cairosvg mis-centers
        multi-tspan text under text-anchor="middle", overlapping the weights). -->
   <text class="wm" x="65" y="142" font-size="46" letter-spacing="-1.1" fill="#F0EDF5">
-    <tspan font-weight="400">daily</tspan><tspan font-weight="700">loadout</tspan>
+    <tspan font-weight="700">slate</tspan>
   </text>
 </svg>
