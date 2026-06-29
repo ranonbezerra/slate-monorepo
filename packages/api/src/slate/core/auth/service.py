@@ -192,22 +192,23 @@ class AuthService:
         token_hash = hash_refresh_token(raw_refresh_token)
         stored = await self._refresh_token_repo.get_by_hash(token_hash)
         if stored is None:
-            # Reuse detection: the active lookup missed, but if the hash exists at
-            # all it means an already-rotated/revoked token was replayed — a theft
-            # signal. Cut off the whole family (revoke all + bump token_version)
-            # so the stolen token, and the legitimate one it was rotated from,
-            # are both useless and the user is forced to re-login everywhere.
+            # A replayed already-rotated token is normally theft → cut off the whole
+            # family. But a client firing two refreshes at once (multi-tab / reload
+            # race) replays the just-rotated token a moment later; within a short
+            # grace window that's a benign race — reject only this request (the
+            # rotation's sibling token stays valid), don't nuke every session.
             replayed = await self._refresh_token_repo.get_any_by_hash(token_hash)
             if replayed is not None:
-                logger.warning(
-                    "refresh_token_reuse_detected",
-                    user_id=replayed.user_id,
-                    refresh_token_id=replayed.id,
-                )
-                await self._revoke_all_sessions_by_internal_id(replayed.user_id)
-                # Persist the cutoff durably: the request raises below (→ 401),
-                # which would otherwise roll back the security write.
-                await self._refresh_token_repo.commit()
+                grace = timedelta(seconds=settings.auth_refresh_reuse_grace_seconds)
+                ra = replayed.revoked_at
+                if ra is not None and ra.tzinfo is None:
+                    ra = ra.replace(tzinfo=UTC)  # SQLite returns naive datetimes
+                if ra is not None and datetime.now(UTC) - ra <= grace:
+                    logger.info("refresh_token_benign_race", user_id=replayed.user_id)
+                else:
+                    logger.warning("refresh_token_reuse_detected", user_id=replayed.user_id)
+                    await self._revoke_all_sessions_by_internal_id(replayed.user_id)
+                    await self._refresh_token_repo.commit()
             raise ValueError("Invalid or expired refresh token")
 
         # Revoke the old token (rotation)

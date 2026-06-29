@@ -153,12 +153,13 @@ class Settings(BaseSettings):
     # App uses BODY mode (no cookie); web only. PROD: auth_cookie_secure=True,
     # and samesite="none" (requires Secure) if web/api are on different domains.
     auth_cookie_name: str = "slate_refresh_token"
-    # Secure by default; dev/test may override to False so http://localhost works.
-    # Production startup refuses to boot with this False (see guard below).
+    # Secure by default; dev may set False for http://localhost (prod refuses False).
     auth_cookie_secure: bool = True
     auth_cookie_samesite: Literal["lax", "strict", "none"] = "lax"
     auth_cookie_path: str = "/v1/auth"
     auth_cookie_domain: str | None = None
+    # Grace after rotation: a replay within it is a benign refresh race, not theft.
+    auth_refresh_reuse_grace_seconds: int = 10
 
     # ── Limits ───────────────────────────────────────────────────────────
     capture_max_audio_seconds: int = 60
@@ -170,8 +171,7 @@ class Settings(BaseSettings):
     pick_cooldown_hours: int = 12
 
     # ── Rate limiting (Redis fixed-window, per-user / per-IP) ────────────
-    # Master switch (False => rate_limit() is a no-op, used in tests). The
-    # limiter also fails open if Redis is unreachable.
+    # Master switch (False => rate_limit() is a no-op). Also fails open if Redis is down.
     rate_limit_enabled: bool = True
     # Auth limiters (per client IP) — Redis-backed, shared across workers.
     rate_limit_login_per_minute: int = 10

@@ -205,7 +205,13 @@ class TestBan:
 
 
 class TestRefreshReuseDetection:
-    async def test_replaying_rotated_token_revokes_family(self, async_client: AsyncClient) -> None:
+    async def test_replaying_rotated_token_revokes_family(
+        self, async_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from slate.config import settings
+
+        # Grace 0 → an immediate replay is treated as theft, not a benign race.
+        monkeypatch.setattr(settings, "auth_refresh_reuse_grace_seconds", 0)
         tokens = await _register(async_client, "theft@example.com")
         old_refresh = tokens["refresh_token"]
         before_tv = await _token_version("theft@example.com")
@@ -242,6 +248,26 @@ class TestRefreshReuseDetection:
                 .all()
             )
         assert active == []
+
+    async def test_benign_concurrent_refresh_keeps_family(self, async_client: AsyncClient) -> None:
+        """A replay within the grace window (concurrent refresh / multi-tab) rejects
+        the one request but does NOT revoke the family — the rotated-to token works."""
+        tokens = await _register(async_client, "race@example.com")
+        old_refresh = tokens["refresh_token"]
+        before_tv = await _token_version("race@example.com")
+
+        rot = await async_client.post("/v1/auth/refresh", json={"refresh_token": old_refresh})
+        assert rot.status_code == 200
+        new_refresh = rot.json()["refresh_token"]
+
+        # Immediate replay of the just-rotated token = benign race (default grace).
+        replay = await async_client.post("/v1/auth/refresh", json={"refresh_token": old_refresh})
+        assert replay.status_code == 401
+
+        # Family intact: token_version unchanged, and the rotated-to token still works.
+        assert await _token_version("race@example.com") == before_tv
+        followup = await async_client.post("/v1/auth/refresh", json={"refresh_token": new_refresh})
+        assert followup.status_code == 200
 
     async def test_unknown_token_does_not_bump_version(self, async_client: AsyncClient) -> None:
         await _register(async_client, "noreuse@example.com")
