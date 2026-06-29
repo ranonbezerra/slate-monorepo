@@ -40,7 +40,7 @@ function detail(over: Partial<AdminPlaySessionDetail> = {}): AdminPlaySessionDet
 		...playSession(),
 		platformLabel: "PC",
 		recapText: "Beat the boss",
-		debriefText: null,
+		wrapUpText: null,
 		hasExtractedState: false,
 		...over,
 	};
@@ -145,13 +145,13 @@ describe("PlaySessionsPage", () => {
 		mockUsePlaySession.mockReturnValue({
 			data: detail({
 				status: "ended",
-				endedVia: "debrief_completed",
+				endedVia: "wrap_up_completed",
 				endedAt: new Date().toISOString(),
 			}),
 			isLoading: false,
 		});
 		mockUsePlaySessions.mockReturnValue({
-			data: list([playSession({ status: "ended", endedVia: "debrief_completed" })]),
+			data: list([playSession({ status: "ended", endedVia: "wrap_up_completed" })]),
 			isLoading: false,
 			isError: false,
 		});

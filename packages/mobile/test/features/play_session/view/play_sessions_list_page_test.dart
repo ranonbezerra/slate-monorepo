@@ -33,7 +33,7 @@ final _activePlaySession = PlaySessionListItem(
   startedAt: DateTime(2024, 6, 15, 10),
 );
 
-final _debriefedPlaySession = PlaySessionListItem(
+final _wrappedUpPlaySession = PlaySessionListItem(
   publicId: 'playSession-2',
   libraryEntry: LibraryEntry(
     publicId: 'entry-2',
@@ -57,7 +57,7 @@ final _debriefedPlaySession = PlaySessionListItem(
   playSessionType: 'regular',
   startedAt: DateTime(2024, 6, 10, 14),
   endedAt: DateTime(2024, 6, 10, 16, 30),
-  endedVia: 'debrief',
+  endedVia: 'wrapUp',
 );
 
 final _pausedPlaySession = PlaySessionListItem(
@@ -166,7 +166,7 @@ void main() {
       (tester) async {
         when(() => playSessionBloc.state).thenReturn(
           PlaySessionListLoaded(
-            playSessions: [_activePlaySession, _debriefedPlaySession],
+            playSessions: [_activePlaySession, _wrappedUpPlaySession],
             total: 2,
           ),
         );
@@ -198,7 +198,7 @@ void main() {
       tester,
     ) async {
       when(() => playSessionBloc.state).thenReturn(
-        PlaySessionListLoaded(playSessions: [_debriefedPlaySession], total: 1),
+        PlaySessionListLoaded(playSessions: [_wrappedUpPlaySession], total: 1),
       );
 
       await tester.pumpWidget(buildSubject());
@@ -219,11 +219,11 @@ void main() {
       expect(find.text('Active'), findsOneWidget);
     });
 
-    testWidgets('shows Wrapped status badge for debriefed playSession', (
+    testWidgets('shows Wrapped status badge for wrapped-up playSession', (
       tester,
     ) async {
       when(() => playSessionBloc.state).thenReturn(
-        PlaySessionListLoaded(playSessions: [_debriefedPlaySession], total: 1),
+        PlaySessionListLoaded(playSessions: [_wrappedUpPlaySession], total: 1),
       );
 
       await tester.pumpWidget(buildSubject());
@@ -298,7 +298,7 @@ void main() {
       tester,
     ) async {
       when(() => playSessionBloc.state).thenReturn(
-        PlaySessionListLoaded(playSessions: [_debriefedPlaySession], total: 1),
+        PlaySessionListLoaded(playSessions: [_wrappedUpPlaySession], total: 1),
       );
 
       await tester.pumpWidget(buildSubject());
@@ -309,7 +309,7 @@ void main() {
 
     testWidgets('shows platform label on playSession card', (tester) async {
       when(() => playSessionBloc.state).thenReturn(
-        PlaySessionListLoaded(playSessions: [_debriefedPlaySession], total: 1),
+        PlaySessionListLoaded(playSessions: [_wrappedUpPlaySession], total: 1),
       );
 
       await tester.pumpWidget(buildSubject());

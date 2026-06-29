@@ -39,8 +39,8 @@ async def _create_test_data(platform_id: int) -> int:
                 play_session_type="regular",
                 started_at=now - timedelta(days=i, hours=2),
                 ended_at=now - timedelta(days=i),
-                ended_via="debrief_completed",
-                debrief_text=f"Session {i} debrief",
+                ended_via="wrap_up_completed",
+                wrap_up_text=f"Session {i} wrap_up",
             )
             session.add(play_session)
 

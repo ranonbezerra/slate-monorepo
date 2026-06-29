@@ -97,7 +97,7 @@ class TestStartPlaySession:
         assert play_session["ended_at"] is None
         assert play_session["ended_via"] is None
         assert play_session["started_at"] is not None
-        # First play_session — no prior debriefs, but recap should still be generated.
+        # First play_session — no prior wrap_ups, but recap should still be generated.
         assert play_session["recap_text"] is not None
 
     async def test_start_skip_recap(
@@ -236,12 +236,12 @@ class TestGetActivePlaySession:
 
 
 # =====================================================================
-# Test: Submit debrief
+# Test: Submit wrap_up
 # =====================================================================
 
 
-class TestSubmitDebrief:
-    async def test_debrief_success(
+class TestSubmitWrapUp:
+    async def test_wrap_up_success(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -251,19 +251,19 @@ class TestSubmitDebrief:
         play_session = await _start_play_session(async_client, auth_headers, entry["public_id"])
 
         resp = await async_client.patch(
-            f"/v1/play-sessions/{play_session['public_id']}/debrief",
-            json={"debrief_text": "Beat the Mantis Lords. Heading to Greenpath."},
+            f"/v1/play-sessions/{play_session['public_id']}/wrap-up",
+            json={"wrap_up_text": "Beat the Mantis Lords. Heading to Greenpath."},
             headers=auth_headers,
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["debrief_text"] == "Beat the Mantis Lords. Heading to Greenpath."
-        assert data["ended_via"] == "debrief_completed"
+        assert data["wrap_up_text"] == "Beat the Mantis Lords. Heading to Greenpath."
+        assert data["ended_via"] == "wrap_up_completed"
         assert data["ended_at"] is not None
         # Extraction is now async — extracted_state is null in the immediate response.
         assert data["extracted_state"] is None
 
-    async def test_debrief_extraction_via_sync_fallback(
+    async def test_wrap_up_extraction_via_sync_fallback(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -274,12 +274,12 @@ class TestSubmitDebrief:
         play_session = await _start_play_session(async_client, auth_headers, entry["public_id"])
 
         await async_client.patch(
-            f"/v1/play-sessions/{play_session['public_id']}/debrief",
-            json={"debrief_text": "Found the Mantis Claw. Need to go to City of Tears next."},
+            f"/v1/play-sessions/{play_session['public_id']}/wrap-up",
+            json={"wrap_up_text": "Found the Mantis Claw. Need to go to City of Tears next."},
             headers=auth_headers,
         )
 
-        # Preview recap — sync fallback should extract the first debrief.
+        # Preview recap — sync fallback should extract the first wrap_up.
         preview = await _preview_recap(async_client, auth_headers, entry["public_id"])
         assert preview["last_session_context"] is not None
         assert preview["last_session_context"]["next_action"] is not None
@@ -290,7 +290,7 @@ class TestSubmitDebrief:
         assert len(items) == 1
         assert items[0]["platforms"][0]["play_session_next_action"] is not None
 
-    async def test_debrief_already_ended(
+    async def test_wrap_up_already_ended(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
@@ -306,48 +306,48 @@ class TestSubmitDebrief:
             headers=auth_headers,
         )
 
-        # Try debrief on ended play_session.
+        # Try wrap_up on ended play_session.
         resp = await async_client.patch(
-            f"/v1/play-sessions/{play_session['public_id']}/debrief",
-            json={"debrief_text": "Some text here."},
+            f"/v1/play-sessions/{play_session['public_id']}/wrap-up",
+            json={"wrap_up_text": "Some text here."},
             headers=auth_headers,
         )
         assert resp.status_code == 409
 
-    async def test_debrief_not_found(
+    async def test_wrap_up_not_found(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
     ) -> None:
         resp = await async_client.patch(
-            f"/v1/play-sessions/{uuid4()}/debrief",
-            json={"debrief_text": "Some text here."},
+            f"/v1/play-sessions/{uuid4()}/wrap-up",
+            json={"wrap_up_text": "Some text here."},
             headers=auth_headers,
         )
         assert resp.status_code == 404
 
 
 # =====================================================================
-# Test: Retroactive debrief (unregistered session)
+# Test: Retroactive wrap_up (unregistered session)
 # =====================================================================
 
 
-class TestRetroactiveDebrief:
+class TestRetroactiveWrapUp:
     async def test_retroactive_creates_play_session_and_updates_preview(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Submitting a retroactive debrief creates a pre-ended play_session
+        """Submitting a retroactive wrap_up creates a pre-ended play_session
         and returns an updated preview with extracted context."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
         resp = await async_client.post(
-            "/v1/play-sessions/retroactive-debrief",
+            "/v1/play-sessions/retroactive-wrap-up",
             json={
                 "library_entry_public_id": entry["public_id"],
-                "debrief_text": "Played for 3 hours. Beat Soul Master and got to City of Tears.",
+                "wrap_up_text": "Played for 3 hours. Beat Soul Master and got to City of Tears.",
             },
             headers=auth_headers,
         )
@@ -370,10 +370,10 @@ class TestRetroactiveDebrief:
         auth_headers: dict[str, str],
     ) -> None:
         resp = await async_client.post(
-            "/v1/play-sessions/retroactive-debrief",
+            "/v1/play-sessions/retroactive-wrap-up",
             json={
                 "library_entry_public_id": str(uuid4()),
-                "debrief_text": "Some session notes.",
+                "wrap_up_text": "Some session notes.",
             },
             headers=auth_headers,
         )
@@ -385,7 +385,7 @@ class TestRetroactiveDebrief:
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Retroactive debrief should work even with an active play_session
+        """Retroactive wrap_up should work even with an active play_session
         for a different game, since it creates a pre-ended play_session."""
         entry1 = await _create_library_entry(async_client, auth_headers, seed_platforms)
         entry2 = await _create_library_entry(
@@ -395,13 +395,13 @@ class TestRetroactiveDebrief:
         # Start a regular play_session for entry1.
         await _start_play_session(async_client, auth_headers, entry1["public_id"])
 
-        # Submit retroactive debrief for entry2 — should succeed
+        # Submit retroactive wrap_up for entry2 — should succeed
         # because the retroactive play_session is pre-ended.
         resp = await async_client.post(
-            "/v1/play-sessions/retroactive-debrief",
+            "/v1/play-sessions/retroactive-wrap-up",
             json={
                 "library_entry_public_id": entry2["public_id"],
-                "debrief_text": "Cleared chapter 3 of Celeste.",
+                "wrap_up_text": "Cleared chapter 3 of Celeste.",
             },
             headers=auth_headers,
         )
@@ -409,7 +409,7 @@ class TestRetroactiveDebrief:
 
 
 # =====================================================================
-# Test: End play_session (no debrief)
+# Test: End play_session (no wrap_up)
 # =====================================================================
 
 
@@ -477,32 +477,32 @@ class TestEndPlaySession:
 
 
 # =====================================================================
-# Test: Recap with context from debriefs
+# Test: Recap with context from wrap_ups
 # =====================================================================
 
 
 class TestRecapWithContext:
-    async def test_second_play_session_uses_debrief_context(
+    async def test_second_play_session_uses_wrap_up_context(
         self,
         async_client: AsyncClient,
         auth_headers: dict[str, str],
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """The second play_session's recap should reference the first debrief."""
+        """The second play_session's recap should reference the first wrap_up."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
-        # First play_session with debrief.
+        # First play_session with wrap_up.
         m1 = await _start_play_session(async_client, auth_headers, entry["public_id"])
         await async_client.patch(
-            f"/v1/play-sessions/{m1['public_id']}/debrief",
-            json={"debrief_text": "Beat the Mantis Lords. Heading to Greenpath next."},
+            f"/v1/play-sessions/{m1['public_id']}/wrap-up",
+            json={"wrap_up_text": "Beat the Mantis Lords. Heading to Greenpath next."},
             headers=auth_headers,
         )
 
-        # Second play_session should have a recap referencing the debrief.
+        # Second play_session should have a recap referencing the wrap_up.
         m2 = await _start_play_session(async_client, auth_headers, entry["public_id"])
         assert m2["recap_text"] is not None
-        # The dummy LLM uses debrief data — should reference it.
+        # The dummy LLM uses wrap_up data — should reference it.
         recap = m2["recap_text"].lower()
         assert "previously" in recap or "hollow knight" in recap
 
@@ -796,11 +796,11 @@ class TestActionableRecap:
         p1 = await _preview_recap(async_client, auth_headers, entry["public_id"])
         assert p1["last_session_context"] is None
 
-        # First play_session: start, debrief, end.
+        # First play_session: start, wrap_up, end.
         m1 = await _start_play_session(async_client, auth_headers, entry["public_id"])
         await async_client.patch(
-            f"/v1/play-sessions/{m1['public_id']}/debrief",
-            json={"debrief_text": "Beat the Mantis Lords, heading to City of Tears"},
+            f"/v1/play-sessions/{m1['public_id']}/wrap-up",
+            json={"wrap_up_text": "Beat the Mantis Lords, heading to City of Tears"},
             headers=auth_headers,
         )
 
@@ -818,11 +818,11 @@ class TestActionableRecap:
         """Recap should contain actionable 'What you could do' section."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
-        # First play_session with debrief.
+        # First play_session with wrap_up.
         m1 = await _start_play_session(async_client, auth_headers, entry["public_id"])
         await async_client.patch(
-            f"/v1/play-sessions/{m1['public_id']}/debrief",
-            json={"debrief_text": "Explored the Forgotten Crossroads"},
+            f"/v1/play-sessions/{m1['public_id']}/wrap-up",
+            json={"wrap_up_text": "Explored the Forgotten Crossroads"},
             headers=auth_headers,
         )
 
@@ -840,11 +840,11 @@ class TestActionableRecap:
         """Regenerate with position override should include the correction."""
         entry = await _create_library_entry(async_client, auth_headers, seed_platforms)
 
-        # First play_session with debrief.
+        # First play_session with wrap_up.
         m1 = await _start_play_session(async_client, auth_headers, entry["public_id"])
         await async_client.patch(
-            f"/v1/play-sessions/{m1['public_id']}/debrief",
-            json={"debrief_text": "Reached Greenpath after beating Gruz Mother"},
+            f"/v1/play-sessions/{m1['public_id']}/wrap-up",
+            json={"wrap_up_text": "Reached Greenpath after beating Gruz Mother"},
             headers=auth_headers,
         )
 

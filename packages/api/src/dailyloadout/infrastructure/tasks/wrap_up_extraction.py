@@ -1,4 +1,4 @@
-"""Async task: extract structured state from a play_session debrief via LLM."""
+"""Async task: extract structured state from a play_session wrap_up via LLM."""
 
 from __future__ import annotations
 
@@ -10,12 +10,12 @@ logger = structlog.get_logger()
 
 
 @broker.task(retry_on_error=True, max_retries=3)
-async def extract_debrief_state_task(
+async def extract_wrap_up_state_task(
     play_session_id: int,
     game_title: str,
-    debrief_text: str,
+    wrap_up_text: str,
 ) -> None:
-    """Extract structured state from a debrief and persist it.
+    """Extract structured state from a wrap_up and persist it.
 
     Runs as a background Taskiq task with up to 3 retries on failure.
     If all retries fail, the sync fallback in ``_ensure_extractions_complete``
@@ -33,9 +33,9 @@ async def extract_debrief_state_task(
         play_session_repo = PlaySessionRepository(session)
         library_repo = LibraryRepository(session)
 
-        extracted = await llm_client.extract_debrief_state(
+        extracted = await llm_client.extract_wrap_up_state(
             game_title=game_title,
-            debrief_text=debrief_text,
+            wrap_up_text=wrap_up_text,
         )
 
         state_dict = {
@@ -63,6 +63,6 @@ async def extract_debrief_state_task(
         await session.commit()
 
     logger.info(
-        "debrief_extraction_completed",
+        "wrap_up_extraction_completed",
         play_session_id=play_session_id,
     )

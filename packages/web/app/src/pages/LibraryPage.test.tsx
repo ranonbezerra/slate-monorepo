@@ -46,7 +46,7 @@ vi.mock("./PlaySessionRecapModal", () => ({
 	PlaySessionRecapModal: ({ mode }: { mode: string }) =>
 		mode === "preview" ? <div data-testid="recap-preview-modal" /> : null,
 }));
-vi.mock("./PlaySessionDebriefModal", () => ({ PlaySessionDebriefModal: () => null }));
+vi.mock("./PlaySessionWrapUpModal", () => ({ PlaySessionWrapUpModal: () => null }));
 vi.mock("../components/QuickAddMenu", () => ({
 	QuickAddMenu: () => <button type="button">Quick Add</button>,
 }));
@@ -189,7 +189,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 		},
 		playSessionType: "regular",
 		recapText: "Your next adventure awaits",
-		debriefText: null,
+		wrapUpText: null,
 		extractedState: null,
 		endedVia: null,
 		startedAt: "2024-06-02T10:00:00Z",

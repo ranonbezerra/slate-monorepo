@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Read-only history of all playSessions.
 ///
-/// Active-playSession management (recap / debrief) now lives on the Play page;
+/// Active-playSession management (recap / wrapUp) now lives on the Play page;
 /// this surface only lists past and ongoing playSessions.
 class PlaySessionsListPage extends StatefulWidget {
   const PlaySessionsListPage({super.key});
@@ -210,7 +210,7 @@ class _PlaySessionCard extends StatelessWidget {
   String get _statusLabel {
     if (_isActive) return 'Active';
     return switch (playSession.endedVia) {
-      'debrief' => 'Wrapped',
+      'wrapUp' => 'Wrapped',
       'paused_app' => 'Paused',
       'auto_clamp' => 'Auto-closed',
       'retroactive' => 'Retroactive',
@@ -222,7 +222,7 @@ class _PlaySessionCard extends StatelessWidget {
   Color _statusColor(ColorScheme colors) {
     if (_isActive) return colors.primary; // blue/coral
     return switch (playSession.endedVia) {
-      'debrief' => DLColors.green,
+      'wrapUp' => DLColors.green,
       'paused_app' => DLColors.violet,
       'auto_clamp' => DLColors.textDim,
       'retroactive' => DLColors.violetDeep,

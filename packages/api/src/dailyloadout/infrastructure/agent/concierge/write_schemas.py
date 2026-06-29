@@ -24,9 +24,9 @@ class GenerateRecapArgs(BaseModel):
     )
 
 
-class RetroactiveDebriefArgs(BaseModel):
+class RetroactiveWrapUpArgs(BaseModel):
     library_entry_public_id: str = Field(..., description="The game's id (from search_library).")
-    debrief_text: str = Field(
+    wrap_up_text: str = Field(
         ..., description="What the player did in their past, untracked session."
     )
 

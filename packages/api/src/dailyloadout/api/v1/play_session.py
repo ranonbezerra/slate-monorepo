@@ -1,4 +1,4 @@
-"""PlaySession API endpoints: start, active, debrief, end, regenerate, list."""
+"""PlaySession API endpoints: start, active, wrap_up, end, regenerate, list."""
 
 from __future__ import annotations
 
@@ -10,16 +10,16 @@ from dailyloadout.api.v1._cost_guard import cost_guard
 from dailyloadout.api.v1._rate_limit import rate_limit
 from dailyloadout.config import settings
 from dailyloadout.core.play_session.schemas import (
-    PlaySessionDebriefRequest,
     PlaySessionEndRequest,
     PlaySessionListItem,
     PlaySessionListResponse,
     PlaySessionResponse,
     PlaySessionStartRequest,
+    PlaySessionWrapUpRequest,
     RecapPreviewRequest,
     RecapPreviewResponse,
     RegenerateRecapRequest,
-    RetroactiveDebriefRequest,
+    RetroactiveWrapUpRequest,
 )
 from dailyloadout.deps import CurrentUserDep, RequireVerifiedUserDep
 from dailyloadout.deps.play_session import PlaySessionServiceDep
@@ -105,29 +105,29 @@ async def preview_recap(
 
 
 # ---------------------------------------------------------------------------
-# Retroactive debrief (unregistered play session)
+# Retroactive wrap_up (unregistered play session)
 # ---------------------------------------------------------------------------
 
 
 @router.post(
-    "/retroactive-debrief",
+    "/retroactive-wrap-up",
     response_model=RecapPreviewResponse,
     dependencies=[_recap_rate_limit, _play_session_cost_guard],
 )
-async def submit_retroactive_debrief(
-    body: RetroactiveDebriefRequest,
+async def submit_retroactive_wrap_up(
+    body: RetroactiveWrapUpRequest,
     current_user: RequireVerifiedUserDep,
     play_session_service: PlaySessionServiceDep,
 ) -> RecapPreviewResponse:
-    """Record a debrief for a play session that wasn't tracked.
+    """Record a wrap_up for a play session that wasn't tracked.
 
     Creates a pre-ended retroactive play_session, extracts state, and returns
     an updated recap preview that includes the new data.
     """
-    result = await play_session_service.submit_retroactive_debrief(
+    result = await play_session_service.submit_retroactive_wrap_up(
         user_id=current_user.id,
         library_entry_public_id=body.library_entry_public_id,
-        debrief_text=body.debrief_text,
+        wrap_up_text=body.wrap_up_text,
     )
     return RecapPreviewResponse.model_validate(result)
 
@@ -150,31 +150,31 @@ async def get_active_play_session(
 
 
 # ---------------------------------------------------------------------------
-# Debrief
+# WrapUp
 # ---------------------------------------------------------------------------
 
 
 @router.patch(
-    "/{public_id}/debrief",
+    "/{public_id}/wrap-up",
     response_model=PlaySessionResponse,
 )
-async def submit_debrief(
+async def submit_wrap_up(
     public_id: UUID,
-    body: PlaySessionDebriefRequest,
+    body: PlaySessionWrapUpRequest,
     current_user: CurrentUserDep,
     play_session_service: PlaySessionServiceDep,
 ) -> PlaySessionResponse:
-    """Submit a debrief for a play_session, extracting state and ending it."""
-    play_session = await play_session_service.submit_debrief(
+    """Submit a wrap_up for a play_session, extracting state and ending it."""
+    play_session = await play_session_service.submit_wrap_up(
         user_id=current_user.id,
         play_session_public_id=public_id,
-        debrief_text=body.debrief_text,
+        wrap_up_text=body.wrap_up_text,
     )
     return PlaySessionResponse.model_validate(play_session)
 
 
 # ---------------------------------------------------------------------------
-# End play_session (no debrief)
+# End play_session (no wrap_up)
 # ---------------------------------------------------------------------------
 
 
@@ -188,7 +188,7 @@ async def end_play_session(
     current_user: CurrentUserDep,
     play_session_service: PlaySessionServiceDep,
 ) -> PlaySessionResponse:
-    """End a play_session without a debrief."""
+    """End a play_session without a wrap_up."""
     play_session = await play_session_service.end_play_session(
         user_id=current_user.id,
         play_session_public_id=public_id,

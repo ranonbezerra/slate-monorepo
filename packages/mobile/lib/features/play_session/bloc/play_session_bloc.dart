@@ -20,9 +20,9 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     on<PreviewRecap>(_onPreviewRecap);
     on<CancelDeepRecap>(_onCancelDeepRecap);
     on<StartPlaySession>(_onStartPlaySession);
-    on<SubmitDebrief>(_onSubmitDebrief);
+    on<SubmitWrapUp>(_onSubmitWrapUp);
     on<EndPlaySession>(_onEndPlaySession);
-    on<SubmitRetroactiveDebrief>(_onSubmitRetroactiveDebrief);
+    on<SubmitRetroactiveWrapUp>(_onSubmitRetroactiveWrapUp);
     on<RegenerateRecap>(_onRegenerateRecap);
   }
 
@@ -189,16 +189,16 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     }
   }
 
-  Future<void> _onSubmitDebrief(
-    SubmitDebrief event,
+  Future<void> _onSubmitWrapUp(
+    SubmitWrapUp event,
     Emitter<PlaySessionState> emit,
   ) async {
     emit(const PlaySessionLoading());
 
     try {
-      final playSession = await _playSessionRepository.submitDebrief(
+      final playSession = await _playSessionRepository.submitWrapUp(
         event.publicId,
-        event.debriefText,
+        event.wrapUpText,
       );
       emit(PlaySessionEnded(playSession: playSession));
     } on DioException catch (e) {
@@ -227,16 +227,16 @@ class PlaySessionBloc extends Bloc<PlaySessionEvent, PlaySessionState> {
     }
   }
 
-  Future<void> _onSubmitRetroactiveDebrief(
-    SubmitRetroactiveDebrief event,
+  Future<void> _onSubmitRetroactiveWrapUp(
+    SubmitRetroactiveWrapUp event,
     Emitter<PlaySessionState> emit,
   ) async {
     emit(const PlaySessionLoading());
 
     try {
-      final preview = await _playSessionRepository.submitRetroactiveDebrief(
+      final preview = await _playSessionRepository.submitRetroactiveWrapUp(
         event.libraryEntryPublicId,
-        event.debriefText,
+        event.wrapUpText,
       );
       emit(RecapPreviewLoaded(preview: preview));
     } on DioException catch (e) {

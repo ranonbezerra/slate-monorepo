@@ -162,22 +162,22 @@ _schema_created = False
 
 @pytest.fixture(autouse=True)
 def _no_background_dispatch(monkeypatch: pytest.MonkeyPatch) -> None:
-    """No-op the debrief-extraction Taskiq dispatch in tests.
+    """No-op the wrap_up-extraction Taskiq dispatch in tests.
 
-    The task is exercised directly via its ``.original_func``; an API debrief
+    The task is exercised directly via its ``.original_func``; an API wrap_up
     submission only needs ``.kiq()`` to be a no-op. A real fire-and-forget
     ``InMemoryBroker`` task outlives the test's event loop and its aiosqlite
     connection then calls back into a closed loop — a teardown
     ResourceWarning/thread-exception that ``filterwarnings=["error"]`` escalates
-    to a failure (flaky under xdist). Every test that submits a debrief already
+    to a failure (flaky under xdist). Every test that submits a wrap_up already
     asserts the state is NOT yet extracted, so a no-op matches that behaviour.
     """
-    from dailyloadout.infrastructure.tasks import debrief_extraction
+    from dailyloadout.infrastructure.tasks import wrap_up_extraction
 
     async def _noop_kiq(*_args: object, **_kwargs: object) -> None:
         return None
 
-    monkeypatch.setattr(debrief_extraction.extract_debrief_state_task, "kiq", _noop_kiq)
+    monkeypatch.setattr(wrap_up_extraction.extract_wrap_up_state_task, "kiq", _noop_kiq)
 
 
 @pytest.fixture(autouse=True)

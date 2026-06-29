@@ -21,8 +21,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useActivePlaySession } from "../hooks/usePlaySession";
 import { FEATURES } from "../lib/features";
-import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
 import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
+import { PlaySessionWrapUpModal } from "./PlaySessionWrapUpModal";
 
 interface DoorCardProps {
 	title: string;
@@ -87,7 +87,7 @@ export function PlayPage() {
 	const navigate = useNavigate();
 	const { data: activePlaySession } = useActivePlaySession();
 	const [showRecap, setShowRecap] = useState(false);
-	const [showDebrief, setShowDebrief] = useState(false);
+	const [showWrapUp, setShowWrapUp] = useState(false);
 	const hasActivePlaySession = Boolean(activePlaySession);
 
 	return (
@@ -126,7 +126,7 @@ export function PlayPage() {
 							<Button
 								leftSection={<IconFlagCheck size={18} />}
 								color="teal"
-								onClick={() => setShowDebrief(true)}
+								onClick={() => setShowWrapUp(true)}
 							>
 								Wrap up
 							</Button>
@@ -174,9 +174,9 @@ export function PlayPage() {
 					onClose={() => setShowRecap(false)}
 				/>
 			)}
-			<PlaySessionDebriefModal
-				playSession={showDebrief ? (activePlaySession ?? null) : null}
-				onClose={() => setShowDebrief(false)}
+			<PlaySessionWrapUpModal
+				playSession={showWrapUp ? (activePlaySession ?? null) : null}
+				onClose={() => setShowWrapUp(false)}
 			/>
 		</Stack>
 	);

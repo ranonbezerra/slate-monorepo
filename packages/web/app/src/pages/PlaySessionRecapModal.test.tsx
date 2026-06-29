@@ -66,7 +66,7 @@ vi.mock("../components/AiRecapOverlay", () => ({
 vi.mock("../hooks/usePlaySession", () => ({
 	usePreviewRecap: vi.fn(),
 	useRegenerateRecap: vi.fn(),
-	useRetroactiveDebrief: vi.fn(),
+	useRetroactiveWrapUp: vi.fn(),
 	useStartPlaySession: vi.fn(),
 }));
 
@@ -78,7 +78,7 @@ import { notifications } from "@mantine/notifications";
 import {
 	usePreviewRecap,
 	useRegenerateRecap,
-	useRetroactiveDebrief,
+	useRetroactiveWrapUp,
 	useStartPlaySession,
 } from "../hooks/usePlaySession";
 import type { LibraryEntry } from "../types/library";
@@ -130,7 +130,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 		libraryEntry: makeEntry(),
 		playSessionType: "regular",
 		recapText: "Continue exploring the City of Tears. Look for the Soul Master.",
-		debriefText: null,
+		wrapUpText: null,
 		extractedState: null,
 		endedVia: null,
 		startedAt: "2024-06-02T10:00:00Z",
@@ -249,7 +249,7 @@ beforeEach(() => {
 		mutateAsync: mockRegenerateMutateAsync,
 		isPending: false,
 	});
-	(useRetroactiveDebrief as Mock).mockReturnValue({
+	(useRetroactiveWrapUp as Mock).mockReturnValue({
 		mutateAsync: mockRetroactiveMutateAsync,
 		isPending: false,
 	});
@@ -511,7 +511,7 @@ describe("PlaySessionRecapModal", () => {
 			await waitFor(() => {
 				expect(mockRetroactiveMutateAsync).toHaveBeenCalledWith({
 					libraryEntryPublicId: "entry-1",
-					debriefText: "I beat the Soul Master and got the Desolate Dive",
+					wrapUpText: "I beat the Soul Master and got the Desolate Dive",
 				});
 			});
 		});

@@ -12,12 +12,14 @@ from dailyloadout.core.play_session.start import create_play_session_for_entry
 from dailyloadout.infrastructure.db.models import Loadout
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
 from dailyloadout.infrastructure.db.repositories.loadout import LoadoutRepository
-from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import (
+    PlaySessionRepository,
+)
 from dailyloadout.infrastructure.llm.base import AbstractLLMClient
 
 logger = structlog.get_logger()
 
-_ACTIVE_MISSION_DETAIL = "You already have an active play_session. End it first."
+_ACTIVE_PLAY_SESSION_DETAIL = "You already have an active play session. End it first."
 
 
 class LoadoutService:
@@ -179,7 +181,7 @@ class LoadoutService:
         if await self._play_session_repo.get_active_for_user(user_id) is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=_ACTIVE_MISSION_DETAIL,
+                detail=_ACTIVE_PLAY_SESSION_DETAIL,
             )
         loadout = await self.create_loadout(
             user_id, mood, available_minutes, mental_energy, context, cooldown_hours
@@ -219,7 +221,7 @@ class LoadoutService:
         if await self._play_session_repo.get_active_for_user(user_id) is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=_ACTIVE_MISSION_DETAIL,
+                detail=_ACTIVE_PLAY_SESSION_DETAIL,
             )
 
         play_session = await create_play_session_for_entry(

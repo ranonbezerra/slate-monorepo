@@ -187,7 +187,7 @@ class TimelineEntry extends Equatable {
     required this.playSessionType,
     required this.startedAt,
     this.recapText,
-    this.debriefText,
+    this.wrapUpText,
     this.endedVia,
     this.endedAt,
     this.durationMinutes,
@@ -200,7 +200,7 @@ class TimelineEntry extends Equatable {
       platformLabel: json['platform_label'] as String,
       playSessionType: json['play_session_type'] as String,
       recapText: json['recap_text'] as String?,
-      debriefText: json['debrief_text'] as String?,
+      wrapUpText: json['wrap_up_text'] as String?,
       endedVia: json['ended_via'] as String?,
       startedAt: DateTime.parse(json['started_at'] as String),
       endedAt: json['ended_at'] != null
@@ -215,7 +215,7 @@ class TimelineEntry extends Equatable {
   final String platformLabel;
   final String playSessionType;
   final String? recapText;
-  final String? debriefText;
+  final String? wrapUpText;
   final String? endedVia;
   final DateTime startedAt;
   final DateTime? endedAt;
@@ -228,7 +228,7 @@ class TimelineEntry extends Equatable {
     platformLabel,
     playSessionType,
     recapText,
-    debriefText,
+    wrapUpText,
     endedVia,
     startedAt,
     endedAt,

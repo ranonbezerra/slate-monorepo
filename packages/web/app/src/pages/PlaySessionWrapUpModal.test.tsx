@@ -4,9 +4,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
-import { useEndPlaySession, useSubmitDebrief } from "../hooks/usePlaySession";
+import { useEndPlaySession, useSubmitWrapUp } from "../hooks/usePlaySession";
 import type { PlaySession } from "../types/play-session";
-import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
+import { PlaySessionWrapUpModal } from "./PlaySessionWrapUpModal";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -14,7 +14,7 @@ import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
 
 vi.mock("../hooks/usePlaySession", () => ({
 	useEndPlaySession: vi.fn(),
-	useSubmitDebrief: vi.fn(),
+	useSubmitWrapUp: vi.fn(),
 	usePlaySessions: vi.fn(() => ({ data: null, isLoading: false })),
 	useActivePlaySession: vi.fn(() => ({ data: null })),
 	usePlaySession: vi.fn(() => ({ data: null, isLoading: false })),
@@ -30,7 +30,7 @@ vi.mock("../hooks/usePlaySession", () => ({
 		mutateAsync: vi.fn(),
 		isPending: false,
 	})),
-	useRetroactiveDebrief: vi.fn(() => ({
+	useRetroactiveWrapUp: vi.fn(() => ({
 		mutateAsync: vi.fn(),
 		isPending: false,
 	})),
@@ -97,7 +97,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 		},
 		playSessionType: "regular",
 		recapText: "Welcome back to Hollow Knight...",
-		debriefText: null,
+		wrapUpText: null,
 		extractedState: null,
 		endedVia: null,
 		startedAt: "2024-06-01T10:00:00Z",
@@ -115,7 +115,7 @@ function renderModal(playSession: PlaySession | null, onClose = defaultOnClose) 
 	return render(
 		<MantineProvider>
 			<MemoryRouter>
-				<PlaySessionDebriefModal playSession={playSession} onClose={onClose} />
+				<PlaySessionWrapUpModal playSession={playSession} onClose={onClose} />
 			</MemoryRouter>
 		</MantineProvider>,
 	);
@@ -125,14 +125,14 @@ function renderModal(playSession: PlaySession | null, onClose = defaultOnClose) 
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("PlaySessionDebriefModal", () => {
+describe("PlaySessionWrapUpModal", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		(useEndPlaySession as Mock).mockReturnValue({
 			mutateAsync: vi.fn(),
 			isPending: false,
 		});
-		(useSubmitDebrief as Mock).mockReturnValue({
+		(useSubmitWrapUp as Mock).mockReturnValue({
 			mutateAsync: vi.fn(),
 			isPending: false,
 		});
@@ -179,7 +179,7 @@ describe("PlaySessionDebriefModal", () => {
 		expect(screen.getByText(/End session: Elden Ring/)).toBeInTheDocument();
 	});
 
-	it("renders the debrief description text", () => {
+	it("renders the wrapUp description text", () => {
 		renderModal(makePlaySession());
 
 		expect(screen.getByText(/What happened this session/)).toBeInTheDocument();
@@ -198,14 +198,14 @@ describe("PlaySessionDebriefModal", () => {
 		expect(screen.getByRole("button", { name: /Save wrap-up/i })).toBeInTheDocument();
 	});
 
-	it("submit debrief button is disabled when text is shorter than 3 characters", () => {
+	it("submit wrapUp button is disabled when text is shorter than 3 characters", () => {
 		renderModal(makePlaySession());
 
 		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		expect(submitButton).toBeDisabled();
 	});
 
-	it("submit debrief button becomes enabled when text is 3+ characters", () => {
+	it("submit wrapUp button becomes enabled when text is 3+ characters", () => {
 		renderModal(makePlaySession());
 
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
@@ -215,7 +215,7 @@ describe("PlaySessionDebriefModal", () => {
 		expect(submitButton).not.toBeDisabled();
 	});
 
-	it("submit debrief stays disabled with only whitespace", () => {
+	it("submit wrapUp stays disabled with only whitespace", () => {
 		renderModal(makePlaySession());
 
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
@@ -225,7 +225,7 @@ describe("PlaySessionDebriefModal", () => {
 		expect(submitButton).toBeDisabled();
 	});
 
-	it("skip debrief button is not disabled even without text", () => {
+	it("skip wrapUp button is not disabled even without text", () => {
 		renderModal(makePlaySession());
 
 		const skipButton = screen.getByRole("button", { name: /Skip wrap-up/i });
@@ -244,8 +244,8 @@ describe("PlaySessionDebriefModal", () => {
 		expect(skipButton).toHaveAttribute("data-loading");
 	});
 
-	it("shows loading state on submit button when submitDebrief is pending", () => {
-		(useSubmitDebrief as Mock).mockReturnValue({
+	it("shows loading state on submit button when submitWrapUp is pending", () => {
+		(useSubmitWrapUp as Mock).mockReturnValue({
 			mutateAsync: vi.fn(),
 			isPending: true,
 		});
@@ -258,9 +258,9 @@ describe("PlaySessionDebriefModal", () => {
 
 	// --- Save wrap-up flow ---
 
-	it("calls submitDebrief.mutateAsync on submit and shows success notification", async () => {
+	it("calls submitWrapUp.mutateAsync on submit and shows success notification", async () => {
 		const mutateAsyncFn = vi.fn().mockResolvedValueOnce(undefined);
-		(useSubmitDebrief as Mock).mockReturnValue({
+		(useSubmitWrapUp as Mock).mockReturnValue({
 			mutateAsync: mutateAsyncFn,
 			isPending: false,
 		});
@@ -277,7 +277,7 @@ describe("PlaySessionDebriefModal", () => {
 		await waitFor(() => {
 			expect(mutateAsyncFn).toHaveBeenCalledWith({
 				publicId: "mis-001",
-				debriefText: "Beat the Mantis Lords and got the cloak",
+				wrapUpText: "Beat the Mantis Lords and got the cloak",
 			});
 		});
 
@@ -295,9 +295,9 @@ describe("PlaySessionDebriefModal", () => {
 		});
 	});
 
-	it("shows error notification when submitDebrief fails with Error", async () => {
+	it("shows error notification when submitWrapUp fails with Error", async () => {
 		const mutateAsyncFn = vi.fn().mockRejectedValueOnce(new Error("Server error"));
-		(useSubmitDebrief as Mock).mockReturnValue({
+		(useSubmitWrapUp as Mock).mockReturnValue({
 			mutateAsync: mutateAsyncFn,
 			isPending: false,
 		});
@@ -305,7 +305,7 @@ describe("PlaySessionDebriefModal", () => {
 		renderModal(makePlaySession());
 
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
-		fireEvent.change(textarea, { target: { value: "Some debrief text" } });
+		fireEvent.change(textarea, { target: { value: "Some wrapUp text" } });
 
 		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		fireEvent.click(submitButton);
@@ -321,9 +321,9 @@ describe("PlaySessionDebriefModal", () => {
 		});
 	});
 
-	it("shows generic error notification when submitDebrief fails with non-Error", async () => {
+	it("shows generic error notification when submitWrapUp fails with non-Error", async () => {
 		const mutateAsyncFn = vi.fn().mockRejectedValueOnce("something");
-		(useSubmitDebrief as Mock).mockReturnValue({
+		(useSubmitWrapUp as Mock).mockReturnValue({
 			mutateAsync: mutateAsyncFn,
 			isPending: false,
 		});
@@ -331,7 +331,7 @@ describe("PlaySessionDebriefModal", () => {
 		renderModal(makePlaySession());
 
 		const textarea = screen.getByPlaceholderText(/Beat the Mantis Lords/);
-		fireEvent.change(textarea, { target: { value: "Some debrief text" } });
+		fireEvent.change(textarea, { target: { value: "Some wrapUp text" } });
 
 		const submitButton = screen.getByRole("button", { name: /Save wrap-up/i });
 		fireEvent.click(submitButton);

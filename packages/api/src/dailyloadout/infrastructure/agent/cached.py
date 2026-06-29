@@ -2,8 +2,8 @@
 
 Caches the *entire* graph run (~4 LLM calls + web research), addressed by a
 digest of the grounding ``PlaySessionContext``. Because that context includes the
-session's debriefs, a new debrief changes the digest and yields a fresh key — so
-"bust on new debrief" is structural, no explicit invalidation needed.
+session's wrap_ups, a new wrap_up changes the digest and yields a fresh key — so
+"bust on new wrap_up" is structural, no explicit invalidation needed.
 
 Only genuine deep-research results are cached; a quick-fallback (the deep path
 timed out or research was down) is left uncached so the next attempt can try the
@@ -19,7 +19,7 @@ from dailyloadout.infrastructure.cache.base import AbstractCache
 from dailyloadout.infrastructure.cache.keys import NS_RECAP, recap_key
 from dailyloadout.infrastructure.cache.layer import cached_call
 
-from .base import AbstractRecapAgent, BriefResult, DeepBriefRequest
+from .base import AbstractRecapAgent, DeepRecapRequest, RecapResult
 
 
 class CachedRecapAgent(AbstractRecapAgent):
@@ -30,18 +30,18 @@ class CachedRecapAgent(AbstractRecapAgent):
         self._cache = cache
         self._ttl = ttl_seconds
 
-    async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
+    async def deep_recap(self, req: DeepRecapRequest) -> RecapResult:
         return await cached_call(
             cache=self._cache,
             key=recap_key("deep", req.context),
             ttl_seconds=self._ttl,
             namespace=NS_RECAP,
-            compute=lambda: self._inner.deep_brief(req),
-            loads=lambda d: BriefResult(**d),
+            compute=lambda: self._inner.deep_recap(req),
+            loads=lambda d: RecapResult(**d),
             dumps=_to_dict,
             cache_if=lambda r: r.source == "deep_research" and bool(r.text),
         )
 
 
-def _to_dict(result: BriefResult) -> dict[str, Any]:
+def _to_dict(result: RecapResult) -> dict[str, Any]:
     return asdict(result)

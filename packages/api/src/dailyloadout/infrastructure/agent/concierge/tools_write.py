@@ -1,7 +1,7 @@
 """Write tool functions for the Backlog Concierge (ROADMAP Epic 12).
 
 These turn the Concierge from a recommender into the *conversational operator*
-of the play_session pipeline: it can start a play_session, brief it, log an offline
+of the play_session pipeline: it can start a play_session, recap it, log an offline
 session, and update a game's status — all funnelling through the same shared
 orchestrator and guard rails the REST endpoints use.
 
@@ -27,7 +27,7 @@ from dailyloadout.infrastructure.agent.concierge.base import ConciergeTool
 from dailyloadout.infrastructure.agent.concierge.tools import _resolve_entry
 from dailyloadout.infrastructure.agent.concierge.write_schemas import (
     GenerateRecapArgs,
-    RetroactiveDebriefArgs,
+    RetroactiveWrapUpArgs,
     SetStatusArgs,
     StartPlaySessionArgs,
 )
@@ -118,7 +118,7 @@ async def generate_recap(
     _ = mode  # accepted but intentionally ignored — always clamped to quick.
     play_session = await play_session_repo.get_active_for_user(user_id)
     if play_session is None:
-        return "There's no active play_session to brief. Start one first."
+        return "There's no active play_session to recap. Start one first."
 
     # Clamp to 'quick' (mirror start_play_session's _RECAP_CHOICES): one 6/min chat
     # turn must not be able to trigger the full deep-research graph and bypass the
@@ -140,14 +140,14 @@ async def generate_recap(
     return f"Recap for {play_session.library_entry.game.title}:\n{recap_text}"
 
 
-async def submit_retroactive_debrief(
+async def submit_retroactive_wrap_up(
     library_repo: LibraryRepository,
     play_session_repo: PlaySessionRepository,
     llm_client: AbstractLLMClient,
     user_id: int,
     *,
     library_entry_public_id: str,
-    debrief_text: str,
+    wrap_up_text: str,
 ) -> str:
     """Log a past, untracked play session as a pre-ended retroactive play_session."""
     entry = await _resolve_entry(library_repo, user_id, library_entry_public_id)
@@ -156,9 +156,9 @@ async def submit_retroactive_debrief(
 
     extracted_state = None
     try:
-        extracted = await llm_client.extract_debrief_state(
+        extracted = await llm_client.extract_wrap_up_state(
             game_title=entry.game.title,
-            debrief_text=debrief_text,
+            wrap_up_text=wrap_up_text,
         )
         extracted_state = {
             "location": extracted.location,
@@ -174,7 +174,7 @@ async def submit_retroactive_debrief(
     await play_session_repo.create_retroactive(
         user_id=user_id,
         library_entry_id=entry.id,
-        debrief_text=debrief_text,
+        wrap_up_text=wrap_up_text,
         extracted_state=extracted_state,
     )
     await invalidate_user_stats(user_id)
@@ -230,19 +230,19 @@ def build_concierge_write_tools(
             recap=recap,
         )
 
-    async def _brief(mode: str = "quick") -> str:
+    async def _recap(mode: str = "quick") -> str:
         return await generate_recap(
             library_repo, play_session_repo, llm_client, agent, settings, user_id, mode=mode
         )
 
-    async def _retro(library_entry_public_id: str, debrief_text: str) -> str:
-        return await submit_retroactive_debrief(
+    async def _retro(library_entry_public_id: str, wrap_up_text: str) -> str:
+        return await submit_retroactive_wrap_up(
             library_repo,
             play_session_repo,
             llm_client,
             user_id,
             library_entry_public_id=library_entry_public_id,
-            debrief_text=debrief_text,
+            wrap_up_text=wrap_up_text,
         )
 
     async def _status(library_entry_public_id: str, status: str) -> str:
@@ -265,13 +265,13 @@ def build_concierge_write_tools(
             "and save it. Use after start_play_session, or when the player asks for a "
             "refresher on where they left off.",
             args_schema=GenerateRecapArgs,
-            coroutine=_brief,
+            coroutine=_recap,
         ),
         ConciergeTool(
-            name="submit_retroactive_debrief",
+            name="submit_retroactive_wrap_up",
             description="Log a past play session the player did NOT track live (e.g. 'I played "
             "two hours offline'). Records what happened and saves their next step.",
-            args_schema=RetroactiveDebriefArgs,
+            args_schema=RetroactiveWrapUpArgs,
             coroutine=_retro,
         ),
         ConciergeTool(

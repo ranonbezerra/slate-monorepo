@@ -1,4 +1,4 @@
-"""Tests for the async debrief extraction Taskiq task."""
+"""Tests for the async wrap_up extraction Taskiq task."""
 
 from __future__ import annotations
 
@@ -15,13 +15,13 @@ async def _setup_ended_play_session(
     headers: dict[str, str],
     seed_platforms: list[dict[str, Any]],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Create a library entry, start a play_session, submit a debrief, return both."""
+    """Create a library entry, start a play_session, submit a wrap_up, return both."""
     entry = await _create_library_entry(client, headers, seed_platforms)
     play_session = await _start_play_session(client, headers, entry["public_id"])
 
     resp = await client.patch(
-        f"/v1/play-sessions/{play_session['public_id']}/debrief",
-        json={"debrief_text": "Found the Mantis Claw. Heading to City of Tears."},
+        f"/v1/play-sessions/{play_session['public_id']}/wrap-up",
+        json={"wrap_up_text": "Found the Mantis Claw. Heading to City of Tears."},
         headers=headers,
     )
     assert resp.status_code == 200
@@ -31,7 +31,7 @@ async def _setup_ended_play_session(
     return entry, play_session
 
 
-class TestDebriefExtractionTask:
+class TestWrapUpExtractionTask:
     async def test_task_extracts_and_persists_state(
         self,
         async_client: AsyncClient,
@@ -49,15 +49,15 @@ class TestDebriefExtractionTask:
             "dailyloadout.infrastructure.db.session.async_session_factory",
             _TestSessionFactory,
         ):
-            from dailyloadout.infrastructure.tasks.debrief_extraction import (
-                extract_debrief_state_task,
+            from dailyloadout.infrastructure.tasks.wrap_up_extraction import (
+                extract_wrap_up_state_task,
             )
 
             # Call the underlying coroutine directly (not via .kiq()).
-            await extract_debrief_state_task.original_func(
+            await extract_wrap_up_state_task.original_func(
                 play_session_id=1,
                 game_title="Hollow Knight",
-                debrief_text="Found the Mantis Claw. Heading to City of Tears.",
+                wrap_up_text="Found the Mantis Claw. Heading to City of Tears.",
             )
 
         # Verify the extracted state is persisted.
@@ -85,14 +85,14 @@ class TestDebriefExtractionTask:
             "dailyloadout.infrastructure.db.session.async_session_factory",
             _TestSessionFactory,
         ):
-            from dailyloadout.infrastructure.tasks.debrief_extraction import (
-                extract_debrief_state_task,
+            from dailyloadout.infrastructure.tasks.wrap_up_extraction import (
+                extract_wrap_up_state_task,
             )
 
-            await extract_debrief_state_task.original_func(
+            await extract_wrap_up_state_task.original_func(
                 play_session_id=1,
                 game_title="Hollow Knight",
-                debrief_text="Found the Mantis Claw. Heading to City of Tears.",
+                wrap_up_text="Found the Mantis Claw. Heading to City of Tears.",
             )
 
         # Check library entry's play_session_next_action is updated.

@@ -32,8 +32,8 @@ def _context_text(ctx: PlaySessionContext) -> str:
         value = ctx.get(key)
         if value:
             parts.append(str(value))
-    for debrief in ctx.get("previous_debriefs", []) or []:
-        parts.extend(str(v) for v in debrief.values() if v is not None)
+    for wrap_up in ctx.get("previous_wrap_ups", []) or []:
+        parts.extend(str(v) for v in wrap_up.values() if v is not None)
     return " ".join(p for p in parts if p)
 
 
@@ -182,12 +182,12 @@ async def fallback_quick(
 ) -> dict[str, object]:
     """Degrade to the existing single-shot quick recap."""
     ctx = state["context"]
-    previous_debriefs = typing.cast(
-        "list[dict[str, object]]", ctx.get("previous_debriefs", []) or []
+    previous_wrap_ups = typing.cast(
+        "list[dict[str, object]]", ctx.get("previous_wrap_ups", []) or []
     )
     text = await llm.generate_recap(
         game_title=ctx.get("game_title", ""),
-        previous_debriefs=previous_debriefs,
+        previous_wrap_ups=previous_wrap_ups,
         current_next_action=ctx.get("next_action"),
     )
     return {"recap": text, "source": "quick_fallback"}

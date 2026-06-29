@@ -35,7 +35,7 @@ const TOOL_LABELS: Record<string, string> = {
 	estimate_session_fit: "sizing up the session",
 	start_play_session: "starting your session",
 	generate_recap: "writing a recap",
-	submit_retroactive_debrief: "logging your session",
+	submit_retroactive_wrap_up: "logging your session",
 	set_status: "updating your library",
 };
 

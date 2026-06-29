@@ -62,8 +62,8 @@ def stats_namespace(user_id: int) -> str:
 def recap_key(mode: str, context: Any) -> str:
     """Key for a deep recap, addressed by its grounding context.
 
-    The context *includes* the session's debriefs, so a new debrief changes the
-    digest and naturally yields a fresh key — "bust on new debrief" falls out of
+    The context *includes* the session's wrap_ups, so a new wrap_up changes the
+    digest and naturally yields a fresh key — "bust on new wrap_up" falls out of
     content-addressing, no explicit invalidation needed.
     """
     return f"{NS_RECAP}:{mode}:{digest(context)}"

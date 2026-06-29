@@ -74,15 +74,15 @@ final class StartPlaySession extends PlaySessionEvent {
   List<Object?> get props => [libraryEntryPublicId, recapText, skipRecap];
 }
 
-/// Dispatched to submit a debrief for a playSession.
-final class SubmitDebrief extends PlaySessionEvent {
-  const SubmitDebrief({required this.publicId, required this.debriefText});
+/// Dispatched to submit a wrapUp for a playSession.
+final class SubmitWrapUp extends PlaySessionEvent {
+  const SubmitWrapUp({required this.publicId, required this.wrapUpText});
 
   final String publicId;
-  final String debriefText;
+  final String wrapUpText;
 
   @override
-  List<Object?> get props => [publicId, debriefText];
+  List<Object?> get props => [publicId, wrapUpText];
 }
 
 /// Dispatched to end a playSession.
@@ -96,18 +96,18 @@ final class EndPlaySession extends PlaySessionEvent {
   List<Object?> get props => [publicId, endedVia];
 }
 
-/// Dispatched to submit a retroactive debrief for a library entry.
-final class SubmitRetroactiveDebrief extends PlaySessionEvent {
-  const SubmitRetroactiveDebrief({
+/// Dispatched to submit a retroactive wrapUp for a library entry.
+final class SubmitRetroactiveWrapUp extends PlaySessionEvent {
+  const SubmitRetroactiveWrapUp({
     required this.libraryEntryPublicId,
-    required this.debriefText,
+    required this.wrapUpText,
   });
 
   final String libraryEntryPublicId;
-  final String debriefText;
+  final String wrapUpText;
 
   @override
-  List<Object?> get props => [libraryEntryPublicId, debriefText];
+  List<Object?> get props => [libraryEntryPublicId, wrapUpText];
 }
 
 /// Dispatched to regenerate the recap for an existing playSession.

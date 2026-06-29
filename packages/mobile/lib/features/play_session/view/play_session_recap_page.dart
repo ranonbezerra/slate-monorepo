@@ -108,9 +108,9 @@ class _PlaySessionRecapPageState extends State<PlaySessionRecapPage> {
     if (text.isEmpty) return;
 
     context.read<PlaySessionBloc>().add(
-      SubmitRetroactiveDebrief(
+      SubmitRetroactiveWrapUp(
         libraryEntryPublicId: widget.libraryEntryPublicId!,
-        debriefText: text,
+        wrapUpText: text,
       ),
     );
     _retroactiveController.clear();

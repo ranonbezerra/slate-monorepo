@@ -23,7 +23,7 @@ from dailyloadout.infrastructure.cache.keys import stats_namespace
 async def invalidate_user_stats(user_id: int, cache: AbstractCache | None = None) -> None:
     """Bust every cached stats view for *user_id*.
 
-    Called whenever a play_session starts, ends, or is debriefed, or the library
+    Called whenever a play_session starts, ends, or is wrapped up, or the library
     changes — any of which shifts the overview / heatmap / genre / platform /
     timeline aggregates. Best-effort: a no-op cache (tests, caching disabled)
     simply does nothing.

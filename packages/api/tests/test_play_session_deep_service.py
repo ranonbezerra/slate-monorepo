@@ -9,8 +9,8 @@ from dailyloadout.config import Settings
 from dailyloadout.core.play_session.recap import generate_recap_for_mode
 from dailyloadout.infrastructure.agent.base import (
     AbstractRecapAgent,
-    BriefResult,
-    DeepBriefRequest,
+    DeepRecapRequest,
+    RecapResult,
 )
 from dailyloadout.infrastructure.agent.dummy import DummyRecapAgent
 from dailyloadout.infrastructure.llm.dummy import DummyLLMClient
@@ -29,13 +29,13 @@ class _RaisingAgent(AbstractRecapAgent):
     def __init__(self, exc: Exception) -> None:
         self._exc = exc
 
-    async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
+    async def deep_recap(self, req: DeepRecapRequest) -> RecapResult:
         raise self._exc
 
 
 class _EmptyTextAgent(AbstractRecapAgent):
-    async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
-        return BriefResult(text="", source="deep_research", suspicious=False)
+    async def deep_recap(self, req: DeepRecapRequest) -> RecapResult:
+        return RecapResult(text="", source="deep_research", suspicious=False)
 
 
 def _entry() -> SimpleNamespace:
@@ -47,7 +47,7 @@ def _entry() -> SimpleNamespace:
     )
 
 
-async def _brief(agent: AbstractRecapAgent | None, mode: str) -> str:
+async def _recap(agent: AbstractRecapAgent | None, mode: str) -> str:
     return await generate_recap_for_mode(
         _FakePlaySessionRepo(),  # type: ignore[arg-type]
         SimpleNamespace(),  # type: ignore[arg-type]  # library_repo unused on empty path
@@ -66,23 +66,23 @@ def _is_quick(text: str) -> bool:
 
 class TestDeepRecapMode:
     async def test_deep_mode_uses_agent_text(self) -> None:
-        text = await _brief(DummyRecapAgent(), "deep")
+        text = await _recap(DummyRecapAgent(), "deep")
         assert "Previously on Hollow Knight" in text
 
     async def test_quick_mode_skips_agent(self) -> None:
-        assert _is_quick(await _brief(DummyRecapAgent(), "quick"))
+        assert _is_quick(await _recap(DummyRecapAgent(), "quick"))
 
     async def test_deep_without_agent_falls_back_to_quick(self) -> None:
-        assert _is_quick(await _brief(None, "deep"))
+        assert _is_quick(await _recap(None, "deep"))
 
     async def test_research_unavailable_falls_back(self) -> None:
-        assert _is_quick(await _brief(_RaisingAgent(ResearchUnavailableError("down")), "deep"))
+        assert _is_quick(await _recap(_RaisingAgent(ResearchUnavailableError("down")), "deep"))
 
     async def test_timeout_falls_back(self) -> None:
-        assert _is_quick(await _brief(_RaisingAgent(TimeoutError()), "deep"))
+        assert _is_quick(await _recap(_RaisingAgent(TimeoutError()), "deep"))
 
     async def test_unexpected_error_falls_back(self) -> None:
-        assert _is_quick(await _brief(_RaisingAgent(RuntimeError("boom")), "deep"))
+        assert _is_quick(await _recap(_RaisingAgent(RuntimeError("boom")), "deep"))
 
     async def test_empty_agent_text_falls_back(self) -> None:
-        assert _is_quick(await _brief(_EmptyTextAgent(), "deep"))
+        assert _is_quick(await _recap(_EmptyTextAgent(), "deep"))

@@ -12,9 +12,9 @@ Player's last known state:
 {% if context.current_quest %}- Current quest: {{ context.current_quest | udata }}{% endif %}
 {% if context.next_action %}- Next action they noted: {{ context.next_action | udata }}{% endif %}
 {% if context.level %}- Level/progress: {{ context.level | udata }}{% endif %}
-{% if context.previous_debriefs %}
+{% if context.previous_wrap_ups %}
 Recent session notes (the player's own words — anchor the recap to these):
-{% for d in context.previous_debriefs %}- {{ d | udata }}
+{% for d in context.previous_wrap_ups %}- {{ d | udata }}
 {% endfor %}
 {% endif %}
 

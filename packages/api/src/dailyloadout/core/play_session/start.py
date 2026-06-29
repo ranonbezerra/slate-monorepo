@@ -14,9 +14,11 @@ from sqlalchemy.exc import IntegrityError
 from dailyloadout.core.cache.invalidation import invalidate_user_stats
 from dailyloadout.infrastructure.db.models import LibraryEntry, PlaySession
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
-from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
+from dailyloadout.infrastructure.db.repositories.play_session import (
+    PlaySessionRepository,
+)
 
-_ACTIVE_MISSION_DETAIL = "You already have an active play_session. End it first."
+_ACTIVE_PLAY_SESSION_DETAIL = "You already have an active play session. End it first."
 
 
 async def create_play_session_for_entry(
@@ -46,7 +48,7 @@ async def create_play_session_for_entry(
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=_ACTIVE_MISSION_DETAIL,
+            detail=_ACTIVE_PLAY_SESSION_DETAIL,
         ) from None
 
     play_session.library_entry = entry

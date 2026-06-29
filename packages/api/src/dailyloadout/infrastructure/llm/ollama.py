@@ -47,7 +47,7 @@ def _load_prompt(name: str) -> str:
 _CAPTURE_PARSE_SRC = _load_prompt("capture_parse.j2")
 _CAPTURE_PARSE_VISION_SRC = _load_prompt("capture_parse_vision.j2")
 _RECAP_SRC = _load_prompt("recap.j2")
-_DEBRIEF_EXTRACT_SRC = _load_prompt("debrief_extract.j2")
+_WRAP_UP_EXTRACT_SRC = _load_prompt("wrap_up_extract.j2")
 _LOADOUT_PICK_SRC = _load_prompt("loadout_pick.j2")
 
 
@@ -171,14 +171,14 @@ class OllamaClient(AbstractLLMClient):
     async def generate_recap(
         self,
         game_title: str,
-        previous_debriefs: list[dict[str, object]],
+        previous_wrap_ups: list[dict[str, object]],
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
         """Generate a play_session recap using the smart LLM model."""
         prompt = _jinja_env.from_string(_RECAP_SRC).render(
             game_title=game_title,
-            previous_debriefs=previous_debriefs,
+            previous_wrap_ups=previous_wrap_ups,
             current_next_action=current_next_action,
             position_override=position_override,
         )
@@ -195,15 +195,15 @@ class OllamaClient(AbstractLLMClient):
         body: dict[str, str] = resp.json()
         return body.get("response", "").strip()
 
-    async def extract_debrief_state(
+    async def extract_wrap_up_state(
         self,
         game_title: str,
-        debrief_text: str,
+        wrap_up_text: str,
     ) -> ExtractedState:
-        """Extract structured state from a debrief using the fast LLM model."""
-        prompt = _jinja_env.from_string(_DEBRIEF_EXTRACT_SRC).render(
+        """Extract structured state from a wrap_up using the fast LLM model."""
+        prompt = _jinja_env.from_string(_WRAP_UP_EXTRACT_SRC).render(
             game_title=game_title,
-            debrief_text=debrief_text,
+            wrap_up_text=wrap_up_text,
         )
         payload = {
             "model": self._model,
@@ -212,7 +212,7 @@ class OllamaClient(AbstractLLMClient):
             "format": "json",
         }
 
-        resp = await self._call_generate(payload, "ollama_debrief_extract_failed")
+        resp = await self._call_generate(payload, "ollama_wrap_up_extract_failed")
         if resp is None:
             return ExtractedState()
 
@@ -222,7 +222,7 @@ class OllamaClient(AbstractLLMClient):
             parsed = json.loads(raw_text)
 
             if not isinstance(parsed, dict):
-                logger.warning("ollama_debrief_not_a_dict", raw=raw_text)
+                logger.warning("ollama_wrap_up_not_a_dict", raw=raw_text)
                 return ExtractedState()
 
             return ExtractedState(
@@ -232,7 +232,7 @@ class OllamaClient(AbstractLLMClient):
                 current_quest=parsed.get("current_quest"),
             )
         except (json.JSONDecodeError, KeyError, TypeError) as exc:
-            logger.warning("ollama_debrief_parse_error", error=str(exc))
+            logger.warning("ollama_wrap_up_parse_error", error=str(exc))
             return ExtractedState()
 
     async def pick_loadout_game(

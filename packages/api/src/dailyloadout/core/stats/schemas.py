@@ -54,7 +54,7 @@ class TimelineEntry(BaseModel):
     platform_label: str
     play_session_type: str
     recap_text: str | None = None
-    debrief_text: str | None = None
+    wrap_up_text: str | None = None
     ended_via: str | None = None
     started_at: datetime
     ended_at: datetime | None = None

@@ -390,12 +390,12 @@ class TestPlaySessionIsolation:
         )
         assert resp.status_code == 404
 
-    async def test_user_b_cannot_debrief_user_a_play_session(
+    async def test_user_b_cannot_wrap_up_user_a_play_session(
         self,
         async_client: AsyncClient,
         seed_platforms: list[dict[str, Any]],
     ) -> None:
-        """Submitting a debrief on User A's play_session should return 404 for User B."""
+        """Submitting a wrap_up on User A's play_session should return 404 for User B."""
         headers_a = await _register_and_get_headers(async_client, _USER_A)
         headers_b = await _register_and_get_headers(async_client, _USER_B)
 
@@ -403,8 +403,8 @@ class TestPlaySessionIsolation:
         play_session = await _start_play_session(async_client, headers_a, entry["public_id"])
 
         resp = await async_client.patch(
-            f"/v1/play-sessions/{play_session['public_id']}/debrief",
-            json={"debrief_text": "Attempted cross-user debrief."},
+            f"/v1/play-sessions/{play_session['public_id']}/wrap-up",
+            json={"wrap_up_text": "Attempted cross-user wrap_up."},
             headers=headers_b,
         )
         assert resp.status_code == 404
@@ -497,10 +497,10 @@ class TestPlaySessionIsolation:
         entry = await _create_library_entry_via_capture(async_client, headers_a, seed_platforms)
         play_session = await _start_play_session(async_client, headers_a, entry["public_id"])
 
-        # User B tries debrief, end, and regenerate -- all should fail.
+        # User B tries wrap_up, end, and regenerate -- all should fail.
         await async_client.patch(
-            f"/v1/play-sessions/{play_session['public_id']}/debrief",
-            json={"debrief_text": "cross-user debrief attempt"},
+            f"/v1/play-sessions/{play_session['public_id']}/wrap-up",
+            json={"wrap_up_text": "cross-user wrap_up attempt"},
             headers=headers_b,
         )
         await async_client.post(
@@ -521,5 +521,5 @@ class TestPlaySessionIsolation:
         assert resp.status_code == 200
         data = resp.json()
         assert data["ended_at"] is None
-        assert data["debrief_text"] is None
+        assert data["wrap_up_text"] is None
         assert data["ended_via"] is None

@@ -109,9 +109,9 @@ void main() {
         'library_entry': buildLibraryEntryJson(),
         'play_session_type': 'story',
         'recap_text': 'Your playSession today...',
-        'debrief_text': 'Great session!',
+        'wrap_up_text': 'Great session!',
         'extracted_state': <String, dynamic>{'boss_defeated': true},
-        'ended_via': 'debrief',
+        'ended_via': 'wrapUp',
         'started_at': '2025-06-20T18:00:00Z',
         'ended_at': '2025-06-20T20:00:00Z',
         'created_at': '2025-06-20T17:55:00Z',
@@ -129,12 +129,12 @@ void main() {
       expect(playSession.libraryEntry.publicId, equals('entry-001'));
       expect(playSession.playSessionType, equals('story'));
       expect(playSession.recapText, equals('Your playSession today...'));
-      expect(playSession.debriefText, equals('Great session!'));
+      expect(playSession.wrapUpText, equals('Great session!'));
       expect(
         playSession.extractedState,
         equals(<String, dynamic>{'boss_defeated': true}),
       );
-      expect(playSession.endedVia, equals('debrief'));
+      expect(playSession.endedVia, equals('wrapUp'));
       expect(playSession.startedAt, equals(DateTime.utc(2025, 6, 20, 18)));
       expect(playSession.endedAt, equals(DateTime.utc(2025, 6, 20, 20)));
       expect(playSession.createdAt, equals(DateTime.utc(2025, 6, 20, 17, 55)));
@@ -149,7 +149,7 @@ void main() {
         'library_entry': buildLibraryEntryJson(),
         'play_session_type': 'freeplay',
         'recap_text': null,
-        'debrief_text': null,
+        'wrap_up_text': null,
         'extracted_state': null,
         'ended_via': null,
         'started_at': '2025-06-21T10:00:00Z',
@@ -163,7 +163,7 @@ void main() {
 
       expect(playSession.publicId, equals('playSession-002'));
       expect(playSession.recapText, isNull);
-      expect(playSession.debriefText, isNull);
+      expect(playSession.wrapUpText, isNull);
       expect(playSession.extractedState, isNull);
       expect(playSession.endedVia, isNull);
       expect(playSession.endedAt, isNull);
@@ -199,7 +199,7 @@ void main() {
         'public_id': 'playSession-001',
         'library_entry': buildLibraryEntryJson(),
         'play_session_type': 'story',
-        'ended_via': 'debrief',
+        'ended_via': 'wrapUp',
         'started_at': '2025-06-20T18:00:00Z',
         'ended_at': '2025-06-20T20:00:00Z',
       };
@@ -213,7 +213,7 @@ void main() {
       expect(item.publicId, equals('playSession-001'));
       expect(item.libraryEntry.game.title, equals('Elden Ring'));
       expect(item.playSessionType, equals('story'));
-      expect(item.endedVia, equals('debrief'));
+      expect(item.endedVia, equals('wrapUp'));
       expect(item.startedAt, equals(DateTime.utc(2025, 6, 20, 18)));
       expect(item.endedAt, equals(DateTime.utc(2025, 6, 20, 20)));
     });
@@ -265,7 +265,7 @@ void main() {
             'public_id': 'playSession-001',
             'library_entry': buildLibraryEntryJson(),
             'play_session_type': 'story',
-            'ended_via': 'debrief',
+            'ended_via': 'wrapUp',
             'started_at': '2025-06-20T18:00:00Z',
             'ended_at': '2025-06-20T20:00:00Z',
           },
@@ -354,7 +354,7 @@ void main() {
     test('Equatable: equal instances are equal', () {
       final json = <String, dynamic>{
         'library_entry': buildLibraryEntryJson(),
-        'recap_text': 'Brief',
+        'recap_text': 'Recap',
         'last_session_context': buildSessionContextJson(),
       };
       final a = RecapPreview.fromJson(json);
@@ -367,12 +367,12 @@ void main() {
     test('Equatable: different instances are not equal', () {
       final a = RecapPreview.fromJson(<String, dynamic>{
         'library_entry': buildLibraryEntryJson(),
-        'recap_text': 'Brief A',
+        'recap_text': 'Recap A',
         'last_session_context': null,
       });
       final b = RecapPreview.fromJson(<String, dynamic>{
         'library_entry': buildLibraryEntryJson(publicId: 'entry-999'),
-        'recap_text': 'Brief B',
+        'recap_text': 'Recap B',
         'last_session_context': null,
       });
 

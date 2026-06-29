@@ -22,7 +22,7 @@ class PlaySessionContext(TypedDict, total=False):
     current_quest: str | None
     next_action: str | None
     level: str | None
-    previous_debriefs: list[dict[str, object]]
+    previous_wrap_ups: list[dict[str, object]]
 
 
 Grade = Literal["sufficient", "insufficient", "empty"]

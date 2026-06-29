@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6380/0"
     # Best-effort caching (IGDB lookups, etc.); off => NullCache (Epic 17).
     cache_enabled: bool = True
-    # Per-user stats cached briefly, bust on play_session start/end/debrief (Epic 18).
+    # Per-user stats cached for a short time, bust on play_session start/end/wrap_up (Epic 18).
     stats_cache_ttl_seconds: int = 300
     # Deep recaps are content-addressed on the session context (Epic 18). 7d.
     recap_cache_ttl_seconds: int = 7 * 24 * 3600

@@ -16,7 +16,7 @@ from dailyloadout.infrastructure.agent.concierge.tools_write import (
     generate_recap,
     set_status,
     start_play_session,
-    submit_retroactive_debrief,
+    submit_retroactive_wrap_up,
 )
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
 from dailyloadout.infrastructure.db.repositories.play_session import PlaySessionRepository
@@ -239,22 +239,22 @@ async def test_generate_recap_clamps_deep_to_quick() -> None:
         assert "Hollow Knight" in out
 
 
-# -- submit_retroactive_debrief -------------------------------------------------
+# -- submit_retroactive_wrap_up -------------------------------------------------
 
 
-async def test_retroactive_debrief_logs_session() -> None:
+async def test_retroactive_wrap_up_logs_session() -> None:
     async with _TestSessionFactory() as session:
         user_id, public_id, entry_id = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await submit_retroactive_debrief(
+        out = await submit_retroactive_wrap_up(
             LibraryRepository(session),
             PlaySessionRepository(session),
             DummyLLMClient(),
             user_id,
             library_entry_public_id=public_id,
-            debrief_text="Cleared the second boss and unlocked the dash.",
+            wrap_up_text="Cleared the second boss and unlocked the dash.",
         )
         assert "Logged your past session" in out
         await session.commit()
@@ -267,19 +267,19 @@ async def test_retroactive_debrief_logs_session() -> None:
         assert play_sessions[0].play_session_type == "retroactive"
 
 
-async def test_retroactive_debrief_unknown_game() -> None:
+async def test_retroactive_wrap_up_unknown_game() -> None:
     async with _TestSessionFactory() as session:
         user_id, _, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        out = await submit_retroactive_debrief(
+        out = await submit_retroactive_wrap_up(
             LibraryRepository(session),
             PlaySessionRepository(session),
             DummyLLMClient(),
             user_id,
             library_entry_public_id=str(uuid4()),
-            debrief_text="played offline",
+            wrap_up_text="played offline",
         )
         assert "not in the library" in out
 
@@ -361,6 +361,6 @@ async def test_build_concierge_write_tools_shapes() -> None:
         assert names == {
             "start_play_session",
             "generate_recap",
-            "submit_retroactive_debrief",
+            "submit_retroactive_wrap_up",
             "set_status",
         }

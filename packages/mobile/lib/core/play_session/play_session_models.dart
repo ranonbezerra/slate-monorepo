@@ -28,7 +28,7 @@ class SessionContext extends Equatable {
   List<Object?> get props => [location, nextAction, level, currentQuest];
 }
 
-/// Represents a full playSession with recap, debrief, and session context.
+/// Represents a full playSession with recap, wrapUp, and session context.
 class PlaySession extends Equatable {
   const PlaySession({
     required this.publicId,
@@ -38,7 +38,7 @@ class PlaySession extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.recapText,
-    this.debriefText,
+    this.wrapUpText,
     this.extractedState,
     this.endedVia,
     this.endedAt,
@@ -53,7 +53,7 @@ class PlaySession extends Equatable {
       ),
       playSessionType: json['play_session_type'] as String,
       recapText: json['recap_text'] as String?,
-      debriefText: json['debrief_text'] as String?,
+      wrapUpText: json['wrap_up_text'] as String?,
       extractedState: json['extracted_state'] as Map<String, dynamic>?,
       endedVia: json['ended_via'] as String?,
       startedAt: DateTime.parse(json['started_at'] as String),
@@ -74,7 +74,7 @@ class PlaySession extends Equatable {
   final LibraryEntry libraryEntry;
   final String playSessionType;
   final String? recapText;
-  final String? debriefText;
+  final String? wrapUpText;
   final Map<String, dynamic>? extractedState;
   final String? endedVia;
   final DateTime startedAt;
@@ -89,7 +89,7 @@ class PlaySession extends Equatable {
     libraryEntry,
     playSessionType,
     recapText,
-    debriefText,
+    wrapUpText,
     extractedState,
     endedVia,
     startedAt,

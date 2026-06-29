@@ -80,8 +80,8 @@ async def _make_play_session(
             recap_text="Go beat the boss",
             started_at=now - timedelta(hours=2),
             ended_at=now if ended else None,
-            ended_via="debrief_completed" if ended else None,
-            debrief_text="cleared it" if ended else None,
+            ended_via="wrap_up_completed" if ended else None,
+            wrap_up_text="cleared it" if ended else None,
         )
         session.add(play_session)
         await session.flush()

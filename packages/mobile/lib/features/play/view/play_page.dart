@@ -188,7 +188,7 @@ class _ActivePlaySessionCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => context.push(
-                      '/play-sessions/${playSession.publicId}/debrief',
+                      '/play-sessions/${playSession.publicId}/wrap-up',
                     ),
                     child: const Text('Wrap up'),
                   ),

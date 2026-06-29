@@ -12,9 +12,9 @@ from dailyloadout.core.library.schemas import LibraryEntryResponse
 
 
 class ExtractedState(BaseModel):
-    """Structured state extracted from a play_session debrief by the LLM.
+    """Structured state extracted from a play_session wrap_up by the LLM.
 
-    Mirrors the shape persisted by ``extract_debrief_state_task`` /
+    Mirrors the shape persisted by ``extract_wrap_up_state_task`` /
     ``ConciergeService`` (see ``infrastructure.llm.base.ExtractedState``). All
     fields are optional so older rows and partial extractions still validate;
     unknown keys are ignored for forward/backward compatibility with the JSONB
@@ -69,17 +69,17 @@ class RecapPreviewRequest(BaseModel):
     )
 
 
-class RetroactiveDebriefRequest(BaseModel):
-    """Body for ``POST /v1/play-sessions/retroactive-debrief``."""
+class RetroactiveWrapUpRequest(BaseModel):
+    """Body for ``POST /v1/play-sessions/retroactive-wrap_up``."""
 
     library_entry_public_id: UUID
-    debrief_text: str = Field(min_length=3, max_length=5000)
+    wrap_up_text: str = Field(min_length=3, max_length=5000)
 
 
-class PlaySessionDebriefRequest(BaseModel):
-    """Body for ``PATCH /v1/play-sessions/{public_id}/debrief``."""
+class PlaySessionWrapUpRequest(BaseModel):
+    """Body for ``PATCH /v1/play-sessions/{public_id}/wrap_up``."""
 
-    debrief_text: str = Field(min_length=3, max_length=5000)
+    wrap_up_text: str = Field(min_length=3, max_length=5000)
 
 
 class PlaySessionEndRequest(BaseModel):
@@ -110,7 +110,7 @@ class PlaySessionResponse(BaseModel):
     library_entry: LibraryEntryResponse
     play_session_type: str = "regular"
     recap_text: str | None = None
-    debrief_text: str | None = None
+    wrap_up_text: str | None = None
     extracted_state: ExtractedState | None = None
     ended_via: str | None = None
     started_at: datetime
@@ -153,7 +153,7 @@ class RecapPreviewResponse(BaseModel):
 
 
 # Valid ended_via values (for documentation / validation).
-EndedVia = Literal["debrief_completed", "paused_app", "auto_clamp", "retroactive"]
+EndedVia = Literal["wrap_up_completed", "paused_app", "auto_clamp", "retroactive"]
 
 PlaySessionType = Literal["regular", "retroactive"]
 
@@ -163,7 +163,6 @@ PlaySessionStatus = Literal["active", "ended"]
 __all__ = [
     "EndedVia",
     "ExtractedState",
-    "PlaySessionDebriefRequest",
     "PlaySessionEndRequest",
     "PlaySessionListItem",
     "PlaySessionListResponse",
@@ -171,8 +170,9 @@ __all__ = [
     "PlaySessionStartRequest",
     "PlaySessionStatus",
     "PlaySessionType",
+    "PlaySessionWrapUpRequest",
     "RecapPreviewRequest",
     "RecapPreviewResponse",
     "RegenerateRecapRequest",
-    "RetroactiveDebriefRequest",
+    "RetroactiveWrapUpRequest",
 ]

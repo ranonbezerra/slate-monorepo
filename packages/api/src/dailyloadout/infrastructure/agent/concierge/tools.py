@@ -79,7 +79,7 @@ async def get_play_session_history(
     library_entry_public_id: str,
     limit: int = 3,
 ) -> str:
-    """Recent session notes for one game: last debriefs and where the player left off."""
+    """Recent session notes for one game: last wrap_ups and where the player left off."""
     entry = await _resolve_entry(library_repo, user_id, library_entry_public_id)
     if entry is None:
         return "That game is not in the library."
@@ -97,8 +97,8 @@ async def get_play_session_history(
     for m in play_sessions:
         state = m.extracted_state or {}
         bits = [str(v) for v in (state.get("location"), state.get("current_quest")) if v]
-        summary = "; ".join(bits) if bits else (m.debrief_text or "").strip()[:160]
-        # PlaySession state and debrief text are the player's own words — fence them.
+        summary = "; ".join(bits) if bits else (m.wrap_up_text or "").strip()[:160]
+        # PlaySession state and wrap_up text are the player's own words — fence them.
         lines.append(f"- {wrap_user_data(summary or 'session recorded')}")
     return "\n".join(lines)
 

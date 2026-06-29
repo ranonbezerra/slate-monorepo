@@ -9,7 +9,7 @@ import type { PlaySessionListItem } from "../types/play-session";
 dayjs.extend(relativeTime);
 
 const ENDED_VIA_LABELS: Record<string, { label: string; color: string }> = {
-	debrief_completed: { label: "Wrapped", color: "green" },
+	wrap_up_completed: { label: "Wrapped", color: "green" },
 	paused_app: { label: "Paused", color: "yellow" },
 	auto_clamp: { label: "Auto-closed", color: "gray" },
 	retroactive: { label: "Retroactive", color: "grape" },

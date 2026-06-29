@@ -268,8 +268,8 @@ function PlaySessionDrawer({
 					<Field label="Platform" value={data.platformLabel ?? "—"} />
 					{data.endedVia && <Field label="Ended via" value={data.endedVia} />}
 					{data.recapText && <Field label="Recap" value={data.recapText} />}
-					{data.debriefText && <Field label="Debrief" value={data.debriefText} />}
-					<Field label="Debrief extracted" value={data.hasExtractedState ? "yes" : "no"} />
+					{data.wrapUpText && <Field label="WrapUp" value={data.wrapUpText} />}
+					<Field label="WrapUp extracted" value={data.hasExtractedState ? "yes" : "no"} />
 				</Stack>
 			)}
 		</Drawer>

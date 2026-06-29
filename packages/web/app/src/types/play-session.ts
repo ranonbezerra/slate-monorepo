@@ -4,7 +4,7 @@
 
 import type { LibraryEntry } from "./library";
 
-export type EndedVia = "debrief_completed" | "paused_app" | "auto_clamp" | "retroactive";
+export type EndedVia = "wrap_up_completed" | "paused_app" | "auto_clamp" | "retroactive";
 
 export type PlaySessionType = "regular" | "retroactive";
 
@@ -20,7 +20,7 @@ export interface PlaySession {
 	libraryEntry: LibraryEntry;
 	playSessionType: PlaySessionType;
 	recapText: string | null;
-	debriefText: string | null;
+	wrapUpText: string | null;
 	extractedState: Record<string, unknown> | null;
 	endedVia: EndedVia | null;
 	startedAt: string;

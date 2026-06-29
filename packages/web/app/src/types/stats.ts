@@ -44,7 +44,7 @@ export interface TimelineEntry {
 	platformLabel: string;
 	playSessionType: string;
 	recapText: string | null;
-	debriefText: string | null;
+	wrapUpText: string | null;
 	endedVia: string | null;
 	startedAt: string;
 	endedAt: string | null;

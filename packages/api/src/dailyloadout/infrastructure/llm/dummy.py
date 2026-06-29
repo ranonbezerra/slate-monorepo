@@ -65,23 +65,23 @@ class DummyLLMClient(AbstractLLMClient):
     async def generate_recap(
         self,
         game_title: str,
-        previous_debriefs: list[dict[str, object]],
+        previous_wrap_ups: list[dict[str, object]],
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
         """Return a deterministic recap for tests."""
-        if not previous_debriefs:
+        if not previous_wrap_ups:
             return (
                 f"Welcome to your first play_session in {game_title}! "
                 "No previous session data available. Enjoy your adventure."
             )
 
         parts = [f"Previously on {game_title}:"]
-        for debrief in previous_debriefs:
-            if debrief.get("next_action"):
-                parts.append(f"- Your next objective was: {debrief['next_action']}")
-            if debrief.get("location"):
-                parts.append(f"- You were at: {debrief['location']}")
+        for wrap_up in previous_wrap_ups:
+            if wrap_up.get("next_action"):
+                parts.append(f"- Your next objective was: {wrap_up['next_action']}")
+            if wrap_up.get("location"):
+                parts.append(f"- You were at: {wrap_up['location']}")
 
         if position_override:
             parts.append(f"\nPlayer correction: {position_override}")
@@ -95,15 +95,15 @@ class DummyLLMClient(AbstractLLMClient):
 
         return "\n".join(parts)
 
-    async def extract_debrief_state(
+    async def extract_wrap_up_state(
         self,
         game_title: str,
-        debrief_text: str,
+        wrap_up_text: str,
     ) -> ExtractedState:
         """Return a deterministic extracted state for tests."""
         return ExtractedState(
             location=None,
-            next_action=debrief_text[:100] if debrief_text else None,
+            next_action=wrap_up_text[:100] if wrap_up_text else None,
             level=None,
             current_quest=None,
         )

@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-/// Debrief page shown when ending a playSession.
+/// WrapUp page shown when ending a playSession.
 ///
 /// Receives [playSessionPublicId] as a route parameter.
-class PlaySessionDebriefPage extends StatefulWidget {
-  const PlaySessionDebriefPage({required this.playSessionPublicId, super.key});
+class PlaySessionWrapUpPage extends StatefulWidget {
+  const PlaySessionWrapUpPage({required this.playSessionPublicId, super.key});
 
   final String playSessionPublicId;
 
   @override
-  State<PlaySessionDebriefPage> createState() => _PlaySessionDebriefPageState();
+  State<PlaySessionWrapUpPage> createState() => _PlaySessionWrapUpPageState();
 }
 
-class _PlaySessionDebriefPageState extends State<PlaySessionDebriefPage> {
-  final _debriefController = TextEditingController();
+class _PlaySessionWrapUpPageState extends State<PlaySessionWrapUpPage> {
+  final _wrapUpController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -28,22 +28,22 @@ class _PlaySessionDebriefPageState extends State<PlaySessionDebriefPage> {
 
   @override
   void dispose() {
-    _debriefController.dispose();
+    _wrapUpController.dispose();
     super.dispose();
   }
 
-  void _onSubmitDebrief() {
+  void _onSubmitWrapUp() {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<PlaySessionBloc>().add(
-      SubmitDebrief(
+      SubmitWrapUp(
         publicId: widget.playSessionPublicId,
-        debriefText: _debriefController.text.trim(),
+        wrapUpText: _wrapUpController.text.trim(),
       ),
     );
   }
 
-  void _onSkipDebrief() {
+  void _onSkipWrapUp() {
     context.read<PlaySessionBloc>().add(
       EndPlaySession(publicId: widget.playSessionPublicId),
     );
@@ -114,9 +114,9 @@ class _PlaySessionDebriefPageState extends State<PlaySessionDebriefPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Debrief text field
+                  // WrapUp text field
                   TextFormField(
-                    controller: _debriefController,
+                    controller: _wrapUpController,
                     maxLines: 4,
                     minLines: 3,
                     decoration: const InputDecoration(
@@ -140,7 +140,7 @@ class _PlaySessionDebriefPageState extends State<PlaySessionDebriefPage> {
                     width: double.infinity,
                     height: 48,
                     child: FilledButton(
-                      onPressed: _onSubmitDebrief,
+                      onPressed: _onSubmitWrapUp,
                       child: const Text('Save wrap-up'),
                     ),
                   ),
@@ -150,7 +150,7 @@ class _PlaySessionDebriefPageState extends State<PlaySessionDebriefPage> {
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
-                      onPressed: _onSkipDebrief,
+                      onPressed: _onSkipWrapUp,
                       child: const Text('Skip wrap-up'),
                     ),
                   ),

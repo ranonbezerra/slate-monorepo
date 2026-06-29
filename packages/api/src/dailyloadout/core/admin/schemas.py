@@ -258,14 +258,14 @@ class AdminPlaySessionList(BaseModel):
 class AdminPlaySessionDetail(AdminPlaySessionSummary):
     """The full backoffice view of one play_session.
 
-    ``has_extracted_state`` reports whether the debrief LLM extraction ran
+    ``has_extracted_state`` reports whether the wrap_up LLM extraction ran
     (the raw JSON is omitted — it is untrusted model output, not moderation
     signal).
     """
 
     platform_label: str | None
     recap_text: str | None
-    debrief_text: str | None
+    wrap_up_text: str | None
     has_extracted_state: bool
 
 

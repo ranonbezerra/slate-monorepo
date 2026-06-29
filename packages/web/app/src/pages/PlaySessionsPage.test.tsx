@@ -250,10 +250,10 @@ describe("PlaySessionsPage", () => {
 		expect(screen.getByText("Active")).toBeInTheDocument();
 	});
 
-	it("shows 'Wrapped' badge for debrief_completed playSessions", () => {
+	it("shows 'Wrapped' badge for wrap_up_completed playSessions", () => {
 		const items = [
 			makePlaySessionItem({
-				endedVia: "debrief_completed",
+				endedVia: "wrap_up_completed",
 				endedAt: "2024-06-01T12:00:00Z",
 			}),
 		];
@@ -327,7 +327,7 @@ describe("PlaySessionsPage", () => {
 			makePlaySessionItem({
 				startedAt: "2024-06-01T10:00:00Z",
 				endedAt: "2024-06-01T10:45:00Z",
-				endedVia: "debrief_completed",
+				endedVia: "wrap_up_completed",
 			}),
 		];
 
@@ -346,7 +346,7 @@ describe("PlaySessionsPage", () => {
 			makePlaySessionItem({
 				startedAt: "2024-06-01T10:00:00Z",
 				endedAt: "2024-06-01T12:30:00Z",
-				endedVia: "debrief_completed",
+				endedVia: "wrap_up_completed",
 			}),
 		];
 
@@ -365,7 +365,7 @@ describe("PlaySessionsPage", () => {
 			makePlaySessionItem({
 				startedAt: "2024-06-01T10:00:00Z",
 				endedAt: "2024-06-01T12:00:00Z",
-				endedVia: "debrief_completed",
+				endedVia: "wrap_up_completed",
 			}),
 		];
 
@@ -384,7 +384,7 @@ describe("PlaySessionsPage", () => {
 			makePlaySessionItem({ publicId: "mis-001", endedVia: null }),
 			makePlaySessionItem({
 				publicId: "mis-002",
-				endedVia: "debrief_completed",
+				endedVia: "wrap_up_completed",
 				endedAt: "2024-06-01T12:00:00Z",
 			}),
 		];

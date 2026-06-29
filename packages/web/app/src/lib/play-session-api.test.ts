@@ -16,8 +16,8 @@ import {
 	previewRecap,
 	regenerateRecap,
 	startPlaySession,
-	submitDebrief,
-	submitRetroactiveDebrief,
+	submitRetroactiveWrapUp,
+	submitWrapUp,
 } from "./play-session-api";
 
 const mockApiFetch = apiFetch as Mock;
@@ -42,7 +42,7 @@ function makePlaySessionResponse(overrides: Record<string, unknown> = {}) {
 		},
 		play_session_type: "regular",
 		recap_text: "Continue from Asphodel",
-		debrief_text: null,
+		wrap_up_text: null,
 		extracted_state: null,
 		ended_via: null,
 		started_at: "2024-06-01T10:00:00Z",
@@ -162,11 +162,11 @@ describe("previewRecap", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Retroactive debrief
+// Retroactive wrapUp
 // ---------------------------------------------------------------------------
 
-describe("submitRetroactiveDebrief", () => {
-	it("calls POST /v1/play-sessions/retroactive-debrief", async () => {
+describe("submitRetroactiveWrapUp", () => {
+	it("calls POST /v1/play-sessions/retroactive-wrap-up", async () => {
 		const apiResponse = {
 			library_entry: {
 				public_id: "le1",
@@ -187,13 +187,13 @@ describe("submitRetroactiveDebrief", () => {
 		};
 		mockApiFetch.mockResolvedValueOnce(apiResponse);
 
-		const result = await submitRetroactiveDebrief("le1", "Defeated Megaera");
+		const result = await submitRetroactiveWrapUp("le1", "Defeated Megaera");
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/retroactive-debrief", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/retroactive-wrap-up", {
 			method: "POST",
 			body: JSON.stringify({
 				library_entry_public_id: "le1",
-				debrief_text: "Defeated Megaera",
+				wrap_up_text: "Defeated Megaera",
 			}),
 		});
 		expect(result.lastSessionContext).toEqual({ location: "Tartarus" });
@@ -338,7 +338,7 @@ describe("listPlaySessions", () => {
 						updated_at: "2024-01-01",
 					},
 					play_session_type: "regular",
-					ended_via: "debrief_completed",
+					ended_via: "wrap_up_completed",
 					started_at: "2024-06-01T10:00:00Z",
 					ended_at: "2024-06-01T11:00:00Z",
 				},
@@ -351,7 +351,7 @@ describe("listPlaySessions", () => {
 
 		expect(result.items[0].publicId).toBe("m1");
 		expect(result.items[0].playSessionType).toBe("regular");
-		expect(result.items[0].endedVia).toBe("debrief_completed");
+		expect(result.items[0].endedVia).toBe("wrap_up_completed");
 		expect(result.items[0].startedAt).toBe("2024-06-01T10:00:00Z");
 		expect(result.items[0].endedAt).toBe("2024-06-01T11:00:00Z");
 	});
@@ -367,26 +367,26 @@ describe("listPlaySessions", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Submit debrief
+// Submit wrapUp
 // ---------------------------------------------------------------------------
 
-describe("submitDebrief", () => {
-	it("calls PATCH /v1/play-sessions/:publicId/debrief with debrief_text", async () => {
+describe("submitWrapUp", () => {
+	it("calls PATCH /v1/play-sessions/:publicId/wrapUp with wrap_up_text", async () => {
 		const response = makePlaySessionResponse({
-			debrief_text: "Beat the final boss",
-			ended_via: "debrief_completed",
+			wrap_up_text: "Beat the final boss",
+			ended_via: "wrap_up_completed",
 			ended_at: "2024-06-01T11:00:00Z",
 		});
 		mockApiFetch.mockResolvedValueOnce(response);
 
-		const result = await submitDebrief("m1", "Beat the final boss");
+		const result = await submitWrapUp("m1", "Beat the final boss");
 
-		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/m1/debrief", {
+		expect(mockApiFetch).toHaveBeenCalledWith("/v1/play-sessions/m1/wrap-up", {
 			method: "PATCH",
-			body: JSON.stringify({ debrief_text: "Beat the final boss" }),
+			body: JSON.stringify({ wrap_up_text: "Beat the final boss" }),
 		});
-		expect(result.debriefText).toBe("Beat the final boss");
-		expect(result.endedVia).toBe("debrief_completed");
+		expect(result.wrapUpText).toBe("Beat the final boss");
+		expect(result.endedVia).toBe("wrap_up_completed");
 	});
 });
 

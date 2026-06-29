@@ -77,8 +77,8 @@ Map<String, dynamic> _timelineEntryJson({
   String platformLabel = 'PlayStation 5',
   String playSessionType = 'regular',
   String? recapText = 'Time to explore!',
-  String? debriefText = 'Great session.',
-  String? endedVia = 'debrief',
+  String? wrapUpText = 'Great session.',
+  String? endedVia = 'wrapUp',
   String startedAt = '2025-06-10T14:00:00Z',
   String? endedAt = '2025-06-10T16:30:00Z',
   int? durationMinutes = 150,
@@ -88,7 +88,7 @@ Map<String, dynamic> _timelineEntryJson({
   'platform_label': platformLabel,
   'play_session_type': playSessionType,
   'recap_text': recapText,
-  'debrief_text': debriefText,
+  'wrap_up_text': wrapUpText,
   'ended_via': endedVia,
   'started_at': startedAt,
   'ended_at': endedAt,
@@ -588,8 +588,8 @@ void main() {
         expect(entry.platformLabel, 'PlayStation 5');
         expect(entry.playSessionType, 'regular');
         expect(entry.recapText, 'Time to explore!');
-        expect(entry.debriefText, 'Great session.');
-        expect(entry.endedVia, 'debrief');
+        expect(entry.wrapUpText, 'Great session.');
+        expect(entry.endedVia, 'wrapUp');
         expect(entry.startedAt, DateTime.utc(2025, 6, 10, 14));
         expect(entry.endedAt, DateTime.utc(2025, 6, 10, 16, 30));
         expect(entry.durationMinutes, 150);
@@ -598,7 +598,7 @@ void main() {
       test('parses JSON with null optional fields', () {
         final json = _timelineEntryJson(
           recapText: null,
-          debriefText: null,
+          wrapUpText: null,
           endedVia: null,
           endedAt: null,
           durationMinutes: null,
@@ -610,7 +610,7 @@ void main() {
         expect(entry.platformLabel, 'PlayStation 5');
         expect(entry.playSessionType, 'regular');
         expect(entry.recapText, isNull);
-        expect(entry.debriefText, isNull);
+        expect(entry.wrapUpText, isNull);
         expect(entry.endedVia, isNull);
         expect(entry.startedAt, DateTime.utc(2025, 6, 10, 14));
         expect(entry.endedAt, isNull);
@@ -675,11 +675,11 @@ void main() {
         expect(a, isNot(equals(b)));
       });
 
-      test('instances with different debriefText '
+      test('instances with different wrapUpText '
           'are not equal', () {
         final a = TimelineEntry.fromJson(_timelineEntryJson());
         final b = TimelineEntry.fromJson(
-          _timelineEntryJson(debriefText: 'Different'),
+          _timelineEntryJson(wrapUpText: 'Different'),
         );
 
         expect(a, isNot(equals(b)));
@@ -731,7 +731,7 @@ void main() {
         final b = TimelineEntry.fromJson(
           _timelineEntryJson(
             recapText: null,
-            debriefText: null,
+            wrapUpText: null,
             endedVia: null,
             endedAt: null,
             durationMinutes: null,

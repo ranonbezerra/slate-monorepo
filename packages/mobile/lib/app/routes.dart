@@ -20,8 +20,8 @@ import 'package:app/features/library/view/library_list_page.dart';
 import 'package:app/features/library_import/view/library_import_page.dart';
 import 'package:app/features/loadout/view/loadout_page.dart';
 import 'package:app/features/play/view/play_page.dart';
-import 'package:app/features/play_session/view/play_session_debrief_page.dart';
 import 'package:app/features/play_session/view/play_session_recap_page.dart';
+import 'package:app/features/play_session/view/play_session_wrap_up_page.dart';
 import 'package:app/features/play_session/view/play_sessions_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -172,8 +172,8 @@ GoRouter createRouter(
         ),
       ),
       GoRoute(
-        path: '/play-sessions/:id/debrief',
-        builder: (context, state) => PlaySessionDebriefPage(
+        path: '/play-sessions/:id/wrap-up',
+        builder: (context, state) => PlaySessionWrapUpPage(
           playSessionPublicId: state.pathParameters['id']!,
         ),
       ),

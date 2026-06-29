@@ -20,7 +20,7 @@ class ExtractedGame:
 
 @dataclass
 class ExtractedState:
-    """Structured state extracted from a play_session debrief."""
+    """Structured state extracted from a play_session wrap_up."""
 
     location: str | None = None
     next_action: str | None = None
@@ -53,20 +53,20 @@ class AbstractLLMClient(ABC):
     async def generate_recap(
         self,
         game_title: str,
-        previous_debriefs: list[dict[str, object]],
+        previous_wrap_ups: list[dict[str, object]],
         current_next_action: str | None = None,
         position_override: str | None = None,
     ) -> str:
-        """Generate a play_session recap from previous debrief context."""
+        """Generate a play_session recap from previous wrap_up context."""
         ...
 
     @abstractmethod
-    async def extract_debrief_state(
+    async def extract_wrap_up_state(
         self,
         game_title: str,
-        debrief_text: str,
+        wrap_up_text: str,
     ) -> ExtractedState:
-        """Extract structured state from a user's free-text debrief."""
+        """Extract structured state from a user's free-text wrap_up."""
         ...
 
     @abstractmethod

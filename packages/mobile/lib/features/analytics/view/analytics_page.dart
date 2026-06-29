@@ -837,10 +837,10 @@ class _TimelineCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (entry.debriefText != null) ...[
+            if (entry.wrapUpText != null) ...[
               const SizedBox(height: 8),
               Text(
-                entry.debriefText!,
+                entry.wrapUpText!,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: DLColors.textMuted,
                 ),

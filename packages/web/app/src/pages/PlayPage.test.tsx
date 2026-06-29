@@ -30,7 +30,7 @@ vi.mock("../lib/features", () => ({
 	FEATURES: { backlogConcierge: false },
 }));
 
-// The recap/debrief modals are rendered inline on the page now. They pull
+// The recap/wrapUp modals are rendered inline on the page now. They pull
 // in their own data hooks; stub them out so this suite stays focused on the
 // PlayPage behavior and does not need a QueryClient provider.
 vi.mock("./PlaySessionRecapModal", () => ({
@@ -38,9 +38,9 @@ vi.mock("./PlaySessionRecapModal", () => ({
 		<div data-testid="recap-modal">{mode}</div>
 	),
 }));
-vi.mock("./PlaySessionDebriefModal", () => ({
-	PlaySessionDebriefModal: ({ playSession }: { playSession: unknown }) =>
-		playSession ? <div data-testid="debrief-modal" /> : null,
+vi.mock("./PlaySessionWrapUpModal", () => ({
+	PlaySessionWrapUpModal: ({ playSession }: { playSession: unknown }) =>
+		playSession ? <div data-testid="wrapUp-modal" /> : null,
 }));
 
 function renderPage() {
@@ -77,7 +77,7 @@ function makePlaySession(overrides: Partial<PlaySession> = {}): PlaySession {
 		},
 		playSessionType: "regular",
 		recapText: "Your next adventure awaits",
-		debriefText: null,
+		wrapUpText: null,
 		extractedState: null,
 		endedVia: null,
 		startedAt: "2024-06-02T10:00:00Z",
@@ -154,13 +154,13 @@ describe("PlayPage", () => {
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
 
-	it("opens the debrief modal from the 'Wrap up' button", () => {
+	it("opens the wrapUp modal from the 'Wrap up' button", () => {
 		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
 		renderPage();
-		expect(screen.queryByTestId("debrief-modal")).not.toBeInTheDocument();
+		expect(screen.queryByTestId("wrapUp-modal")).not.toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: /wrap up/i }));
-		expect(screen.getByTestId("debrief-modal")).toBeInTheDocument();
-		// Ending/debriefing does not navigate.
+		expect(screen.getByTestId("wrapUp-modal")).toBeInTheDocument();
+		// Ending/wrapping up does not navigate.
 		expect(mockNavigate).not.toHaveBeenCalled();
 	});
 

@@ -1,4 +1,4 @@
-"""PlaySession service: lifecycle management, recap, and debrief orchestration."""
+"""PlaySession service: lifecycle management, recap, and wrap_up orchestration."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ logger = structlog.get_logger()
 
 
 class PlaySessionService:
-    """Orchestrates play_session lifecycle: start, recap, debrief, and end."""
+    """Orchestrates play_session lifecycle: start, recap, wrap_up, and end."""
 
     def __init__(
         self,
@@ -118,15 +118,15 @@ class PlaySessionService:
             mode=mode,
         )
 
-    # -- Retroactive debrief ---------------------------------------------
+    # -- Retroactive wrap_up ---------------------------------------------
 
-    async def submit_retroactive_debrief(
+    async def submit_retroactive_wrap_up(
         self,
         user_id: int,
         library_entry_public_id: UUID,
-        debrief_text: str,
+        wrap_up_text: str,
     ) -> dict[str, object]:
-        """Record a debrief for a play session that wasn't tracked.
+        """Record a wrap_up for a play session that wasn't tracked.
 
         Creates a pre-ended play_session with ``play_session_type="retroactive"``,
         runs LLM extraction synchronously, and returns a fresh recap
@@ -140,9 +140,9 @@ class PlaySessionService:
 
         extracted_state = None
         try:
-            extracted = await self._llm_client.extract_debrief_state(
+            extracted = await self._llm_client.extract_wrap_up_state(
                 game_title=entry.game.title,
-                debrief_text=debrief_text,
+                wrap_up_text=wrap_up_text,
             )
             extracted_state = {
                 "location": extracted.location,
@@ -160,7 +160,7 @@ class PlaySessionService:
         await self._play_session_repo.create_retroactive(
             user_id=user_id,
             library_entry_id=entry.id,
-            debrief_text=debrief_text,
+            wrap_up_text=wrap_up_text,
             extracted_state=extracted_state,
         )
         await invalidate_user_stats(user_id)
@@ -202,17 +202,17 @@ class PlaySessionService:
         total = await self._play_session_repo.count_for_user(user_id)
         return play_sessions, total
 
-    # -- Debrief ---------------------------------------------------------
+    # -- WrapUp ---------------------------------------------------------
 
-    async def submit_debrief(
+    async def submit_wrap_up(
         self,
         user_id: int,
         play_session_public_id: UUID,
-        debrief_text: str,
+        wrap_up_text: str,
     ) -> PlaySession:
-        """Submit a debrief for a play_session and end it.
+        """Submit a wrap_up for a play_session and end it.
 
-        Saves the debrief text, ends the play_session immediately, and dispatches
+        Saves the wrap_up text, ends the play_session immediately, and dispatches
         the LLM extraction to a background Taskiq worker.
         """
         play_session = await self.get_play_session(user_id, play_session_public_id)
@@ -221,30 +221,30 @@ class PlaySessionService:
                 status_code=status.HTTP_409_CONFLICT, detail="PlaySession is already ended"
             )
 
-        await self._play_session_repo.set_debrief(play_session.id, debrief_text)
+        await self._play_session_repo.set_wrap_up(play_session.id, wrap_up_text)
         await self._play_session_repo.end_play_session(
-            play_session.id, ended_via="debrief_completed"
+            play_session.id, ended_via="wrap_up_completed"
         )
         await invalidate_user_stats(user_id)
 
         game_title = play_session.library_entry.game.title
         try:
-            from dailyloadout.infrastructure.tasks.debrief_extraction import (
-                extract_debrief_state_task,
+            from dailyloadout.infrastructure.tasks.wrap_up_extraction import (
+                extract_wrap_up_state_task,
             )
 
-            await extract_debrief_state_task.kiq(play_session.id, game_title, debrief_text)
-            logger.info("debrief_extraction_dispatched", play_session_id=play_session.id)
+            await extract_wrap_up_state_task.kiq(play_session.id, game_title, wrap_up_text)
+            logger.info("wrap_up_extraction_dispatched", play_session_id=play_session.id)
         except Exception:
             logger.warning(
-                "debrief_extraction_dispatch_failed",
+                "wrap_up_extraction_dispatch_failed",
                 play_session_id=play_session.id,
                 exc_info=True,
             )
 
         return await self.get_play_session(user_id, play_session_public_id)
 
-    # -- End play_session (no debrief) ----------------------------------------
+    # -- End play_session (no wrap_up) ----------------------------------------
 
     async def end_play_session(
         self,
@@ -252,7 +252,7 @@ class PlaySessionService:
         play_session_public_id: UUID,
         ended_via: str = "paused_app",
     ) -> PlaySession:
-        """End a play_session without a debrief."""
+        """End a play_session without a wrap_up."""
         play_session = await self.get_play_session(user_id, play_session_public_id)
         if play_session.ended_at is not None:
             raise HTTPException(

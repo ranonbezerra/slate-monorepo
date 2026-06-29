@@ -116,9 +116,9 @@ void main() {
       );
     });
 
-    test('SubmitDebrief supports value equality and props', () {
-      const a = SubmitDebrief(publicId: 'm-1', debriefText: 'great');
-      const b = SubmitDebrief(publicId: 'm-1', debriefText: 'great');
+    test('SubmitWrapUp supports value equality and props', () {
+      const a = SubmitWrapUp(publicId: 'm-1', wrapUpText: 'great');
+      const b = SubmitWrapUp(publicId: 'm-1', wrapUpText: 'great');
       expect(a, b);
       expect(a.props, ['m-1', 'great']);
     });
@@ -134,14 +134,14 @@ void main() {
       ]);
     });
 
-    test('SubmitRetroactiveDebrief supports value equality and props', () {
-      const a = SubmitRetroactiveDebrief(
+    test('SubmitRetroactiveWrapUp supports value equality and props', () {
+      const a = SubmitRetroactiveWrapUp(
         libraryEntryPublicId: 'lib-1',
-        debriefText: 'done',
+        wrapUpText: 'done',
       );
-      const b = SubmitRetroactiveDebrief(
+      const b = SubmitRetroactiveWrapUp(
         libraryEntryPublicId: 'lib-1',
-        debriefText: 'done',
+        wrapUpText: 'done',
       );
       expect(a, b);
       expect(a.props, ['lib-1', 'done']);

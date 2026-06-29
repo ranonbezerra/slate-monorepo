@@ -5,7 +5,7 @@ import { AiRecapOverlay } from "../components/AiRecapOverlay";
 import {
 	usePreviewRecap,
 	useRegenerateRecap,
-	useRetroactiveDebrief,
+	useRetroactiveWrapUp,
 	useStartPlaySession,
 } from "../hooks/usePlaySession";
 import type { RecapMode } from "../lib/play-session-api";
@@ -63,7 +63,7 @@ export function PlaySessionRecapModal(props: PlaySessionRecapModalProps) {
 	// Preview mode hooks
 	const previewMutation = usePreviewRecap();
 	const startPlaySession = useStartPlaySession();
-	const retroactiveMutation = useRetroactiveDebrief();
+	const retroactiveMutation = useRetroactiveWrapUp();
 
 	// View mode hook
 	const regenerate = useRegenerateRecap();
@@ -178,7 +178,7 @@ export function PlaySessionRecapModal(props: PlaySessionRecapModalProps) {
 		try {
 			const updatedPreview = await retroactiveMutation.mutateAsync({
 				libraryEntryPublicId: props.libraryEntryPublicId,
-				debriefText: retroactiveText.trim(),
+				wrapUpText: retroactiveText.trim(),
 			});
 			setCurrentRecap(updatedPreview.recapText);
 			setRetroactiveText("");

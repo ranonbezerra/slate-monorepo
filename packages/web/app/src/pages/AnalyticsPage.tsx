@@ -425,9 +425,9 @@ export function AnalyticsPage() {
 											<Text size="sm" fw={500}>
 												{item.gameTitle}
 											</Text>
-											{item.debriefText && (
+											{item.wrapUpText && (
 												<Text size="xs" c="dimmed" lineClamp={1}>
-													{item.debriefText}
+													{item.wrapUpText}
 												</Text>
 											)}
 										</Table.Td>

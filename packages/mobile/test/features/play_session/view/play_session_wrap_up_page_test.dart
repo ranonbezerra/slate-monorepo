@@ -1,7 +1,7 @@
 import 'package:app/core/library/library_models.dart';
 import 'package:app/core/play_session/play_session_models.dart';
 import 'package:app/features/play_session/bloc/play_session_bloc.dart';
-import 'package:app/features/play_session/view/play_session_debrief_page.dart';
+import 'package:app/features/play_session/view/play_session_wrap_up_page.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -51,12 +51,12 @@ void main() {
     return BlocProvider<PlaySessionBloc>.value(
       value: playSessionBloc,
       child: const MaterialApp(
-        home: PlaySessionDebriefPage(playSessionPublicId: 'playSession-1'),
+        home: PlaySessionWrapUpPage(playSessionPublicId: 'playSession-1'),
       ),
     );
   }
 
-  group('PlaySessionDebriefPage', () {
+  group('PlaySessionWrapUpPage', () {
     testWidgets('shows AppBar with Wrap up title', (tester) async {
       when(() => playSessionBloc.state).thenReturn(const PlaySessionInitial());
 
@@ -126,7 +126,7 @@ void main() {
       );
     });
 
-    testWidgets('shows TextFormField for debrief input', (tester) async {
+    testWidgets('shows TextFormField for wrapUp input', (tester) async {
       when(
         () => playSessionBloc.state,
       ).thenReturn(ActivePlaySessionLoaded(playSession: _samplePlaySession));
@@ -178,7 +178,7 @@ void main() {
       expect(find.text('Please enter at least 3 characters'), findsOneWidget);
     });
 
-    testWidgets('dispatches SubmitDebrief when valid text is submitted', (
+    testWidgets('dispatches SubmitWrapUp when valid text is submitted', (
       tester,
     ) async {
       when(
@@ -197,9 +197,9 @@ void main() {
 
       verify(
         () => playSessionBloc.add(
-          const SubmitDebrief(
+          const SubmitWrapUp(
             publicId: 'playSession-1',
-            debriefText: 'Beat the Soul Master boss',
+            wrapUpText: 'Beat the Soul Master boss',
           ),
         ),
       ).called(1);
@@ -230,7 +230,7 @@ void main() {
       whenListen(
         playSessionBloc,
         Stream<PlaySessionState>.fromIterable([
-          const PlaySessionError(message: 'Failed to submit debrief'),
+          const PlaySessionError(message: 'Failed to submit wrapUp'),
         ]),
         initialState: ActivePlaySessionLoaded(playSession: _samplePlaySession),
       );
@@ -238,7 +238,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('Failed to submit debrief'), findsOneWidget);
+      expect(find.text('Failed to submit wrapUp'), findsOneWidget);
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
@@ -252,7 +252,7 @@ void main() {
       await tester.pumpWidget(buildSubject());
 
       expect(find.text('Hollow Knight'), findsNothing);
-      // But still shows the debrief form.
+      // But still shows the wrapUp form.
       expect(find.text('What happened this session?'), findsOneWidget);
     });
 

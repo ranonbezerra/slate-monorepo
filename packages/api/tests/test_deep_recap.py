@@ -7,7 +7,7 @@ import time
 import pytest
 
 from dailyloadout.config import Settings
-from dailyloadout.infrastructure.agent.base import BriefResult, DeepBriefRequest
+from dailyloadout.infrastructure.agent.base import DeepRecapRequest, RecapResult
 from dailyloadout.infrastructure.agent.dummy import DummyRecapAgent
 from dailyloadout.infrastructure.agent.factory import get_recap_agent
 from dailyloadout.infrastructure.agent.graph import nodes
@@ -28,7 +28,7 @@ def _ctx(**overrides: object) -> PlaySessionContext:
         "current_quest": None,
         "next_action": "find Cornifer",
         "level": None,
-        "previous_debriefs": [{"location": "Greenpath", "raw_text": "got lost"}],
+        "previous_wrap_ups": [{"location": "Greenpath", "raw_text": "got lost"}],
     }
     base.update(overrides)
     return base  # type: ignore[return-value]
@@ -192,7 +192,7 @@ class TestNodes:
 
     async def test_anti_hallucination_ungrounded_appends_disclaimer(self) -> None:
         state = {
-            "context": _ctx(location=None, previous_debriefs=[]),
+            "context": _ctx(location=None, previous_wrap_ups=[]),
             "filtered": "Defeat Radahn in Caelid then visit Sellia",
             "results": [{"title": "t", "url": "u", "snippet": "nothing relevant"}],
         }
@@ -303,18 +303,18 @@ class TestGraphIntegration:
 
 
 class TestAgents:
-    async def test_langgraph_agent_returns_brief_result(self) -> None:
+    async def test_langgraph_agent_returns_recap_result(self) -> None:
         agent = LangGraphRecapAgent(
             llm=DummyLLMClient(), research=DummyResearchClient(), settings=_settings()
         )
-        result = await agent.deep_brief(DeepBriefRequest(context=_ctx(), thread_id="m1"))
-        assert isinstance(result, BriefResult)
+        result = await agent.deep_recap(DeepRecapRequest(context=_ctx(), thread_id="m1"))
+        assert isinstance(result, RecapResult)
         assert result.source in ("deep_research", "quick_fallback")
         assert result.text
 
     async def test_dummy_agent_returns_canned(self) -> None:
-        result = await DummyRecapAgent().deep_brief(
-            DeepBriefRequest(context=_ctx(), thread_id="m1")
+        result = await DummyRecapAgent().deep_recap(
+            DeepRecapRequest(context=_ctx(), thread_id="m1")
         )
         assert result.source == "deep_research"
         assert "Hollow Knight" in result.text

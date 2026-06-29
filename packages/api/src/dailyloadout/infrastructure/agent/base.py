@@ -9,7 +9,7 @@ from .graph.state import PlaySessionContext
 
 
 @dataclass
-class DeepBriefRequest:
+class DeepRecapRequest:
     """Input to a deep recap run."""
 
     context: PlaySessionContext
@@ -17,7 +17,7 @@ class DeepBriefRequest:
 
 
 @dataclass
-class BriefResult:
+class RecapResult:
     """Output of a deep recap run."""
 
     text: str
@@ -29,6 +29,6 @@ class AbstractRecapAgent(ABC):
     """Contract for agents that produce a web-grounded play_session recap."""
 
     @abstractmethod
-    async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
+    async def deep_recap(self, req: DeepRecapRequest) -> RecapResult:
         """Produce a deep, spoiler-safe recap for the given context."""
         ...

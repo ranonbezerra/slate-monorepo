@@ -28,18 +28,18 @@ export async function previewRecap(
 }
 
 // ---------------------------------------------------------------------------
-// Retroactive debrief (unregistered play session)
+// Retroactive wrapUp (unregistered play session)
 // ---------------------------------------------------------------------------
 
-export async function submitRetroactiveDebrief(
+export async function submitRetroactiveWrapUp(
 	libraryEntryPublicId: string,
-	debriefText: string,
+	wrapUpText: string,
 ): Promise<RecapPreview> {
-	const raw = await apiFetch<unknown>("/v1/play-sessions/retroactive-debrief", {
+	const raw = await apiFetch<unknown>("/v1/play-sessions/retroactive-wrap-up", {
 		method: "POST",
 		body: JSON.stringify({
 			library_entry_public_id: libraryEntryPublicId,
-			debrief_text: debriefText,
+			wrap_up_text: wrapUpText,
 		}),
 	});
 	return snakeToCamel<RecapPreview>(raw);
@@ -103,19 +103,19 @@ export async function listPlaySessions(params?: {
 }
 
 // ---------------------------------------------------------------------------
-// Submit debrief
+// Submit wrapUp
 // ---------------------------------------------------------------------------
 
-export async function submitDebrief(publicId: string, debriefText: string): Promise<PlaySession> {
-	const raw = await apiFetch<unknown>(`/v1/play-sessions/${publicId}/debrief`, {
+export async function submitWrapUp(publicId: string, wrapUpText: string): Promise<PlaySession> {
+	const raw = await apiFetch<unknown>(`/v1/play-sessions/${publicId}/wrap-up`, {
 		method: "PATCH",
-		body: JSON.stringify({ debrief_text: debriefText }),
+		body: JSON.stringify({ wrap_up_text: wrapUpText }),
 	});
 	return snakeToCamel<PlaySession>(raw);
 }
 
 // ---------------------------------------------------------------------------
-// End session (no debrief)
+// End session (no wrapUp)
 // ---------------------------------------------------------------------------
 
 export async function endPlaySession(

@@ -99,8 +99,8 @@ void main() {
           builder: (_, __) => const Scaffold(body: Text('Recap stub')),
         ),
         GoRoute(
-          path: '/play-sessions/:id/debrief',
-          builder: (_, __) => const Scaffold(body: Text('Debrief stub')),
+          path: '/play-sessions/:id/wrap-up',
+          builder: (_, __) => const Scaffold(body: Text('WrapUp stub')),
         ),
       ],
     );
@@ -272,7 +272,7 @@ void main() {
       expect(find.text('Recap stub'), findsOneWidget);
     });
 
-    testWidgets('tapping Wrap up navigates to the playSession debrief', (
+    testWidgets('tapping Wrap up navigates to the playSession wrapUp', (
       tester,
     ) async {
       when(
@@ -284,7 +284,7 @@ void main() {
       await tester.tap(find.widgetWithText(OutlinedButton, 'Wrap up'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Debrief stub'), findsOneWidget);
+      expect(find.text('WrapUp stub'), findsOneWidget);
     });
 
     testWidgets('start doors are disabled while a playSession is active', (

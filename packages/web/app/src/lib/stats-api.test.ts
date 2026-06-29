@@ -206,8 +206,8 @@ describe("fetchTimeline", () => {
 					platform_label: "PC",
 					play_session_type: "regular",
 					recap_text: "Continue from Asphodel",
-					debrief_text: "Defeated Theseus",
-					ended_via: "debrief_completed",
+					wrap_up_text: "Defeated Theseus",
+					ended_via: "wrap_up_completed",
 					started_at: "2024-06-01T10:00:00Z",
 					ended_at: "2024-06-01T11:05:00Z",
 					duration_minutes: 65,
@@ -224,8 +224,8 @@ describe("fetchTimeline", () => {
 		expect(result.items[0].platformLabel).toBe("PC");
 		expect(result.items[0].playSessionType).toBe("regular");
 		expect(result.items[0].recapText).toBe("Continue from Asphodel");
-		expect(result.items[0].debriefText).toBe("Defeated Theseus");
-		expect(result.items[0].endedVia).toBe("debrief_completed");
+		expect(result.items[0].wrapUpText).toBe("Defeated Theseus");
+		expect(result.items[0].endedVia).toBe("wrap_up_completed");
 		expect(result.items[0].startedAt).toBe("2024-06-01T10:00:00Z");
 		expect(result.items[0].endedAt).toBe("2024-06-01T11:05:00Z");
 		expect(result.items[0].durationMinutes).toBe(65);
@@ -240,7 +240,7 @@ describe("fetchTimeline", () => {
 					platform_label: "Switch",
 					play_session_type: "regular",
 					recap_text: null,
-					debrief_text: null,
+					wrap_up_text: null,
 					ended_via: null,
 					started_at: "2024-06-01T10:00:00Z",
 					ended_at: null,
@@ -254,7 +254,7 @@ describe("fetchTimeline", () => {
 		const result = await fetchTimeline();
 
 		expect(result.items[0].recapText).toBeNull();
-		expect(result.items[0].debriefText).toBeNull();
+		expect(result.items[0].wrapUpText).toBeNull();
 		expect(result.items[0].endedVia).toBeNull();
 		expect(result.items[0].endedAt).toBeNull();
 		expect(result.items[0].durationMinutes).toBeNull();

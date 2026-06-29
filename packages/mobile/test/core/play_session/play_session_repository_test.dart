@@ -157,18 +157,18 @@ void main() {
     });
   });
 
-  group('submitRetroactiveDebrief', () {
-    test('posts debrief and parses RecapPreview', () async {
+  group('submitRetroactiveWrapUp', () {
+    test('posts wrapUp and parses RecapPreview', () async {
       when(
         () => dio.post<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
         (_) async => _response(
-          '/v1/play-sessions/retroactive-debrief',
+          '/v1/play-sessions/retroactive-wrap-up',
           _recapPreviewJson(),
         ),
       );
 
-      final preview = await repository.submitRetroactiveDebrief(
+      final preview = await repository.submitRetroactiveWrapUp(
         'entry-001',
         'Beat boss',
       );
@@ -180,10 +180,10 @@ void main() {
           data: captureAny(named: 'data'),
         ),
       ).captured;
-      expect(captured[0], '/v1/play-sessions/retroactive-debrief');
+      expect(captured[0], '/v1/play-sessions/retroactive-wrap-up');
       final body = captured[1] as Map<String, dynamic>;
       expect(body['library_entry_public_id'], 'entry-001');
-      expect(body['debrief_text'], 'Beat boss');
+      expect(body['wrap_up_text'], 'Beat boss');
     });
   });
 
@@ -346,18 +346,18 @@ void main() {
     });
   });
 
-  group('submitDebrief', () {
-    test('patches debrief and parses PlaySession', () async {
+  group('submitWrapUp', () {
+    test('patches wrapUp and parses PlaySession', () async {
       when(
         () => dio.patch<Map<String, dynamic>>(any(), data: any(named: 'data')),
       ).thenAnswer(
         (_) async => _response(
-          '/v1/play-sessions/playSession-001/debrief',
+          '/v1/play-sessions/playSession-001/wrap-up',
           _playSessionJson(),
         ),
       );
 
-      final playSession = await repository.submitDebrief(
+      final playSession = await repository.submitWrapUp(
         'playSession-001',
         'Had fun',
       );
@@ -369,8 +369,8 @@ void main() {
           data: captureAny(named: 'data'),
         ),
       ).captured;
-      expect(captured[0], '/v1/play-sessions/playSession-001/debrief');
-      expect((captured[1] as Map)['debrief_text'], 'Had fun');
+      expect(captured[0], '/v1/play-sessions/playSession-001/wrap-up');
+      expect((captured[1] as Map)['wrap_up_text'], 'Had fun');
     });
   });
 
@@ -387,7 +387,7 @@ void main() {
 
       final playSession = await repository.endPlaySession(
         'playSession-001',
-        endedVia: 'debrief',
+        endedVia: 'wrapUp',
       );
 
       expect(playSession.publicId, 'playSession-001');
@@ -398,7 +398,7 @@ void main() {
         ),
       ).captured;
       expect(captured[0], '/v1/play-sessions/playSession-001/end');
-      expect((captured[1] as Map)['ended_via'], 'debrief');
+      expect((captured[1] as Map)['ended_via'], 'wrapUp');
     });
 
     test('defaults ended_via to paused_app', () async {

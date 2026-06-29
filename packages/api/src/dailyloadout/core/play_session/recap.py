@@ -10,7 +10,7 @@ import structlog
 from dailyloadout.config import Settings
 from dailyloadout.config import settings as _settings
 from dailyloadout.core.play_session.anti_hallucination import validate_recap
-from dailyloadout.infrastructure.agent.base import AbstractRecapAgent, DeepBriefRequest
+from dailyloadout.infrastructure.agent.base import AbstractRecapAgent, DeepRecapRequest
 from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
 from dailyloadout.infrastructure.db.models import LibraryEntry, PlaySession
 from dailyloadout.infrastructure.db.repositories.library import LibraryRepository
@@ -23,18 +23,18 @@ logger = structlog.get_logger()
 RecapMode = Literal["quick", "deep"]
 
 
-def _collect_previous_debriefs(recent_play_sessions: list[PlaySession]) -> list[dict[str, object]]:
-    """Flatten recent ended play_sessions into the debrief context the LLM expects."""
-    previous_debriefs: list[dict[str, object]] = []
+def _collect_previous_wrap_ups(recent_play_sessions: list[PlaySession]) -> list[dict[str, object]]:
+    """Flatten recent ended play_sessions into the wrap_up context the LLM expects."""
+    previous_wrap_ups: list[dict[str, object]] = []
     for m in recent_play_sessions:
-        debrief_data: dict[str, object] = {}
+        wrap_up_data: dict[str, object] = {}
         if m.extracted_state:
-            debrief_data.update(m.extracted_state)
-        if m.debrief_text:
-            debrief_data["raw_text"] = m.debrief_text
-        if debrief_data:
-            previous_debriefs.append(debrief_data)
-    return previous_debriefs
+            wrap_up_data.update(m.extracted_state)
+        if m.wrap_up_text:
+            wrap_up_data["raw_text"] = m.wrap_up_text
+        if wrap_up_data:
+            previous_wrap_ups.append(wrap_up_data)
+    return previous_wrap_ups
 
 
 async def build_play_session_context(
@@ -45,12 +45,12 @@ async def build_play_session_context(
 ) -> PlaySessionContext:
     """Assemble the grounding context for a deep recap run.
 
-    Mirrors the context ``generate_recap`` uses: the last 3 debriefs plus
+    Mirrors the context ``generate_recap`` uses: the last 3 wrap_ups plus
     the most recent extracted location/quest/level and the entry's next action.
     """
     await ensure_extractions_complete(play_session_repo, library_repo, llm_client, entry.id)
     recent_play_sessions = await play_session_repo.get_recent_for_entry(entry.id, limit=3)
-    previous_debriefs = _collect_previous_debriefs(recent_play_sessions)
+    previous_wrap_ups = _collect_previous_wrap_ups(recent_play_sessions)
 
     latest_state: dict[str, object] = {}
     if recent_play_sessions and recent_play_sessions[0].extracted_state:
@@ -62,7 +62,7 @@ async def build_play_session_context(
         current_quest=latest_state.get("current_quest"),  # type: ignore[typeddict-item]
         next_action=entry.play_session_next_action,
         level=latest_state.get("level"),  # type: ignore[typeddict-item]
-        previous_debriefs=previous_debriefs,
+        previous_wrap_ups=previous_wrap_ups,
     )
 
 
@@ -79,7 +79,7 @@ async def build_preview(
 ) -> dict[str, object]:
     """Build a recap preview dict for a library entry.
 
-    Shared by ``preview_recap`` and ``submit_retroactive_debrief``. Does NOT
+    Shared by ``preview_recap`` and ``submit_retroactive_wrap_up``. Does NOT
     check for active play_sessions. When *mode* is ``deep`` and an *agent* is given,
     the deep web-researched path runs (falling back to quick on failure);
     otherwise the quick single-shot recap is used.
@@ -125,22 +125,22 @@ async def ensure_extractions_complete(
     llm_client: AbstractLLMClient,
     library_entry_id: int,
 ) -> None:
-    """Sync fallback: extract state for play_sessions with debrief but no extraction.
+    """Sync fallback: extract state for play_sessions with wrap_up but no extraction.
 
     This handles the case where the Taskiq worker failed or hasn't processed
-    the debrief yet. Called before recap generation to ensure context is
+    the wrap_up yet. Called before recap generation to ensure context is
     available.
     """
     pending = await play_session_repo.get_pending_extractions(library_entry_id)
     for play_session in pending:
         logger.info(
-            "debrief_extraction_sync_fallback",
+            "wrap_up_extraction_sync_fallback",
             play_session_id=play_session.id,
         )
         try:
-            extracted = await llm_client.extract_debrief_state(
+            extracted = await llm_client.extract_wrap_up_state(
                 game_title=play_session.library_entry.game.title,
-                debrief_text=play_session.debrief_text,  # type: ignore[arg-type]
+                wrap_up_text=play_session.wrap_up_text,  # type: ignore[arg-type]
             )
             state_dict = {
                 "location": extracted.location,
@@ -155,7 +155,7 @@ async def ensure_extractions_complete(
                 )
         except Exception:
             logger.warning(
-                "debrief_extraction_sync_fallback_failed",
+                "wrap_up_extraction_sync_fallback_failed",
                 play_session_id=play_session.id,
                 exc_info=True,
             )
@@ -193,7 +193,7 @@ async def generate_recap_for_mode(
     context = await build_play_session_context(play_session_repo, library_repo, llm_client, entry)
     try:
         result = await asyncio.wait_for(
-            agent.deep_brief(DeepBriefRequest(context=context, thread_id=str(entry.public_id))),
+            agent.deep_recap(DeepRecapRequest(context=context, thread_id=str(entry.public_id))),
             timeout=settings.deep_recap_deadline_seconds + 5,
         )
     except (TimeoutError, ResearchUnavailableError):
@@ -215,7 +215,7 @@ async def generate_recap(
     current_next_action: str | None,
     position_override: str | None = None,
 ) -> str:
-    """Generate a recap from the last 3 debriefs.
+    """Generate a recap from the last 3 wrap_ups.
 
     If *position_override* is provided, it's passed to the LLM as the
     player's corrected current position.
@@ -228,12 +228,12 @@ async def generate_recap(
     )
     recent_play_sessions = await play_session_repo.get_recent_for_entry(library_entry_id, limit=3)
 
-    previous_debriefs = _collect_previous_debriefs(recent_play_sessions)
+    previous_wrap_ups = _collect_previous_wrap_ups(recent_play_sessions)
 
     try:
         recap = await llm_client.generate_recap(
             game_title=game_title,
-            previous_debriefs=previous_debriefs,
+            previous_wrap_ups=previous_wrap_ups,
             current_next_action=current_next_action,
             position_override=position_override,
         )
@@ -245,9 +245,9 @@ async def generate_recap(
         return ""
 
     # Anti-hallucination check.
-    if previous_debriefs:
+    if previous_wrap_ups:
         context_parts = [game_title]
-        for d in previous_debriefs:
+        for d in previous_wrap_ups:
             context_parts.extend(str(v) for v in d.values() if v is not None)
         if current_next_action:
             context_parts.append(current_next_action)

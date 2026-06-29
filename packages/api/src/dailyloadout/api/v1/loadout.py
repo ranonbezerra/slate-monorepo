@@ -90,7 +90,7 @@ async def start_loadout(
 ) -> LoadoutResponse:
     """AI-pick a game and immediately start a play_session for it (one tap).
 
-    Optionally include a pre-generated ``recap_text`` to start briefed.
+    Optionally include a pre-generated ``recap_text`` to start with a recap ready.
     Returns 422 if no eligible games, 409 if a play_session is already active.
     """
     loadout = await loadout_service.create_and_start(

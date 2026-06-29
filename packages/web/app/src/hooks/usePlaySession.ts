@@ -8,15 +8,15 @@ import {
 	type RecapMode,
 	regenerateRecap,
 	startPlaySession,
-	submitDebrief,
-	submitRetroactiveDebrief,
+	submitRetroactiveWrapUp,
+	submitWrapUp,
 } from "../lib/play-session-api";
 
 // ---------------------------------------------------------------------------
 // Query keys
 // ---------------------------------------------------------------------------
 
-const MISSIONS_KEY = ["playSessions"] as const;
+const PLAY_SESSIONS_KEY = ["playSessions"] as const;
 const LIBRARY_KEY = ["library"] as const;
 const STATS_KEY = ["stats"] as const;
 
@@ -26,14 +26,14 @@ const STATS_KEY = ["stats"] as const;
 
 export function usePlaySessions(params?: { limit?: number; offset?: number }) {
 	return useQuery({
-		queryKey: [...MISSIONS_KEY, params],
+		queryKey: [...PLAY_SESSIONS_KEY, params],
 		queryFn: () => listPlaySessions(params),
 	});
 }
 
 export function usePlaySession(publicId: string) {
 	return useQuery({
-		queryKey: [...MISSIONS_KEY, publicId],
+		queryKey: [...PLAY_SESSIONS_KEY, publicId],
 		queryFn: () => getPlaySession(publicId),
 		enabled: !!publicId,
 	});
@@ -41,7 +41,7 @@ export function usePlaySession(publicId: string) {
 
 export function useActivePlaySession() {
 	return useQuery({
-		queryKey: [...MISSIONS_KEY, "active"],
+		queryKey: [...PLAY_SESSIONS_KEY, "active"],
 		queryFn: () => getActivePlaySession(),
 	});
 }
@@ -61,14 +61,14 @@ export function usePreviewRecap() {
 	});
 }
 
-export function useRetroactiveDebrief() {
+export function useRetroactiveWrapUp() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (vars: { libraryEntryPublicId: string; debriefText: string }) =>
-			submitRetroactiveDebrief(vars.libraryEntryPublicId, vars.debriefText),
+		mutationFn: (vars: { libraryEntryPublicId: string; wrapUpText: string }) =>
+			submitRetroactiveWrapUp(vars.libraryEntryPublicId, vars.wrapUpText),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
+			queryClient.invalidateQueries({ queryKey: PLAY_SESSIONS_KEY });
 			queryClient.invalidateQueries({ queryKey: LIBRARY_KEY });
 			queryClient.invalidateQueries({ queryKey: STATS_KEY });
 		},
@@ -85,21 +85,21 @@ export function useStartPlaySession() {
 			skipRecap?: boolean;
 		}) => startPlaySession(vars.libraryEntryPublicId, vars.recapText, vars.skipRecap),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
+			queryClient.invalidateQueries({ queryKey: PLAY_SESSIONS_KEY });
 			queryClient.invalidateQueries({ queryKey: LIBRARY_KEY });
 			queryClient.invalidateQueries({ queryKey: STATS_KEY });
 		},
 	});
 }
 
-export function useSubmitDebrief() {
+export function useSubmitWrapUp() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (vars: { publicId: string; debriefText: string }) =>
-			submitDebrief(vars.publicId, vars.debriefText),
+		mutationFn: (vars: { publicId: string; wrapUpText: string }) =>
+			submitWrapUp(vars.publicId, vars.wrapUpText),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
+			queryClient.invalidateQueries({ queryKey: PLAY_SESSIONS_KEY });
 			queryClient.invalidateQueries({ queryKey: LIBRARY_KEY });
 			queryClient.invalidateQueries({ queryKey: STATS_KEY });
 		},
@@ -113,7 +113,7 @@ export function useEndPlaySession() {
 		mutationFn: (vars: { publicId: string; endedVia?: string }) =>
 			endPlaySession(vars.publicId, vars.endedVia),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
+			queryClient.invalidateQueries({ queryKey: PLAY_SESSIONS_KEY });
 			queryClient.invalidateQueries({ queryKey: LIBRARY_KEY });
 			queryClient.invalidateQueries({ queryKey: STATS_KEY });
 		},
@@ -127,7 +127,7 @@ export function useRegenerateRecap() {
 		mutationFn: (vars: { publicId: string; currentPosition?: string }) =>
 			regenerateRecap(vars.publicId, vars.currentPosition),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
+			queryClient.invalidateQueries({ queryKey: PLAY_SESSIONS_KEY });
 		},
 	});
 }

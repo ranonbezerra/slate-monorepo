@@ -24,7 +24,7 @@ async def auto_clamp_stale_play_sessions(
     """Close all stale play_sessions and return the number clamped.
 
     A clamp ends a play_session, so each affected user's stats are invalidated —
-    this is the background counterpart to the REST end/debrief hooks.
+    this is the background counterpart to the REST end/wrap_up hooks.
     """
     stale = await play_session_repo.get_stale_play_sessions(max_hours=max_hours)
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from dailyloadout.infrastructure.agent.base import BriefResult, DeepBriefRequest
+from dailyloadout.infrastructure.agent.base import DeepRecapRequest, RecapResult
 from dailyloadout.infrastructure.agent.cached import CachedRecapAgent
 from dailyloadout.infrastructure.agent.graph.state import PlaySessionContext
 from dailyloadout.infrastructure.cache.keys import llm_key, recap_key, research_key
@@ -22,17 +22,17 @@ from tests.test_cache_layer import FakeCache
 
 
 class _FakeAgent:
-    def __init__(self, result: BriefResult) -> None:
+    def __init__(self, result: RecapResult) -> None:
         self._result = result
         self.calls = 0
 
-    async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
+    async def deep_recap(self, req: DeepRecapRequest) -> RecapResult:
         self.calls += 1
         return self._result
 
 
 _CTX: PlaySessionContext = {"game_title": "Hollow Knight", "next_action": "find the cloak"}
-_REQ = DeepBriefRequest(context=_CTX, thread_id="t1")
+_REQ = DeepRecapRequest(context=_CTX, thread_id="t1")
 
 
 def test_recap_key_changes_when_context_changes() -> None:
@@ -41,11 +41,11 @@ def test_recap_key_changes_when_context_changes() -> None:
 
 
 async def test_recap_miss_then_hit_round_trips() -> None:
-    inner = _FakeAgent(BriefResult(text="Go north.", source="deep_research", suspicious=False))
+    inner = _FakeAgent(RecapResult(text="Go north.", source="deep_research", suspicious=False))
     agent = CachedRecapAgent(inner, FakeCache(), ttl_seconds=100)
 
-    await agent.deep_brief(_REQ)
-    second = await agent.deep_brief(_REQ)
+    await agent.deep_recap(_REQ)
+    second = await agent.deep_recap(_REQ)
 
     assert inner.calls == 1  # second served from cache
     assert second.text == "Go north."
@@ -54,21 +54,21 @@ async def test_recap_miss_then_hit_round_trips() -> None:
 
 
 async def test_recap_quick_fallback_not_cached() -> None:
-    inner = _FakeAgent(BriefResult(text="meh", source="quick_fallback", suspicious=False))
+    inner = _FakeAgent(RecapResult(text="meh", source="quick_fallback", suspicious=False))
     agent = CachedRecapAgent(inner, FakeCache(), ttl_seconds=100)
 
-    await agent.deep_brief(_REQ)
-    await agent.deep_brief(_REQ)
+    await agent.deep_recap(_REQ)
+    await agent.deep_recap(_REQ)
 
     assert inner.calls == 2  # degraded result never stored
 
 
 async def test_recap_empty_text_not_cached() -> None:
-    inner = _FakeAgent(BriefResult(text="", source="deep_research", suspicious=False))
+    inner = _FakeAgent(RecapResult(text="", source="deep_research", suspicious=False))
     agent = CachedRecapAgent(inner, FakeCache(), ttl_seconds=100)
 
-    await agent.deep_brief(_REQ)
-    await agent.deep_brief(_REQ)
+    await agent.deep_recap(_REQ)
+    await agent.deep_recap(_REQ)
 
     assert inner.calls == 2
 

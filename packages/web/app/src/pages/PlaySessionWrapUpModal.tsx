@@ -1,33 +1,33 @@
 import { Button, Group, Modal, Stack, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import { useEndPlaySession, useSubmitDebrief } from "../hooks/usePlaySession";
+import { useEndPlaySession, useSubmitWrapUp } from "../hooks/usePlaySession";
 import type { PlaySession } from "../types/play-session";
 
-interface PlaySessionDebriefModalProps {
+interface PlaySessionWrapUpModalProps {
 	playSession: PlaySession | null;
 	onClose: () => void;
 }
 
-export function PlaySessionDebriefModal({ playSession, onClose }: PlaySessionDebriefModalProps) {
-	const [debriefText, setDebriefText] = useState("");
-	const submitDebrief = useSubmitDebrief();
+export function PlaySessionWrapUpModal({ playSession, onClose }: PlaySessionWrapUpModalProps) {
+	const [wrapUpText, setWrapUpText] = useState("");
+	const submitWrapUp = useSubmitWrapUp();
 	const endPlaySession = useEndPlaySession();
 
 	if (!playSession) return null;
 
-	const handleDebrief = async () => {
+	const handleWrapUp = async () => {
 		try {
-			await submitDebrief.mutateAsync({
+			await submitWrapUp.mutateAsync({
 				publicId: playSession.publicId,
-				debriefText,
+				wrapUpText,
 			});
 			notifications.show({
 				title: "Session complete",
 				message: "Your wrap-up has been saved. See you next session!",
 				color: "green",
 			});
-			setDebriefText("");
+			setWrapUpText("");
 			onClose();
 		} catch (err) {
 			notifications.show({
@@ -38,7 +38,7 @@ export function PlaySessionDebriefModal({ playSession, onClose }: PlaySessionDeb
 		}
 	};
 
-	const handleEndWithoutDebrief = async () => {
+	const handleEndWithoutWrapUp = async () => {
 		try {
 			await endPlaySession.mutateAsync({ publicId: playSession.publicId });
 			notifications.show({
@@ -46,7 +46,7 @@ export function PlaySessionDebriefModal({ playSession, onClose }: PlaySessionDeb
 				message: "Session ended without a wrap-up.",
 				color: "yellow",
 			});
-			setDebriefText("");
+			setWrapUpText("");
 			onClose();
 		} catch (err) {
 			notifications.show({
@@ -72,8 +72,8 @@ export function PlaySessionDebriefModal({ playSession, onClose }: PlaySessionDeb
 
 				<Textarea
 					placeholder="Beat the Mantis Lords. Got the cloak. Heading to Greenpath next..."
-					value={debriefText}
-					onChange={(e) => setDebriefText(e.currentTarget.value)}
+					value={wrapUpText}
+					onChange={(e) => setWrapUpText(e.currentTarget.value)}
 					autosize
 					minRows={4}
 					maxRows={8}
@@ -83,15 +83,15 @@ export function PlaySessionDebriefModal({ playSession, onClose }: PlaySessionDeb
 					<Button
 						variant="subtle"
 						color="gray"
-						onClick={handleEndWithoutDebrief}
+						onClick={handleEndWithoutWrapUp}
 						loading={endPlaySession.isPending}
 					>
 						Skip wrap-up
 					</Button>
 					<Button
-						onClick={handleDebrief}
-						loading={submitDebrief.isPending}
-						disabled={debriefText.trim().length < 3}
+						onClick={handleWrapUp}
+						loading={submitWrapUp.isPending}
+						disabled={wrapUpText.trim().length < 3}
 					>
 						Save wrap-up
 					</Button>

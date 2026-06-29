@@ -613,15 +613,15 @@ void main() {
     });
 
     // ---------------------------------------------------------------
-    // SubmitDebrief
+    // SubmitWrapUp
     // ---------------------------------------------------------------
-    group('SubmitDebrief', () {
+    group('SubmitWrapUp', () {
       blocTest<PlaySessionBloc, PlaySessionState>(
         'emits [PlaySessionLoading, PlaySessionEnded] '
         'on success',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.submitDebrief(
+            () => mockPlaySessionRepository.submitWrapUp(
               'playSession-001',
               'Great session!',
             ),
@@ -629,9 +629,9 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const SubmitDebrief(
+          const SubmitWrapUp(
             publicId: 'playSession-001',
-            debriefText: 'Great session!',
+            wrapUpText: 'Great session!',
           ),
         ),
         expect: () => [
@@ -645,7 +645,7 @@ void main() {
         'on DioException',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.submitDebrief(any(), any()),
+            () => mockPlaySessionRepository.submitWrapUp(any(), any()),
           ).thenThrow(
             DioException(
               requestOptions: RequestOptions(),
@@ -659,7 +659,7 @@ void main() {
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const SubmitDebrief(publicId: 'playSession-001', debriefText: 'text'),
+          const SubmitWrapUp(publicId: 'playSession-001', wrapUpText: 'text'),
         ),
         expect: () => const [
           PlaySessionLoading(),
@@ -754,25 +754,25 @@ void main() {
     });
 
     // ---------------------------------------------------------------
-    // SubmitRetroactiveDebrief
+    // SubmitRetroactiveWrapUp
     // ---------------------------------------------------------------
-    group('SubmitRetroactiveDebrief', () {
+    group('SubmitRetroactiveWrapUp', () {
       blocTest<PlaySessionBloc, PlaySessionState>(
         'emits [PlaySessionLoading, RecapPreviewLoaded] '
         'on success',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.submitRetroactiveDebrief(
+            () => mockPlaySessionRepository.submitRetroactiveWrapUp(
               'lib-001',
-              'Retroactive debrief text',
+              'Retroactive wrapUp text',
             ),
           ).thenAnswer((_) async => _preview);
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const SubmitRetroactiveDebrief(
+          const SubmitRetroactiveWrapUp(
             libraryEntryPublicId: 'lib-001',
-            debriefText: 'Retroactive debrief text',
+            wrapUpText: 'Retroactive wrapUp text',
           ),
         ),
         expect: () => [
@@ -786,31 +786,29 @@ void main() {
         'on DioException',
         setUp: () {
           when(
-            () => mockPlaySessionRepository.submitRetroactiveDebrief(
-              any(),
-              any(),
-            ),
+            () =>
+                mockPlaySessionRepository.submitRetroactiveWrapUp(any(), any()),
           ).thenThrow(
             DioException(
               requestOptions: RequestOptions(),
               response: Response(
                 requestOptions: RequestOptions(),
                 statusCode: 422,
-                data: <String, dynamic>{'detail': 'Invalid debrief'},
+                data: <String, dynamic>{'detail': 'Invalid wrapUp'},
               ),
             ),
           );
         },
         build: buildBloc,
         act: (bloc) => bloc.add(
-          const SubmitRetroactiveDebrief(
+          const SubmitRetroactiveWrapUp(
             libraryEntryPublicId: 'lib-001',
-            debriefText: '',
+            wrapUpText: '',
           ),
         ),
         expect: () => const [
           PlaySessionLoading(),
-          PlaySessionError(message: 'Invalid debrief'),
+          PlaySessionError(message: 'Invalid wrapUp'),
         ],
       );
     });

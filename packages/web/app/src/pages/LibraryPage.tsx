@@ -45,8 +45,8 @@ import { CaptureReviewModal } from "./CaptureReviewModal";
 import { CaptureTextModal } from "./CaptureTextModal";
 import { CaptureVoiceModal } from "./CaptureVoiceModal";
 import { ImageSourceModal } from "./ImageSourceModal";
-import { PlaySessionDebriefModal } from "./PlaySessionDebriefModal";
 import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
+import { PlaySessionWrapUpModal } from "./PlaySessionWrapUpModal";
 
 dayjs.extend(relativeTime);
 
@@ -117,7 +117,7 @@ export function LibraryPage() {
 	// recap is fetched inside the modal after the user picks quick vs deep.
 	const [previewEntry, setPreviewEntry] = useState<LibraryEntry | null>(null);
 
-	const [debriefPlaySession, setDebriefPlaySession] = useState<PlaySession | null>(null);
+	const [wrapUpPlaySession, setWrapUpPlaySession] = useState<PlaySession | null>(null);
 
 	const queryParams = {
 		status: statusFilter === "all" ? undefined : statusFilter,
@@ -219,7 +219,7 @@ export function LibraryPage() {
 							<Button
 								size="xs"
 								color="teal"
-								onClick={() => setDebriefPlaySession(activePlaySession)}
+								onClick={() => setWrapUpPlaySession(activePlaySession)}
 							>
 								End session
 							</Button>
@@ -395,9 +395,9 @@ export function LibraryPage() {
 				/>
 			)}
 
-			<PlaySessionDebriefModal
-				playSession={debriefPlaySession}
-				onClose={() => setDebriefPlaySession(null)}
+			<PlaySessionWrapUpModal
+				playSession={wrapUpPlaySession}
+				onClose={() => setWrapUpPlaySession(null)}
 			/>
 		</Stack>
 	);

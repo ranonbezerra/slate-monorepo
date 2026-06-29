@@ -40,7 +40,7 @@ class PlaySessionRepository:
         self,
         user_id: int,
         library_entry_id: int,
-        debrief_text: str,
+        wrap_up_text: str,
         extracted_state: dict[str, Any] | None = None,
     ) -> PlaySession:
         """Insert a pre-ended retroactive play_session and return it."""
@@ -49,7 +49,7 @@ class PlaySessionRepository:
             user_id=user_id,
             library_entry_id=library_entry_id,
             play_session_type="retroactive",
-            debrief_text=debrief_text,
+            wrap_up_text=wrap_up_text,
             extracted_state=extracted_state,
             ended_via="retroactive",
             started_at=now,
@@ -102,7 +102,7 @@ class PlaySessionRepository:
         """Return the most recent *ended* play_sessions for a library entry.
 
         Only returns play_sessions that have ``extracted_state`` set (i.e.
-        debriefs that have been processed).
+        wrap_ups that have been processed).
         """
         stmt = (
             select(PlaySession)
@@ -199,15 +199,15 @@ class PlaySessionRepository:
         total = (await self._session.scalar(select(func.count(PlaySession.id)))) or 0
         return {"active": active, "ended": total - active}
 
-    async def set_debrief(
+    async def set_wrap_up(
         self,
         play_session_id: int,
-        debrief_text: str,
+        wrap_up_text: str,
     ) -> None:
-        """Set the user's debrief text on a play_session."""
+        """Set the user's wrap_up text on a play_session."""
         play_session = await self._session.get(PlaySession, play_session_id)
         if play_session is not None:
-            play_session.debrief_text = debrief_text
+            play_session.wrap_up_text = wrap_up_text
             await self._session.flush()
 
     async def set_extracted_state(
@@ -249,7 +249,7 @@ class PlaySessionRepository:
         self,
         library_entry_id: int,
     ) -> list[PlaySession]:
-        """Return ended play_sessions with debrief text but no extracted state.
+        """Return ended play_sessions with wrap_up text but no extracted state.
 
         These are play_sessions where the async extraction task hasn't completed
         (or failed). Used by the sync fallback before recap generation.
@@ -263,7 +263,7 @@ class PlaySessionRepository:
             .where(
                 PlaySession.library_entry_id == library_entry_id,
                 PlaySession.ended_at.is_not(None),
-                PlaySession.debrief_text.is_not(None),
+                PlaySession.wrap_up_text.is_not(None),
                 PlaySession.extracted_state.is_(None),
             )
         )

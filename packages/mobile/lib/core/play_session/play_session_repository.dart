@@ -36,16 +36,16 @@ class PlaySessionRepository {
     return RecapPreview.fromJson(response.data!);
   }
 
-  /// Submits a retroactive debrief for a library entry.
-  Future<RecapPreview> submitRetroactiveDebrief(
+  /// Submits a retroactive wrapUp for a library entry.
+  Future<RecapPreview> submitRetroactiveWrapUp(
     String libraryEntryPublicId,
-    String debriefText,
+    String wrapUpText,
   ) async {
     final response = await _apiClient.dio.post<Map<String, dynamic>>(
-      '/v1/play-sessions/retroactive-debrief',
+      '/v1/play-sessions/retroactive-wrap-up',
       data: {
         'library_entry_public_id': libraryEntryPublicId,
-        'debrief_text': debriefText,
+        'wrap_up_text': wrapUpText,
       },
     );
     return RecapPreview.fromJson(response.data!);
@@ -106,11 +106,11 @@ class PlaySessionRepository {
     return PlaySessionListResponse.fromJson(response.data!);
   }
 
-  /// Submits a debrief for a playSession.
-  Future<PlaySession> submitDebrief(String publicId, String debriefText) async {
+  /// Submits a wrapUp for a playSession.
+  Future<PlaySession> submitWrapUp(String publicId, String wrapUpText) async {
     final response = await _apiClient.dio.patch<Map<String, dynamic>>(
-      '/v1/play-sessions/$publicId/debrief',
-      data: {'debrief_text': debriefText},
+      '/v1/play-sessions/$publicId/wrap-up',
+      data: {'wrap_up_text': wrapUpText},
     );
     return PlaySession.fromJson(response.data!);
   }

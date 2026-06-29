@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-from .base import AbstractRecapAgent, BriefResult, DeepBriefRequest
+from .base import AbstractRecapAgent, DeepRecapRequest, RecapResult
 from .graph.builder import build_graph
 
 if TYPE_CHECKING:
@@ -27,7 +27,7 @@ class LangGraphRecapAgent(AbstractRecapAgent):
         self._graph: Any = build_graph(llm=llm, research=research, settings=settings)
         self._deadline = settings.deep_recap_deadline_seconds
 
-    async def deep_brief(self, req: DeepBriefRequest) -> BriefResult:
+    async def deep_recap(self, req: DeepRecapRequest) -> RecapResult:
         """Invoke the graph; ``thread_id`` makes the run addressable."""
         init = {
             "context": req.context,
@@ -35,7 +35,7 @@ class LangGraphRecapAgent(AbstractRecapAgent):
         }
         config = {"configurable": {"thread_id": req.thread_id}}
         final = await self._graph.ainvoke(init, config=config)
-        return BriefResult(
+        return RecapResult(
             text=final["recap"],
             source=final["source"],
             suspicious=bool(final.get("suspicious", False)),

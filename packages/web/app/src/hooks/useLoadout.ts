@@ -13,7 +13,7 @@ import type { LoadoutMood, MentalEnergy } from "../types/loadout";
 // ---------------------------------------------------------------------------
 
 const LOADOUTS_KEY = ["loadouts"] as const;
-const MISSIONS_KEY = ["playSessions"] as const;
+const PLAY_SESSIONS_KEY = ["playSessions"] as const;
 const STATS_KEY = ["stats"] as const;
 
 // ---------------------------------------------------------------------------
@@ -64,7 +64,7 @@ export function useAcceptLoadout() {
 			acceptLoadout(vars.publicId, vars.recapText),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: LOADOUTS_KEY });
-			queryClient.invalidateQueries({ queryKey: MISSIONS_KEY });
+			queryClient.invalidateQueries({ queryKey: PLAY_SESSIONS_KEY });
 			queryClient.invalidateQueries({ queryKey: STATS_KEY });
 		},
 	});

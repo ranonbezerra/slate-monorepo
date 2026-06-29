@@ -43,7 +43,7 @@ class PlaySession(TimestampMixin, Base):
         BigInteger, ForeignKey("library_entries.id", ondelete="CASCADE"), nullable=False
     )
     recap_text: Mapped[str | None] = mapped_column(Text, nullable=True)
-    debrief_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    wrap_up_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     extracted_state: Mapped[dict[str, object] | None] = mapped_column(JSONB, nullable=True)
     play_session_type: Mapped[str] = mapped_column(
         String, nullable=False, default="regular", server_default="regular"

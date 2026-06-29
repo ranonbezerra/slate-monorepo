@@ -35,7 +35,7 @@ const mockPlaySession = {
 	libraryEntry: mockLibraryEntry,
 	playSessionType: "regular" as const,
 	recapText: "Continue from Stormveil Castle.",
-	debriefText: null,
+	wrapUpText: null,
 	extractedState: null,
 	endedVia: null,
 	startedAt: "2024-06-15T18:00:00Z",
@@ -81,8 +81,8 @@ vi.mock("../lib/play-session-api", () => ({
 	getActivePlaySession: vi.fn(() => Promise.resolve(mockPlaySession)),
 	previewRecap: vi.fn(() => Promise.resolve(mockRecapPreview)),
 	startPlaySession: vi.fn(() => Promise.resolve(mockPlaySession)),
-	submitDebrief: vi.fn(() =>
-		Promise.resolve({ ...mockPlaySession, debriefText: "Defeated Godrick." }),
+	submitWrapUp: vi.fn(() =>
+		Promise.resolve({ ...mockPlaySession, wrapUpText: "Defeated Godrick." }),
 	),
 	endPlaySession: vi.fn(() =>
 		Promise.resolve({
@@ -94,7 +94,7 @@ vi.mock("../lib/play-session-api", () => ({
 	regenerateRecap: vi.fn(() =>
 		Promise.resolve({ ...mockPlaySession, recapText: "New recap text." }),
 	),
-	submitRetroactiveDebrief: vi.fn(() => Promise.resolve(mockRecapPreview)),
+	submitRetroactiveWrapUp: vi.fn(() => Promise.resolve(mockRecapPreview)),
 }));
 
 import {
@@ -105,8 +105,8 @@ import {
 	previewRecap,
 	regenerateRecap,
 	startPlaySession,
-	submitDebrief,
-	submitRetroactiveDebrief,
+	submitRetroactiveWrapUp,
+	submitWrapUp,
 } from "../lib/play-session-api";
 import {
 	useActivePlaySession,
@@ -115,9 +115,9 @@ import {
 	usePlaySessions,
 	usePreviewRecap,
 	useRegenerateRecap,
-	useRetroactiveDebrief,
+	useRetroactiveWrapUp,
 	useStartPlaySession,
-	useSubmitDebrief,
+	useSubmitWrapUp,
 } from "./usePlaySession";
 
 beforeEach(() => {
@@ -251,18 +251,18 @@ describe("useStartPlaySession", () => {
 	});
 });
 
-describe("useSubmitDebrief", () => {
-	it("calls submitDebrief with publicId and debriefText", async () => {
-		const { result } = renderHook(() => useSubmitDebrief(), {
+describe("useSubmitWrapUp", () => {
+	it("calls submitWrapUp with publicId and wrapUpText", async () => {
+		const { result } = renderHook(() => useSubmitWrapUp(), {
 			wrapper: createWrapper(),
 		});
 
 		await result.current.mutateAsync({
 			publicId: "playSession-1",
-			debriefText: "Defeated Godrick. Heading to Liurnia.",
+			wrapUpText: "Defeated Godrick. Heading to Liurnia.",
 		});
 
-		expect(submitDebrief).toHaveBeenCalledWith(
+		expect(submitWrapUp).toHaveBeenCalledWith(
 			"playSession-1",
 			"Defeated Godrick. Heading to Liurnia.",
 		);
@@ -316,18 +316,18 @@ describe("useRegenerateRecap", () => {
 	});
 });
 
-describe("useRetroactiveDebrief", () => {
-	it("calls submitRetroactiveDebrief with libraryEntryPublicId and debriefText", async () => {
-		const { result } = renderHook(() => useRetroactiveDebrief(), {
+describe("useRetroactiveWrapUp", () => {
+	it("calls submitRetroactiveWrapUp with libraryEntryPublicId and wrapUpText", async () => {
+		const { result } = renderHook(() => useRetroactiveWrapUp(), {
 			wrapper: createWrapper(),
 		});
 
 		await result.current.mutateAsync({
 			libraryEntryPublicId: "entry-1",
-			debriefText: "Played for two hours, cleared a dungeon.",
+			wrapUpText: "Played for two hours, cleared a dungeon.",
 		});
 
-		expect(submitRetroactiveDebrief).toHaveBeenCalledWith(
+		expect(submitRetroactiveWrapUp).toHaveBeenCalledWith(
 			"entry-1",
 			"Played for two hours, cleared a dungeon.",
 		);
