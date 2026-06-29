@@ -1,4 +1,4 @@
-# DailyLoadout — Architecture
+# Slate — Architecture
 
 This document is the technical companion to [PRODUCT.md](./PRODUCT.md). It covers stack decisions, schema, module structure, critical flows, and the rationale behind non-obvious choices.
 
@@ -657,7 +657,7 @@ SMTP_HOST=
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASSWORD=
-SMTP_FROM=DailyLoadout <noreply@dailyloadout.local>
+SMTP_FROM=Slate <noreply@dailyloadout.local>
 
 # Limits
 CAPTURE_MAX_AUDIO_SECONDS=60

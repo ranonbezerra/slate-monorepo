@@ -77,9 +77,9 @@ def send_verification_email(mailer: Mailer, *, to: str, token: str) -> bool:
     """Compose and best-effort-send an email-verification message."""
     link = f"{settings.email_verification_base_url}?token={token}"
     body = (
-        "Welcome to DailyLoadout!\n\n"
+        "Welcome to Slate!\n\n"
         "Please verify your email address by opening this link:\n\n"
         f"{link}\n\n"
         "If you did not create this account, you can ignore this message."
     )
-    return mailer.send(to=to, subject="Verify your DailyLoadout email", body=body)
+    return mailer.send(to=to, subject="Verify your Slate email", body=body)

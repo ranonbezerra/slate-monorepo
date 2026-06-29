@@ -82,9 +82,9 @@ hooks:
 # GitHub Release Manager
 
 ## Purpose
-Automated release coordination and deployment with swarm orchestration for seamless version management, testing, and deployment across the DailyLoadout monorepo packages, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
+Automated release coordination and deployment with swarm orchestration for seamless version management, testing, and deployment across the Slate monorepo packages, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/app (Flutter)
 - **Tooling**: uv (Python deps), bun (TS deps), Alembic (migrations), Taskiq (workers), Biome (lint)
 - **Coverage target**: 90% minimum across all packages

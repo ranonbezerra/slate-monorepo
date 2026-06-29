@@ -1,6 +1,6 @@
-# DailyLoadout — Deployment Guide
+# Slate — Deployment Guide
 
-This document covers deploying DailyLoadout beyond local development. All examples assume you have a working local setup first (`make up && make api`).
+This document covers deploying Slate beyond local development. All examples assume you have a working local setup first (`make up && make api`).
 
 > **Going to production?** Follow the ordered [Pre-Launch Runbook](./PRELAUNCH.md) — the step-by-step checklist (register apps → `.env` → migrations → edge → backups → verify) that links back into the detailed sections here.
 
@@ -190,7 +190,7 @@ Create service files for persistent operation:
 ```ini
 # /etc/systemd/system/dailyloadout-api.service
 [Unit]
-Description=DailyLoadout API
+Description=Slate API
 After=network.target postgresql.service redis.service
 
 [Service]
@@ -207,7 +207,7 @@ WantedBy=multi-user.target
 ```ini
 # /etc/systemd/system/dailyloadout-worker.service
 [Unit]
-Description=DailyLoadout Taskiq Worker
+Description=Slate Taskiq Worker
 After=network.target redis.service
 
 [Service]

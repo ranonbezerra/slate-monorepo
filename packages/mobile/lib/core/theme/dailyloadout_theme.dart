@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// DailyLoadout brand color tokens.
+/// Slate brand color tokens.
 ///
 /// Mirrors `brand/BRAND.md` §14. Dark-first "Night Den": a midnight base
 /// with a coral spotlight and a violet secondary. Do not introduce ad-hoc
@@ -40,7 +40,7 @@ abstract final class DLColors {
   static const Color statusSetAside = textDim; // never red
 }
 
-/// DailyLoadout [ThemeData]. The app is dark-first; [dark] is the canonical
+/// Slate [ThemeData]. The app is dark-first; [dark] is the canonical
 /// theme.
 ///
 /// ## Fonts
@@ -57,7 +57,7 @@ abstract final class DLColors {
 ///    ```
 /// 2. Or bundle the .ttf files under `assets/fonts/` and declare the
 ///    `Outfit` / `Inter` / `JetBrains Mono` families in `pubspec.yaml`.
-abstract final class DailyLoadoutTheme {
+abstract final class SlateTheme {
   static const String displayFamily = 'Outfit';
   static const String bodyFamily = 'Inter';
   static const String monoFamily = 'JetBrains Mono';

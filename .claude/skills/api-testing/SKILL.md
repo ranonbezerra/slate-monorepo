@@ -1,9 +1,9 @@
 ---
 name: api-testing
-description: Load when writing unit tests, integration tests, fixing test failures, or improving test coverage for the DailyLoadout API.
+description: Load when writing unit tests, integration tests, fixing test failures, or improving test coverage for the Slate API.
 ---
 
-# API Testing — DailyLoadout
+# API Testing — Slate
 
 ## Commands
 

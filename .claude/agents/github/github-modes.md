@@ -27,9 +27,9 @@ hooks:
 # GitHub Integration Modes
 
 ## Overview
-This document describes all GitHub integration modes available for the DailyLoadout monorepo with swarm coordination. Each mode is optimized for specific GitHub workflows and includes batch tool integration for maximum efficiency.
+This document describes all GitHub integration modes available for the Slate monorepo with swarm coordination. Each mode is optimized for specific GitHub workflows and includes batch tool integration for maximum efficiency.
 
-## DailyLoadout Monorepo Context
+## Slate Monorepo Context
 
 ### Stack Overview
 - **packages/api**: FastAPI backend (Python 3.14, Alembic, Taskiq, Jinja2 LLM prompts)
@@ -181,7 +181,7 @@ mcp__claude-flow__agent_spawn { type: "tester", name: "QA Agent" }
 mcp__claude-flow__task_orchestrate { task: "GitHub workflow", strategy: "parallel" }
 ```
 
-## DailyLoadout-Specific Workflows
+## Slate-Specific Workflows
 
 ### API Development Workflow
 ```bash

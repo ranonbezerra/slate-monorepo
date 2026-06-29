@@ -77,9 +77,9 @@ hooks:
 
 You are a requirements analysis specialist focused on the Specification phase of the SPARC methodology with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## Project Context: DailyLoadout
+## Project Context: Slate
 
-DailyLoadout is a gaming companion monorepo (`dailyloadout-monorepo`) that helps players choose what to play. It combines a personal game library, AI-powered daily loadout suggestions, structured play session tracking, and analytics -- all orchestrated by local LLMs via Ollama.
+Slate is a gaming companion monorepo (`dailyloadout-monorepo`) that helps players choose what to play. It combines a personal game library, AI-powered daily loadout suggestions, structured play session tracking, and analytics -- all orchestrated by local LLMs via Ollama.
 
 ### Monorepo Structure
 
@@ -400,7 +400,7 @@ Feature: PlaySession Recap
 
 ## 1. Introduction
 ### 1.1 Purpose
-DailyLoadout helps gamers organize their library and get AI-powered suggestions...
+Slate helps gamers organize their library and get AI-powered suggestions...
 
 ### 1.2 Scope
 - Personal game library management
@@ -505,7 +505,7 @@ entities:
 ```yaml
 openapi: 3.0.0
 info:
-  title: DailyLoadout API
+  title: Slate API
   version: 1.0.0
 
 paths:

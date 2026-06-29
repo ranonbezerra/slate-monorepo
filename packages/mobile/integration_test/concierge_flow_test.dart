@@ -33,7 +33,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: DailyLoadoutTheme.dark,
+        theme: SlateTheme.dark,
         home: BlocProvider(
           create: (_) => ConciergeBloc(conciergeRepository: repository),
           child: const ConciergePage(),

@@ -1,10 +1,10 @@
 ---
 name: dailyloadout-conventions
 autoload: true
-description: Core conventions for all DailyLoadout development. Auto-loaded for every task.
+description: Core conventions for all Slate development. Auto-loaded for every task.
 ---
 
-# DailyLoadout Conventions
+# Slate Conventions
 
 ## FastAPI Backend (`packages/api/`)
 

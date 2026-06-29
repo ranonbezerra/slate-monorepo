@@ -1,4 +1,4 @@
-# DailyLoadout — Roadmap
+# Slate — Roadmap
 
 Execution plan organized in weekend-sized epics. Each epic ends in a **demonstrable state** — if the weekend runs out, descope the epic rather than ending in a broken halfway state.
 
@@ -42,7 +42,7 @@ Total: **10 weekends ≈ 2.5 months** for v1.0 (assuming 8–12 productive hours
 - [ ] `.env.example` complete (every env var from ARCHITECTURE.md §7)
 - [ ] `packages/api/pyproject.toml` with Poetry, Python 3.14, base deps (FastAPI, Pydantic v2, SQLAlchemy, asyncpg, alembic, arq, structlog, ruff, mypy, pytest, pytest-asyncio)
 - [ ] `packages/api/src/dailyloadout/main.py` with minimal app factory + `/health`
-- [ ] `packages/app/` initialized via `flutter create`, configured for iOS/Android. Renders "DailyLoadout WIP"
+- [ ] `packages/app/` initialized via `flutter create`, configured for iOS/Android. Renders "Slate WIP"
 - [ ] `packages/web/` initialized with Vite (Bun), React 19, TypeScript, Mantine v8. Renders empty layout on `localhost:3200`
 - [ ] GitHub Actions: three separate workflows (`ci-api.yml`, `ci-app.yml`, `ci-web.yml`) running lint + test on every PR
 - [ ] Issue templates (bug, feature, question)
@@ -407,7 +407,7 @@ When a user submits a wrap-up, `submit_wrap_up()` currently calls `extract_wrap_
 
 > **Stats queries use materialized aggregations.** For users with > 1000 play sessions, naïve aggregation per request hits Postgres hard. A nightly cron pre-computes `daily_user_stats` materialized view. Hot path reads from the view; cold path falls back to raw query. Same pattern used in production Freeler dashboards.
 
-This is the spot that connects DailyLoadout to Freeler narratively. A recruiter who reads both notices: *"this engineer applies the same performance pattern across different projects — not a one-off."*
+This is the spot that connects Slate to Freeler narratively. A recruiter who reads both notices: *"this engineer applies the same performance pattern across different projects — not a one-off."*
 
 ---
 
@@ -1088,7 +1088,7 @@ If at some point you feel you're pushing, these are the epics to defer to **v1.1
 
 ## Optional decisions you can still make
 
-1. **Weekly LinkedIn updates?** Could become a "Building DailyLoadout in public" series — visibility for each epic. More work, but valuable if you want growth.
+1. **Weekly LinkedIn updates?** Could become a "Building Slate in public" series — visibility for each epic. More work, but valuable if you want growth.
 
 2. **Private beta with friends during Epic 9?** Not required for the vitrine, but generates real feedback and testimonials for the README.
 

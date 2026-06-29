@@ -2,7 +2,7 @@ import 'package:app/core/theme/dailyloadout_theme.dart';
 import 'package:flutter/material.dart';
 
 /// Brand devices (BRAND.md §9) — reusable elements that make any screen feel
-/// like DailyLoadout.
+/// like Slate.
 ///
 /// **The one-coral rule:** use a SINGLE coral focal point per screen. A lit
 /// [DLSlot], the lit slot in a [DLLineup], and a [DLSpotlight] glow all count

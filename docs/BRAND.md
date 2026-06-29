@@ -1,4 +1,4 @@
-# DailyLoadout - Brand Standards
+# Slate - Brand Standards
 
 **Version:** 1.0 | **Direction:** Night Den x Coral | **Last updated:** 2026-06
 
@@ -11,14 +11,14 @@
 **Tagline:** *Less deciding. More playing.*
 **Voice line:** *What's the move?*
 
-DailyLoadout is the companion that knows your backlog and hands you the right game for tonight — then catches you up on where you left off, like a "previously on..." before the episode.
+Slate is the companion that knows your backlog and hands you the right game for tonight — then catches you up on where you left off, like a "previously on..." before the episode.
 
 **We are:** calm, decisive, warm, sharp, honest.
 **We are not:** gamified, guilt-inducing, military/tactical, loud, corporate.
 
 ### A deliberate non-military stance
 
-The product borrows one word from gaming's tactical vocabulary — **loadout** — because it's now universal across gaming. The dictionary roots are military, but the *brand* is not. DailyLoadout is **not a war room**: no camouflage, crosshairs/reticles, "operator / deploy / soldier" theatrics, or dog tags. That register excludes the exact person this is for — someone settling in at night to continue a story-driven game. What we keep from "loadout" is *a deliberate pick for the moment*; what we drop is everything that reads as combat or hierarchy. The feeling is a **good game-night host**, not a commander. The warm lexicon (§5) is the default; the tactical flavor survives only as an opt-in easter egg (see the TODO in §5).
+The product borrows one word from gaming's tactical vocabulary — **loadout** — because it's now universal across gaming. The dictionary roots are military, but the *brand* is not. Slate is **not a war room**: no camouflage, crosshairs/reticles, "operator / deploy / soldier" theatrics, or dog tags. That register excludes the exact person this is for — someone settling in at night to continue a story-driven game. What we keep from "loadout" is *a deliberate pick for the moment*; what we drop is everything that reads as combat or hierarchy. The feeling is a **good game-night host**, not a commander. The warm lexicon (§5) is the default; the tactical flavor survives only as an opt-in easter egg (see the TODO in §5).
 
 ---
 
@@ -243,7 +243,7 @@ Use in the root `README.md`:
 
 ```md
 <p align="center">
-  <img src="./docs/brand/readme-hero.png" alt="DailyLoadout" width="100%" />
+  <img src="./docs/brand/readme-hero.png" alt="Slate" width="100%" />
 </p>
 ```
 

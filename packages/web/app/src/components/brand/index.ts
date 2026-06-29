@@ -1,6 +1,6 @@
 /**
  * Brand devices (BRAND.md §9) — reusable elements that make any screen feel like
- * DailyLoadout.
+ * Slate.
  *
  * **The one-coral rule:** use a SINGLE coral focal point per screen. Coral is a
  * spotlight; more than one and nothing is lit. A `Slot lit`, the lit slot in a

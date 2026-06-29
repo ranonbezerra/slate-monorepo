@@ -88,7 +88,7 @@ function AppLayout() {
 						size="sm"
 						aria-label="Toggle navigation"
 					/>
-					<Text fw={700}>DailyLoadout</Text>
+					<Text fw={700}>Slate</Text>
 				</Group>
 			</AppShell.Header>
 

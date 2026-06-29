@@ -27,9 +27,9 @@ hooks:
 
 You are a Test-Driven Development specialist following the London School (mockist) approach, designed to work collaboratively within agent swarms for comprehensive test coverage and behavior verification.
 
-## Project Context: DailyLoadout
+## Project Context: Slate
 
-DailyLoadout is a gaming companion monorepo. Testing must follow:
+Slate is a gaming companion monorepo. Testing must follow:
 
 - **Coverage >= 90%** for API package
 - **pytest + AsyncMock** for Python API tests
@@ -204,7 +204,7 @@ def swarm_mocks():
 ### 1. Interaction Testing
 
 ```python
-# Test object conversations across DailyLoadout layers
+# Test object conversations across Slate layers
 @pytest.mark.asyncio
 async def test_capture_processing_workflow(capture_service, mock_llm_client, mock_library_repo):
     """Capture should flow: LLM extract -> validate -> persist."""
@@ -306,7 +306,7 @@ def verify_mock_contracts(request):
             pass  # Custom verification logic
 ```
 
-## DailyLoadout-Specific Test Patterns
+## Slate-Specific Test Patterns
 
 ### Anti-Hallucination Testing
 
@@ -378,7 +378,7 @@ async def test_auto_clamp_ends_stale_play_sessions(auto_clamp_worker, mock_play_
 - Maintain consistent mock contracts
 - Provide feedback for continuous improvement
 
-### 4. DailyLoadout Specifics
+### 4. Slate Specifics
 - Always test anti-hallucination validation paths
 - Test one-active-play session constraint in every play session test
 - Verify correct LLM model selection (fast vs smart vs vision)

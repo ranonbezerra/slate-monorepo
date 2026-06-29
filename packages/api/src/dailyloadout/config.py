@@ -130,7 +130,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
-    smtp_from: str = "DailyLoadout <noreply@dailyloadout.local>"
+    smtp_from: str = "Slate <noreply@dailyloadout.local>"
 
     # ── Registration identity hygiene (anti-abuse) ───────────────────────
     # Disposable blocklist + MX/A DNS probe (FAILS OPEN, prod-only, short budget).

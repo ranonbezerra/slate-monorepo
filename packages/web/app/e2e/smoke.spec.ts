@@ -3,7 +3,7 @@ import { setupMockedApp } from "./fixtures";
 
 const SHOTS = "e2e/screenshots";
 
-test.describe("DailyLoadout web — smoke + UX capture", () => {
+test.describe("Slate web — smoke + UX capture", () => {
 	test("redirects unauthenticated users to login", async ({ page }) => {
 		// No token seeded and every call 401 → the guard should bounce to /login.
 		await page.route("**/v1/**", (r) =>

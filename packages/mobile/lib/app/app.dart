@@ -78,9 +78,9 @@ class _AppState extends State<App> {
         BlocProvider<ConciergeBloc>.value(value: widget.conciergeBloc),
       ],
       child: MaterialApp.router(
-        title: 'DailyLoadout',
-        theme: DailyLoadoutTheme.dark,
-        darkTheme: DailyLoadoutTheme.dark,
+        title: 'Slate',
+        theme: SlateTheme.dark,
+        darkTheme: SlateTheme.dark,
         themeMode: ThemeMode.dark,
         routerConfig: _router,
       ),

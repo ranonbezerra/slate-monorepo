@@ -1,6 +1,6 @@
-# DailyLoadout — Pre-Launch Runbook
+# Slate — Pre-Launch Runbook
 
-The ordered checklist to take DailyLoadout from "merged on `main`" to "live on a
+The ordered checklist to take Slate from "merged on `main`" to "live on a
 VPS". This is the **what to do, in order**; [DEPLOYMENT.md](./DEPLOYMENT.md) is
 the **how** for each piece (linked per step). Security/anti-abuse hardening is
 already shipped — this runbook is the operational wiring that activates it.

@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────
-# DailyLoadout — Root Makefile
+# Slate — Root Makefile
 # All commands run from the monorepo root.
 # ─────────────────────────────────────────────
 
@@ -319,7 +319,7 @@ pre-commit: ## Run pre-commit hooks on all files
 .PHONY: quality
 quality: ## Run ALL quality gates (pre-commit + api + web + mobile)
 	@echo "\n\033[1;35m╔══════════════════════════════════════╗\033[0m"
-	@echo "\033[1;35m║     DailyLoadout — Quality Gate      ║\033[0m"
+	@echo "\033[1;35m║     Slate — Quality Gate      ║\033[0m"
 	@echo "\033[1;35m╚══════════════════════════════════════╝\033[0m"
 	$(call check,Pre-commit hooks,  pre-commit run --all-files)
 	@$(MAKE) quality-api

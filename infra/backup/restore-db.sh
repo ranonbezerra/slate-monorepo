@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# DailyLoadout — restore a gzipped pg_dump into the running Postgres container.
+# Slate — restore a gzipped pg_dump into the running Postgres container.
 #
 # A backup you've never restored is not a backup. Test this against a scratch DB
 # periodically. Usage:

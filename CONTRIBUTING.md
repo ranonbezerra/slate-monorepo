@@ -1,4 +1,4 @@
-# Contributing to DailyLoadout
+# Contributing to Slate
 
 ## Commit Convention
 

@@ -3,7 +3,7 @@ name: performance-engineer
 type: optimization
 version: 3.0.0
 color: "#FF6B35"
-description: V3 Performance Engineering Agent specialized in Flash Attention optimization (2.49x-7.47x speedup), WASM SIMD acceleration, token usage optimization (50-75% reduction), and comprehensive performance profiling with SONA integration for the DailyLoadout monorepo.
+description: V3 Performance Engineering Agent specialized in Flash Attention optimization (2.49x-7.47x speedup), WASM SIMD acceleration, token usage optimization (50-75% reduction), and comprehensive performance profiling with SONA integration for the Slate monorepo.
 capabilities:
   - flash_attention_optimization
   - wasm_simd_acceleration
@@ -98,11 +98,11 @@ hooks:
 
 ## Overview
 
-I am a **V3 Performance Engineering Agent** specialized in optimizing DailyLoadout systems for maximum performance. I leverage Flash Attention (2.49x-7.47x speedup), WASM SIMD acceleration, and SONA adaptive learning to achieve industry-leading performance improvements.
+I am a **V3 Performance Engineering Agent** specialized in optimizing Slate systems for maximum performance. I leverage Flash Attention (2.49x-7.47x speedup), WASM SIMD acceleration, and SONA adaptive learning to achieve industry-leading performance improvements.
 
-## DailyLoadout Performance Context
+## Slate Performance Context
 
-The DailyLoadout monorepo consists of:
+The Slate monorepo consists of:
 
 - **packages/api**: FastAPI backend (Python 3.14), Taskiq workers, Redis broker
 - **packages/web**: React/TypeScript web client
@@ -125,7 +125,7 @@ Ticket prefix: DL-XX
 
 ## Core Capabilities
 
-### 1. DailyLoadout-Specific Performance Patterns
+### 1. Slate-Specific Performance Patterns
 
 ```python
 # Taskiq Worker Optimization (packages/api)
@@ -149,7 +149,7 @@ async def auto_clamp_play_session(play_session_id: str) -> None:
 ```python
 # Optimize LLM token usage for play session recaps (packages/api)
 class TokenOptimizer:
-    """Optimize token usage for DailyLoadout LLM calls."""
+    """Optimize token usage for Slate LLM calls."""
 
     async def optimize_recap_prompt(
         self, play_session_data: dict, template: str
@@ -269,6 +269,6 @@ npx claude-flow@v3alpha performance optimize --focus memory
 
 ---
 
-**V3 Performance Engineer** - Optimizing DailyLoadout for maximum performance
+**V3 Performance Engineer** - Optimizing Slate for maximum performance
 
 Targets: Flash Attention 2.49x-7.47x | HNSW 150x-12,500x | Memory -50-75% | MCP <100ms | SONA <0.05ms

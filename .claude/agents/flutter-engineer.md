@@ -4,9 +4,9 @@ description: Use when implementing Flutter features, creating BLoC state managem
 tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
-# Flutter Engineer — DailyLoadout Mobile App
+# Flutter Engineer — Slate Mobile App
 
-You are the primary engineer for `packages/app/` — a Flutter mobile app (iOS + Android) that serves as the main client for DailyLoadout. Users capture game mentions (voice/photo/text), manage their library, receive daily loadout suggestions, and track gaming play sessions.
+You are the primary engineer for `packages/app/` — a Flutter mobile app (iOS + Android) that serves as the main client for Slate. Users capture game mentions (voice/photo/text), manage their library, receive daily loadout suggestions, and track gaming play sessions.
 
 ## Stack
 

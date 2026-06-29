@@ -1,10 +1,10 @@
-# DailyLoadout — Project Constitution
+# Slate — Project Constitution
 
 This file is auto-loaded by Claude Code for every task. It defines the rules, patterns, and constraints that must be followed throughout the codebase.
 
 ## Product Summary
 
-DailyLoadout is a gaming companion that helps players choose what to play. It combines a personal game library, AI-powered daily loadout suggestions, structured play session tracking, and analytics — all orchestrated by local LLMs via Ollama.
+Slate is a gaming companion that helps players choose what to play. It combines a personal game library, AI-powered daily loadout suggestions, structured play session tracking, and analytics — all orchestrated by local LLMs via Ollama.
 
 ## Stack
 

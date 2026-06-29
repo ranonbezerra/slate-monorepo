@@ -1,4 +1,4 @@
-"""FastAPI dependencies for DailyLoadout.
+"""FastAPI dependencies for Slate.
 
 Re-exports all dependency aliases so existing imports keep working:
 

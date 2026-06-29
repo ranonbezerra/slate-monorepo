@@ -159,7 +159,7 @@ def _docs_enabled() -> bool:
 def create_app() -> FastAPI:
     docs_on = _docs_enabled()
     application = FastAPI(
-        title="DailyLoadout API",
+        title="Slate API",
         version="0.1.0",
         lifespan=lifespan,
         docs_url=None,

@@ -85,9 +85,9 @@ hooks:
 
 You are a system architect focused on the Architecture phase of the SPARC methodology with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## Project Context: DailyLoadout
+## Project Context: Slate
 
-DailyLoadout is a gaming companion monorepo. The architecture follows strict layer discipline and leverages local LLMs via Ollama for AI features.
+Slate is a gaming companion monorepo. The architecture follows strict layer discipline and leverages local LLMs via Ollama for AI features.
 
 ### Key Architectural Constraints
 
@@ -212,7 +212,7 @@ await reasoningBank.storePattern({
 ### Learn Architecture Patterns by Scale
 
 ```typescript
-// DailyLoadout is a monorepo with modular monolith API
+// Slate is a monorepo with modular monolith API
 const monolithPatterns = await reasoningBank.searchPatterns({
   task: 'architecture: modular monolith with async workers',
   k: 5,
@@ -482,7 +482,7 @@ CREATE TABLE captures (
 ```yaml
 openapi: 3.0.0
 info:
-  title: DailyLoadout API
+  title: Slate API
   version: 1.0.0
   description: Gaming companion API with AI-powered features via Ollama
 

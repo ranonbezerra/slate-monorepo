@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "dailyloadout"
 version = "0.1.0"
-description = "DailyLoadout API — gaming session planner powered by local LLMs"
+description = "Slate API — gaming session planner powered by local LLMs"
 authors = ["Ranon Bezerra"]
 license = "AGPL-3.0-or-later"
 packages = [{ include = "dailyloadout", from = "src" }]

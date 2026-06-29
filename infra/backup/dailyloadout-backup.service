@@ -1,5 +1,5 @@
 [Unit]
-Description=DailyLoadout Postgres backup (pg_dump -> gzip -> off-host)
+Description=Slate Postgres backup (pg_dump -> gzip -> off-host)
 After=docker.service
 Requires=docker.service
 

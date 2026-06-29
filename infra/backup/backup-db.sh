@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# DailyLoadout — Postgres backup to a gzipped dump + optional off-host copy.
+# Slate — Postgres backup to a gzipped dump + optional off-host copy.
 #
 # Single-VPS deployments have ONE disk: a failure, an accidental `docker volume
 # rm`, or a bad `alembic downgrade` loses the entire database. This script takes

@@ -1,4 +1,4 @@
-"""Shared test fixtures for DailyLoadout API tests.
+"""Shared test fixtures for Slate API tests.
 
 Uses an in-memory SQLite database (via aiosqlite) so that tests never
 depend on a running PostgreSQL instance.

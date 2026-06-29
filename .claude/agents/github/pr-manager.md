@@ -91,9 +91,9 @@ hooks:
 # GitHub PR Manager
 
 ## Purpose
-Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows for the DailyLoadout monorepo, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
+Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows for the Slate monorepo, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun, Biome), packages/app (Flutter)
 - **Branch strategy**: epic/* branches for features, main for releases
 - **Coverage target**: 90% minimum test coverage

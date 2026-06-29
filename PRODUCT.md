@@ -1,4 +1,4 @@
-# DailyLoadout — Product Document
+# Slate — Product Document
 
 **Version:** 2.0 (showcase / open-source)
 **Last updated:** 2026-05
@@ -32,9 +32,9 @@ This is an adapted version of the original product. The product premise is ident
 
 ## 1. Vision and purpose
 
-DailyLoadout is an app to manage your gaming backlog. The problem is familiar: you own 60 games, you play 2, you forget the others. Every time you turn on the console, you spend half the session deciding between "continue that RPG" and "try something new" — and indecision consumes the gaming time. Worse: when you return to a game after 3 weeks, you've forgotten where you stopped, what the quest was, what build you were running.
+Slate is an app to manage your gaming backlog. The problem is familiar: you own 60 games, you play 2, you forget the others. Every time you turn on the console, you spend half the session deciding between "continue that RPG" and "try something new" — and indecision consumes the gaming time. Worse: when you return to a game after 3 weeks, you've forgotten where you stopped, what the quest was, what build you were running.
 
-DailyLoadout solves this with three core ideas:
+Slate solves this with three core ideas:
 
 1. **Frictionless capture.** Voice, photo, free text. You don't type "Hollow Knight, Switch, bought 2022, metroidvania, ~30h." You say "got Hollow Knight" and the app fills the rest.
 
@@ -44,7 +44,7 @@ DailyLoadout solves this with three core ideas:
 
 ### Central thesis
 
-The gaming backlog is not an organization problem — it's a **decision** problem. Apps like HowLongToBeat or Backloggd solve cataloging. DailyLoadout solves "what should I play right now, and where do I pick up from?"
+The gaming backlog is not an organization problem — it's a **decision** problem. Apps like HowLongToBeat or Backloggd solve cataloging. Slate solves "what should I play right now, and where do I pick up from?"
 
 ### Product metaphor
 
@@ -54,7 +54,7 @@ Each gaming session is a **play session**. The app is your **tactical operator**
 
 - **HowLongToBeat** — catalog reference, but static.
 - **Backloggd / Grouvee** — social, but focused on post-game reviews.
-- **Anti-pattern: Steam, PSN, Nintendo Network** — all have data, none act on it. DailyLoadout is the **opposite of stats display**; it's a decision layer.
+- **Anti-pattern: Steam, PSN, Nintendo Network** — all have data, none act on it. Slate is the **opposite of stats display**; it's a decision layer.
 
 ### Competitive differentiators
 

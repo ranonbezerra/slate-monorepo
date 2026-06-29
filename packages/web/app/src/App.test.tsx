@@ -99,14 +99,14 @@ describe("App - unauthenticated routes", () => {
 
 	it("renders LoginPage at the /login route", () => {
 		renderApp(["/login"]);
-		expect(screen.getByText("Sign in to DailyLoadout")).toBeInTheDocument();
+		expect(screen.getByText("Sign in to Slate")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
 	});
 
 	it("renders RegisterPage at the /register route", () => {
 		renderApp(["/register"]);
 		expect(screen.getByText("Create an account")).toBeInTheDocument();
-		expect(screen.getByText("Join DailyLoadout")).toBeInTheDocument();
+		expect(screen.getByText("Join Slate")).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /create account/i })).toBeInTheDocument();
 	});
 });
@@ -121,9 +121,9 @@ describe("App - authenticated layout", () => {
 		expect(await screen.findByText("PlayPage")).toBeInTheDocument();
 	});
 
-	it("displays the DailyLoadout brand text in the navbar", () => {
+	it("displays the Slate brand text in the navbar", () => {
 		renderApp(["/play"]);
-		expect(screen.getByText("DailyLoadout")).toBeInTheDocument();
+		expect(screen.getByText("Slate")).toBeInTheDocument();
 	});
 
 	it("renders the primary nav links", () => {

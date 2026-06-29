@@ -1,6 +1,6 @@
 # /new-migration
 
-Create a new Alembic migration for the DailyLoadout API.
+Create a new Alembic migration for the Slate API.
 
 ## Usage
 ```

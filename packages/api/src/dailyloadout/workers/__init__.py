@@ -1,1 +1,1 @@
-"""Background workers for DailyLoadout."""
+"""Background workers for Slate."""

@@ -40,9 +40,9 @@ hooks:
 # Release Swarm - Intelligent Release Automation
 
 ## Overview
-Orchestrate complex software releases using AI swarms that handle everything from changelog generation to multi-platform deployment for the DailyLoadout monorepo.
+Orchestrate complex software releases using AI swarms that handle everything from changelog generation to multi-platform deployment for the Slate monorepo.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/app (Flutter)
 - **Tooling**: uv, bun, Alembic, Taskiq, Biome
 - **Coverage target**: 90% minimum

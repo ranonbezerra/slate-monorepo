@@ -1,6 +1,6 @@
-# DailyLoadout — Agents & Skills Guide
+# Slate — Agents & Skills Guide
 
-How Claude Code uses the artifacts in this `.claude/` directory to assist with DailyLoadout development.
+How Claude Code uses the artifacts in this `.claude/` directory to assist with Slate development.
 
 ## Architecture
 

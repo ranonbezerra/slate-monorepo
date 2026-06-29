@@ -36,7 +36,7 @@ hooks:
 ## Overview
 Coordinate AI swarms across multiple repositories, enabling organization-wide automation and intelligent cross-project collaboration.
 
-## DailyLoadout Context
+## Slate Context
 - **Primary monorepo**: ranonbezerra/dailyloadout-monorepo (packages/api, packages/web, packages/app)
 - **Stack**: FastAPI (Python 3.14), React+Mantine (Bun, Biome), Flutter
 - **Domain**: Library, PlaySessions, Loadouts, Captures

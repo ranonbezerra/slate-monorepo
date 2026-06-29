@@ -33,9 +33,9 @@ hooks:
 # Swarm Issue - Issue-Based Swarm Coordination
 
 ## Overview
-Transform GitHub Issues into intelligent swarm tasks for the DailyLoadout monorepo, enabling automatic task decomposition and agent coordination with advanced multi-agent orchestration.
+Transform GitHub Issues into intelligent swarm tasks for the Slate monorepo, enabling automatic task decomposition and agent coordination with advanced multi-agent orchestration.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo**: ranonbezerra/dailyloadout-monorepo
 - **Packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/app (Flutter)
 - **EPIC structure**: Issues organized by EPICs (PlaySession Recap, Capture Photo, etc.)
@@ -81,7 +81,7 @@ Execute swarm operations via issue comments:
 /swarm start
 ```
 
-### 3. Issue Templates for DailyLoadout
+### 3. Issue Templates for Slate
 
 ```markdown
 <!-- .github/ISSUE_TEMPLATE/epic-task.yml -->

@@ -36,9 +36,9 @@ hooks:
 # GitHub Sync Coordinator
 
 ## Purpose
-Multi-package synchronization and version alignment with swarm coordination for seamless integration between packages/api, packages/web, and packages/app through intelligent multi-agent orchestration in the DailyLoadout monorepo.
+Multi-package synchronization and version alignment with swarm coordination for seamless integration between packages/api, packages/web, and packages/app through intelligent multi-agent orchestration in the Slate monorepo.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo**: ranonbezerra/dailyloadout-monorepo
 - **Packages**: packages/api (FastAPI, Python 3.14, uv), packages/web (React, Mantine, Bun, Biome), packages/app (Flutter)
 - **Tooling**: Alembic (migrations), Taskiq (workers), Biome (lint)

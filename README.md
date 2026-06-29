@@ -1,6 +1,6 @@
-# DailyLoadout
+# Slate
 
-![DailyLoadout](./docs/brand/readme-hero.png)
+![Slate](./docs/brand/readme-hero.png)
 
 > *Less deciding. More playing.* A self-hosted gaming companion and production-AI systems showcase. Voice/photo/text capture, structured play session state, "previously on..." recaps before each session, and a 3-question daily loadout that picks one game for you.
 
@@ -15,7 +15,7 @@
 
 You own 60 games. You play 2. Every time you sit down, half the session is spent deciding what to play — and when you come back to a game after 3 weeks, you've forgotten where you stopped.
 
-DailyLoadout treats the backlog as a **decision problem**, not a cataloging problem. Three ideas:
+Slate treats the backlog as a **decision problem**, not a cataloging problem. Three ideas:
 
 1. **Frictionless capture.** Speak "got Hollow Knight on Switch" and the app fills the metadata. No forms.
 2. **PlaySession recaps.** Before each session, the app generates a "previously on..." paragraph from your past wrap-ups — like a TV show recap.
@@ -27,7 +27,7 @@ No streaks. No "X days without playing" guilt. Dropping a game is a legitimate d
 
 ## Why This Repo Exists
 
-DailyLoadout is a production-style AI application wrapped in a real product I use: a full-stack, self-hosted system for turning messy player input into structured state, recommendations, and play session recaps. It runs entirely on your own hardware and uses **local LLMs via Ollama** instead of requiring cloud APIs.
+Slate is a production-style AI application wrapped in a real product I use: a full-stack, self-hosted system for turning messy player input into structured state, recommendations, and play session recaps. It runs entirely on your own hardware and uses **local LLMs via Ollama** instead of requiring cloud APIs.
 
 This is not a prompt demo. The interesting parts are the reliability boundaries around probabilistic systems:
 
@@ -139,7 +139,7 @@ Detailed architecture in [ARCHITECTURE.md](./ARCHITECTURE.md).
 
 ## Self-hosting
 
-The Docker Compose setup is the recommended way to run DailyLoadout. For deploying to a VPS or PaaS, see [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) (Fly.io, Railway, Hetzner).
+The Docker Compose setup is the recommended way to run Slate. For deploying to a VPS or PaaS, see [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) (Fly.io, Railway, Hetzner).
 
 For Ollama model configuration and hardware requirements, see [docs/OLLAMA.md](./docs/OLLAMA.md).
 

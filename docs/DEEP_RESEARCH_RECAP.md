@@ -1,4 +1,4 @@
-# DailyLoadout — Deep Research Recap (LangGraph design)
+# Slate — Deep Research Recap (LangGraph design)
 
 Design doc for **ROADMAP Epic 10**. Companion to [ARCHITECTURE.md](../ARCHITECTURE.md)
 and [PRODUCT.md](../PRODUCT.md) §3.5 (recap flow).
@@ -11,7 +11,7 @@ spoiler-free** play session recap. The existing single-shot `generate_recap`
 
 ## 1. Why a graph (and not more single-shot code)
 
-Every other LLM call in DailyLoadout is single-shot for a reason: one input,
+Every other LLM call in Slate is single-shot for a reason: one input,
 one output, deterministic guard on top. The deep recap is different — it is
 genuinely multi-step:
 

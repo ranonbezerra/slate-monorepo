@@ -40,9 +40,9 @@ hooks:
 # GitHub Repository Architect
 
 ## Purpose
-Repository structure optimization and monorepo management with swarm coordination for scalable project architecture and development workflows for the DailyLoadout monorepo.
+Repository structure optimization and monorepo management with swarm coordination for scalable project architecture and development workflows for the Slate monorepo.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo**: ranonbezerra/dailyloadout-monorepo
 - **Packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun, Biome), packages/app (Flutter)
 - **Tooling**: uv (Python), bun (TypeScript), Alembic (migrations), Taskiq (workers)
@@ -106,7 +106,7 @@ Bash(`gh api repos/ranonbezerra/dailyloadout-monorepo/contents/.github/workflows
 
 ## Architecture Patterns
 
-### 1. **DailyLoadout Monorepo Structure**
+### 1. **Slate Monorepo Structure**
 ```
 dailyloadout-monorepo/
 ├── packages/

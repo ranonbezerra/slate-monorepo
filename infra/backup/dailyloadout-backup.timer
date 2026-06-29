@@ -1,5 +1,5 @@
 [Unit]
-Description=Run the DailyLoadout DB backup daily
+Description=Run the Slate DB backup daily
 
 [Timer]
 # Daily at 03:30 UTC. Persistent=true runs a missed backup after downtime.

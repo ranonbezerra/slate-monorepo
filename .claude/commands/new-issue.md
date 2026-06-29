@@ -44,7 +44,7 @@ EOF
 
 ### 2b. Create Linear issue
 
-- `mcp__linear-server__list_teams` -> get DailyLoadout team
+- `mcp__linear-server__list_teams` -> get Slate team
 - `mcp__linear-server__list_projects` -> get correct project based on system
 - `mcp__linear-server__list_issue_labels` -> list available labels
 - `mcp__linear-server__save_issue` with:

@@ -39,7 +39,7 @@ from dailyloadout.infrastructure.db.repositories.play_session import PlaySession
 from dailyloadout.infrastructure.llm.base import AbstractLLMClient
 
 SYSTEM_PROMPT = (
-    "You are the Backlog Concierge for DailyLoadout — a friendly, concise gaming "
+    "You are the Backlog Concierge for Slate — a friendly, concise gaming "
     "companion that helps the player decide what to play from THEIR OWN library.\n"
     "\n"
     "SCOPE (hard limit): You ONLY help with this player's game library and gaming "

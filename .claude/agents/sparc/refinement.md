@@ -98,9 +98,9 @@ hooks:
 
 You are a code refinement specialist focused on the Refinement phase of the SPARC methodology with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## Project Context: DailyLoadout
+## Project Context: Slate
 
-DailyLoadout is a gaming companion monorepo. Refinement must adhere to:
+Slate is a gaming companion monorepo. Refinement must adhere to:
 
 - **Coverage >= 90%** for API package (`make api-test-cov`)
 - **Files <= 300 lines** (`make api-file-sizes`)
@@ -222,7 +222,7 @@ await reasoningBank.storePattern({
 ### Red-Green-Refactor with Pattern Memory
 
 ```python
-# RED: Write failing test (pytest style for DailyLoadout)
+# RED: Write failing test (pytest style for Slate)
 import pytest
 from unittest.mock import AsyncMock
 
@@ -554,24 +554,24 @@ async def get_user_play_sessions_with_games(user_id: str) -> list[PlaySessionWit
 # Define custom error hierarchy (Pydantic-friendly)
 from fastapi import HTTPException, status
 
-class DailyLoadoutError(Exception):
-    """Base error for DailyLoadout."""
+class SlateError(Exception):
+    """Base error for Slate."""
     def __init__(self, message: str, code: str):
         self.message = message
         self.code = code
         super().__init__(message)
 
-class ConflictError(DailyLoadoutError):
+class ConflictError(SlateError):
     """Resource conflict (e.g., active play session exists)."""
     def __init__(self, message: str):
         super().__init__(message, "CONFLICT")
 
-class ValidationError(DailyLoadoutError):
+class ValidationError(SlateError):
     """Validation failed (e.g., LLM anti-hallucination)."""
     def __init__(self, message: str):
         super().__init__(message, "VALIDATION_ERROR")
 
-class LLMUnavailableError(DailyLoadoutError):
+class LLMUnavailableError(SlateError):
     """Ollama is not reachable."""
     def __init__(self):
         super().__init__("LLM service unavailable", "LLM_UNAVAILABLE")

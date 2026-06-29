@@ -1,12 +1,12 @@
-# DailyLoadout — Ollama Configuration
+# Slate — Ollama Configuration
 
-DailyLoadout uses [Ollama](https://ollama.com) for all LLM inference. This document covers model selection, hardware requirements, and tuning.
+Slate uses [Ollama](https://ollama.com) for all LLM inference. This document covers model selection, hardware requirements, and tuning.
 
 ---
 
 ## Model roles
 
-DailyLoadout uses three model slots, configured via environment variables:
+Slate uses three model slots, configured via environment variables:
 
 | Slot | Default | Used for | Config var |
 | --- | --- | --- | --- |
@@ -185,7 +185,7 @@ The `base` model is recommended for most setups. Use `small` if transcription ac
 
 ## LLM provider fallback
 
-DailyLoadout supports an alternative LLM provider via `LLM_PROVIDER`:
+Slate supports an alternative LLM provider via `LLM_PROVIDER`:
 
 | Value | Backend | Requires |
 | --- | --- | --- |

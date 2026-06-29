@@ -1,6 +1,6 @@
 # /new-domain
 
-Create the full structure for a new domain in the DailyLoadout API: router + service + schemas + repository + model + deps + tests.
+Create the full structure for a new domain in the Slate API: router + service + schemas + repository + model + deps + tests.
 
 ## Usage
 ```

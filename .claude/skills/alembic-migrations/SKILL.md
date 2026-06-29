@@ -3,7 +3,7 @@ name: alembic-migrations
 description: Load when creating or modifying database migrations, designing schema, adding indexes, or working with PostgreSQL-specific features.
 ---
 
-# Alembic Migrations — DailyLoadout
+# Alembic Migrations — Slate
 
 ## Commands
 

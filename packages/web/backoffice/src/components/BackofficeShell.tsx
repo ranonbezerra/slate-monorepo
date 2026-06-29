@@ -70,7 +70,7 @@ export function BackofficeShell({ children }: { children: ReactNode }) {
 								BACKOFFICE
 							</Text>
 							<Text size="xs" c="dimmed">
-								DailyLoadout
+								Slate
 							</Text>
 						</Group>
 						<Badge color="violet" variant="light" size="xs" radius="sm">

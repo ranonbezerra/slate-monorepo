@@ -25,7 +25,7 @@ void main() {
 
   Widget buildSubject() {
     return MaterialApp(
-      theme: DailyLoadoutTheme.dark,
+      theme: SlateTheme.dark,
       home: BlocProvider(
         create: (_) => ConciergeBloc(conciergeRepository: repository),
         child: const ConciergePage(),

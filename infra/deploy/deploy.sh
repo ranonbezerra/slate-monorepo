@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# DailyLoadout — migration-gated deploy (run ON the VPS, invoked by CD over SSH).
+# Slate — migration-gated deploy (run ON the VPS, invoked by CD over SSH).
 #
 # The rule: try the migrations FIRST; if they fail, abort the deploy and keep the
 # previous version serving. Order is the gate — migrations run BEFORE the service

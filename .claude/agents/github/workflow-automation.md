@@ -93,9 +93,9 @@ hooks:
 # Workflow Automation - GitHub Actions Integration
 
 ## Overview
-Integrate AI swarms with GitHub Actions to create intelligent, self-organizing CI/CD pipelines for the DailyLoadout monorepo that adapt to the codebase through advanced multi-agent coordination and automation, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
+Integrate AI swarms with GitHub Actions to create intelligent, self-organizing CI/CD pipelines for the Slate monorepo that adapt to the codebase through advanced multi-agent coordination and automation, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo**: ranonbezerra/dailyloadout-monorepo
 - **Packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun, Biome), packages/app (Flutter)
 - **Tooling**: uv (Python), bun (TypeScript), Alembic (migrations), Taskiq (workers), Biome (lint)
@@ -134,10 +134,10 @@ const failedWorkflows = await reasoningBank.searchPatterns({
 
 ## Core Features
 
-### 1. Swarm-Powered Actions for DailyLoadout
+### 1. Swarm-Powered Actions for Slate
 ```yaml
 # .github/workflows/swarm-ci.yml
-name: DailyLoadout CI with Swarms
+name: Slate CI with Swarms
 on: [push, pull_request]
 
 jobs:
@@ -215,10 +215,10 @@ npx claude-flow@v3alpha actions generate-workflow \
 
 ## Workflow Templates
 
-### DailyLoadout CI/CD Pipeline
+### Slate CI/CD Pipeline
 ```yaml
 # .github/workflows/dailyloadout-ci.yml
-name: DailyLoadout CI/CD
+name: Slate CI/CD
 on:
   push:
     branches: [main, 'epic/*']
@@ -283,7 +283,7 @@ jobs:
 ### Adaptive Security Scanning
 ```yaml
 # .github/workflows/security-scan.yml
-name: DailyLoadout Security Scan
+name: Slate Security Scan
 on:
   schedule:
     - cron: '0 0 * * *'

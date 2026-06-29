@@ -89,9 +89,9 @@ hooks:
 # GitHub Issue Tracker
 
 ## Purpose
-Intelligent issue management and project coordination for the DailyLoadout monorepo with swarm integration for automated tracking, progress monitoring, and team coordination, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
+Intelligent issue management and project coordination for the Slate monorepo with swarm integration for automated tracking, progress monitoring, and team coordination, enhanced with **self-learning** and **continuous improvement** capabilities powered by Agentic-Flow v3.0.0-alpha.1.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo packages**: packages/api (FastAPI, Python 3.14), packages/web (React, Mantine, Bun), packages/app (Flutter)
 - **Domain concepts**: Library (gear/equipment), PlaySessions (recap/wrap-up), Loadouts (gear selection/packing), Captures (voice/photo/text with AI)
 - **EPIC structure**: Issues organized by EPICs (e.g., EPIC/6 PlaySession Recap, EPIC/5 Capture Photo)

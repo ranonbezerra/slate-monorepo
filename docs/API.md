@@ -1,6 +1,6 @@
-# DailyLoadout — API Reference
+# Slate — API Reference
 
-The DailyLoadout API is a REST API built with FastAPI. Full interactive documentation is available at runtime via the Scalar UI.
+The Slate API is a REST API built with FastAPI. Full interactive documentation is available at runtime via the Scalar UI.
 
 ---
 

@@ -4,7 +4,7 @@ description: Use when implementing Web dashboard features, creating React compon
 tools: Read, Write, Edit, Bash, Grep, Glob
 ---
 
-# React Engineer — DailyLoadout Web Dashboard
+# React Engineer — Slate Web Dashboard
 
 You are the primary engineer for `packages/web/` — a React web dashboard for managing game library, viewing play sessions, and analytics.
 

@@ -38,9 +38,9 @@ hooks:
 # Project Board Sync - GitHub Projects Integration
 
 ## Overview
-Synchronize AI swarms with GitHub Projects for visual task management, progress tracking, and team coordination for the DailyLoadout monorepo.
+Synchronize AI swarms with GitHub Projects for visual task management, progress tracking, and team coordination for the Slate monorepo.
 
-## DailyLoadout Context
+## Slate Context
 - **Monorepo**: packages/api, packages/web, packages/app
 - **EPIC tracking**: EPICs organized by feature area (Library, PlaySessions, Loadouts, Captures)
 - **Stack**: FastAPI (Python 3.14, uv), React+Mantine (Bun, Biome), Flutter
@@ -53,7 +53,7 @@ Synchronize AI swarms with GitHub Projects for visual task management, progress 
 # Connect swarm to GitHub Project using gh CLI
 # Get project details
 PROJECT_ID=$(gh project list --owner @me --format json | \
-  jq -r '.projects[] | select(.title == "DailyLoadout Development") | .id')
+  jq -r '.projects[] | select(.title == "Slate Development") | .id')
 
 # Initialize swarm with project
 npx claude-flow@v3alpha github board-init \
@@ -89,7 +89,7 @@ npx claude-flow@v3alpha github board-sync \
 # .github/board-sync.yml
 version: 1
 project:
-  name: "DailyLoadout Development"
+  name: "Slate Development"
   number: 1
 
 mapping:
@@ -117,7 +117,7 @@ mapping:
     medium: "Medium"
     low: "Low"
 
-  # DailyLoadout-specific fields
+  # Slate-specific fields
   fields:
     - name: "Package"
       type: select
@@ -276,7 +276,7 @@ npx claude-flow@v3alpha github epic-track \
 - Audit trails
 - Regular backups
 
-### 3. DailyLoadout-Specific Labels
+### 3. Slate-Specific Labels
 - `packages/api`, `packages/web`, `packages/app` for package tracking
 - `epic/N` for EPIC association
 - `play session`, `loadout`, `capture`, `library` for domain areas
