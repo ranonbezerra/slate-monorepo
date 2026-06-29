@@ -200,6 +200,58 @@ def decode_password_reset_token(token: str) -> tuple[str, int]:
 
 
 # ---------------------------------------------------------------------------
+# MFA challenge tokens (issued after password check, before the 2nd factor)
+# ---------------------------------------------------------------------------
+_MFA_CHALLENGE_PURPOSE = "mfa_pending"
+
+
+def create_mfa_challenge_token(public_id: str, token_version: int) -> str:
+    """Create a short-lived token proving "password OK, awaiting second factor".
+
+    Purpose-scoped (``purpose="mfa_pending"``) and bound to the user's
+    ``token_version`` (a password change / logout-everywhere invalidates a
+    pending challenge). It carries no session authority on its own — it is only
+    accepted by the MFA-login endpoint to exchange a valid code for real tokens.
+    """
+    now = datetime.now(UTC)
+    expire = now + timedelta(minutes=settings.mfa_challenge_ttl_minutes)
+    payload = {
+        "sub": public_id,
+        "tv": token_version,
+        "purpose": _MFA_CHALLENGE_PURPOSE,
+        "exp": expire,
+        "iat": now,
+    }
+    return str(jwt.encode(payload, settings.secret_key, algorithm=_ALGORITHM))
+
+
+def decode_mfa_challenge_token(token: str) -> tuple[str, int]:
+    """Decode an MFA-challenge *token* and return ``(subject_public_id, tv)``.
+
+    Raises:
+        ValueError: if the token is invalid, expired, not purpose-scoped to the
+            MFA challenge, or missing a well-formed subject / ``tv`` claim.
+    """
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[_ALGORITHM])
+    except PyJWTError as exc:
+        raise ValueError("Invalid or expired MFA challenge") from exc
+
+    if payload.get("purpose") != _MFA_CHALLENGE_PURPOSE:
+        raise ValueError("Invalid or expired MFA challenge")
+
+    subject = payload.get("sub")
+    if not isinstance(subject, str) or not subject:
+        raise ValueError("Invalid or expired MFA challenge")
+
+    token_version = payload.get("tv")
+    if not isinstance(token_version, int) or isinstance(token_version, bool):
+        raise ValueError("Invalid or expired MFA challenge")
+
+    return subject, token_version
+
+
+# ---------------------------------------------------------------------------
 # Refresh tokens
 # ---------------------------------------------------------------------------
 def generate_refresh_token() -> str:
@@ -218,9 +270,11 @@ __all__ = [
     "PyJWTError",
     "create_access_token",
     "create_email_verification_token",
+    "create_mfa_challenge_token",
     "create_password_reset_token",
     "decode_access_token",
     "decode_email_verification_token",
+    "decode_mfa_challenge_token",
     "decode_password_reset_token",
     "generate_refresh_token",
     "hash_password",
