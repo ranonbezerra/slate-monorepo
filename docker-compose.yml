@@ -101,7 +101,7 @@ services:
       context: ./packages/api
       dockerfile: Dockerfile
     container_name: dl-taskiq-worker
-    command: ["taskiq", "worker", "dailyloadout.infrastructure.tasks.debrief_extraction:broker"]
+    command: ["taskiq", "worker", "dailyloadout.infrastructure.tasks.wrap_up_extraction:broker"]
     # App settings (SECRET_KEY, IGDB, Ollama, …) come from the API env file.
     env_file: ./packages/api/.env
     # DB/Redis connection strings are built here from the SINGLE source of truth
