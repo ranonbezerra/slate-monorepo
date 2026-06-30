@@ -36,8 +36,10 @@ async def _main(real: bool, strict: bool) -> int:
     if real:
         from slate.config import settings
         from slate.infrastructure.llm.factory import get_llm_client
+        from slate.infrastructure.llm.traced import TracedLLMClient
 
-        llm = get_llm_client(settings)
+        base = get_llm_client(settings)
+        llm = TracedLLMClient(base) if settings.tracing_enabled else base
         report = await run_eval(llm, golden_cases(), LLMJudge(llm))
     else:
         llm = DummyLLMClient()
