@@ -98,6 +98,28 @@ class TestChecks:
         [result] = run_checks("Welcome back! You head to Watson now.", case)
         assert result.passed and result.score == pytest.approx(1.0)
 
+    def test_grounding_ignores_sentence_initial_adverb(self) -> None:
+        # Regression: "Carefully" leading a sentence used to count as a proper noun
+        # and sink grounding to 0.00. It must be treated as boilerplate now.
+        case = EvalCase(
+            id="x", task="recap", inputs={}, reference={"context": "Watson"}, checks=["grounding"]
+        )
+        [result] = run_checks("Carefully make your way back toward Watson.", case)
+        assert result.passed and result.score == pytest.approx(1.0)
+
+    def test_grounding_keeps_context_proper_noun_at_note_start(self) -> None:
+        # The context is NOT sentence-initial-lowercased, so a note that *starts*
+        # with the entity ('Watson is...') still grounds an output that names it.
+        case = EvalCase(
+            id="x",
+            task="recap",
+            inputs={},
+            reference={"context": "Watson is where you left off"},
+            checks=["grounding"],
+        )
+        [result] = run_checks("you head back to Watson", case)
+        assert result.passed and result.score == pytest.approx(1.0)
+
     def test_spoiler_free_catches_forbidden_term(self) -> None:
         case = EvalCase(
             id="x",

@@ -103,8 +103,22 @@ def _mentioned(term: str, text_lower: str) -> bool:
     return re.search(rf"\b{re.escape(_singular(term))}s?\b", text_lower) is not None
 
 
-def _interesting(text: str) -> set[str]:
-    """Singularised proper-noun-ish tokens in *text*, minus boilerplate stopwords."""
+# Lowercase the first letter-led word of each line/sentence — it is capitalised by
+# grammar, not because it's a proper noun ('Carefully', 'Welcome', bullet '- You').
+# Catches the whole class instead of whack-a-mole stopwords. Applied to the OUTPUT
+# only: the context keeps all caps, so a real entity that merely *starts* a note is
+# not lost (which would falsely sink the overlap).
+_SENTENCE_START_RE = re.compile(r"""(^|[.!?]\s+|\n)([\s\-*•>"'()]*)([A-Z]\w*)""")
+
+
+def _interesting(text: str, *, drop_sentence_initial: bool = False) -> set[str]:
+    """Singularised proper-noun-ish tokens in *text*, minus boilerplate.
+
+    With *drop_sentence_initial*, lowercase each sentence's leading word first so a
+    grammar-capitalised common word ('Carefully') can't masquerade as a proper noun.
+    """
+    if drop_sentence_initial:
+        text = _SENTENCE_START_RE.sub(lambda m: m.group(1) + m.group(2) + m.group(3).lower(), text)
     out: set[str] = set()
     for token in _INTERESTING_RE.findall(text):
         low = token.lower()
@@ -128,7 +142,7 @@ def check_grounding(output: str, case: EvalCase) -> CheckResult:
     must ground on the notes; deep recaps ground on web research, so they omit
     this check (the in-graph anti_hallucination node guards them instead).
     """
-    out_tokens = _interesting(output)
+    out_tokens = _interesting(output, drop_sentence_initial=True)
     if not out_tokens:
         return CheckResult(name="grounding", passed=True, score=1.0)
     ctx_tokens = _interesting(_ref_str(case, "context"))
