@@ -95,3 +95,15 @@ class EvalReport:
         for r in self.results:
             by_task.setdefault(r.task, []).append(r.score)
         return {task: sum(s) / len(s) for task, s in by_task.items()}
+
+    def scores_by_check(self) -> dict[str, float]:
+        """Mean score per deterministic check (spoiler_free, grounding, …).
+
+        This is what the gate watches most closely: the deterministic checks are
+        stable across runs (unlike the judge), so a drop here is a real regression.
+        """
+        by_check: dict[str, list[float]] = {}
+        for r in self.results:
+            for c in r.checks:
+                by_check.setdefault(c.name, []).append(c.score)
+        return {name: sum(s) / len(s) for name, s in by_check.items()}

@@ -24,7 +24,7 @@ _RUBRICS: dict[str, str] = {
         "X days', no streaks). HARD RULE: any named entity (place, boss, item, "
         "character) NOT present in the notes — or any beat from unplayed content — "
         "is a hallucination/spoiler and caps the score low, however well-written. "
-        "Use reference.behavior as the expected behaviour for this case."
+        "Follow the expected behavior given for the case."
     ),
     "wrap_up": "Good extraction captures location, next action, level, and quest accurately.",
     "capture": "Good extraction lists exactly the game titles present in the input, no extras.",
@@ -56,12 +56,17 @@ class LLMJudge(AbstractJudge):
 
     def _build_prompt(self, case: EvalCase, output: str) -> str:
         rubric = _RUBRICS.get(case.task, "Grade the output for correctness and helpfulness.")
-        reference = json.dumps(case.reference, default=str, ensure_ascii=False)
+        # Only the grounding context + expected behavior — NOT the answer key
+        # (mentions/forbidden). Showing the must-mention list would let the judge
+        # reward shallow keyword presence; showing the spoiler list leaks it.
+        notes = str(case.reference.get("context") or "")
+        behavior = str(case.reference.get("behavior") or "")
         return (
             "You are a strict evaluator scoring an AI assistant's output.\n"
             f"Task: {case.task}\n"
             f"Rubric: {rubric}\n"
-            f"Reference/context (JSON): {reference}\n"
+            f"Player's notes (the ONLY source of truth): {notes}\n"
+            f"Expected behavior for this case: {behavior}\n"
             f"Output to grade:\n{output}\n\n"
             'Respond with ONLY JSON: {"score": <float 0..1>, "reason": "<one sentence>"}.'
         )

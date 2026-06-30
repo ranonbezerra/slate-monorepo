@@ -9,6 +9,7 @@ candidate. The LLM-as-judge only scores what determinism can't.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Callable
 
 from evals.schema import CheckResult, EvalCase
@@ -18,6 +19,16 @@ from slate.core.play_session.anti_hallucination import validate_recap
 def _ref_str(case: EvalCase, key: str) -> str:
     value = case.reference.get(key, "")
     return value if isinstance(value, str) else str(value)
+
+
+def _mentioned(term: str, text_lower: str) -> bool:
+    """True if *term* appears in *text_lower* on word boundaries.
+
+    Word-boundary match (not substring) so a short term never matches inside a
+    longer word: 'ending' must not fire on 'depending', 'story' not on 'history',
+    'camp' not on 'campaign'.
+    """
+    return re.search(rf"\b{re.escape(term.lower())}\b", text_lower) is not None
 
 
 def check_non_empty(output: str, case: EvalCase) -> CheckResult:
@@ -50,7 +61,7 @@ def check_spoiler_free(output: str, case: EvalCase) -> CheckResult:
     forbidden = case.reference.get("forbidden", [])
     terms = forbidden if isinstance(forbidden, list) else []
     low = output.lower()
-    hits = [t for t in terms if isinstance(t, str) and t.lower() in low]
+    hits = [t for t in terms if isinstance(t, str) and _mentioned(t, low)]
     return CheckResult(
         name="spoiler_free",
         passed=not hits,
@@ -66,7 +77,7 @@ def check_mentions(output: str, case: EvalCase) -> CheckResult:
     if not terms:
         return CheckResult(name="mentions", passed=True, score=1.0)
     low = output.lower()
-    missing = [t for t in terms if t.lower() not in low]
+    missing = [t for t in terms if not _mentioned(t, low)]
     return CheckResult(
         name="mentions",
         passed=not missing,

@@ -11,15 +11,22 @@ from __future__ import annotations
 import json
 from dataclasses import asdict
 from typing import cast
+from uuid import uuid4
 
 from evals.checks import run_checks
 from evals.judge import AbstractJudge, DummyJudge
 from evals.schema import CaseResult, EvalCase, EvalReport
+from slate.infrastructure.agent.base import AbstractRecapAgent, DeepRecapRequest
+from slate.infrastructure.agent.graph.state import PlaySessionContext
 from slate.infrastructure.llm.base import AbstractLLMClient
 
 
-async def produce_output(llm: AbstractLLMClient, case: EvalCase) -> str:
-    """Run *case*'s task through *llm* and return the output as a string."""
+async def produce_output(
+    llm: AbstractLLMClient,
+    case: EvalCase,
+    agent: AbstractRecapAgent | None = None,
+) -> str:
+    """Run *case*'s task through the LLM (or the deep-recap *agent*) and return text."""
     inputs = case.inputs
     task = case.task
 
@@ -29,6 +36,26 @@ async def produce_output(llm: AbstractLLMClient, case: EvalCase) -> str:
             previous_wrap_ups=cast("list[dict[str, object]]", inputs.get("previous_wrap_ups", [])),
             current_next_action=cast("str | None", inputs.get("current_next_action")),
         )
+
+    if task == "deep_recap":
+        # Exercises the LangGraph deep-research graph (search → grade → refine →
+        # synthesize → spoiler-aware → anti-hallucination), not the quick path.
+        if agent is None:
+            raise ValueError("deep_recap task requires a recap agent")
+        context: PlaySessionContext = {
+            "game_title": cast(str, inputs["game_title"]),
+            "previous_wrap_ups": cast(
+                "list[dict[str, object]]", inputs.get("previous_wrap_ups", [])
+            ),
+            "location": cast("str | None", inputs.get("location")),
+            "current_quest": cast("str | None", inputs.get("current_quest")),
+            "next_action": cast("str | None", inputs.get("current_next_action")),
+            "level": cast("str | None", inputs.get("level")),
+        }
+        result = await agent.deep_recap(
+            DeepRecapRequest(context=context, thread_id=uuid4().hex, force_refresh=True)
+        )
+        return result.text
 
     if task == "wrap_up":
         state = await llm.extract_wrap_up_state(
@@ -59,9 +86,14 @@ async def produce_output(llm: AbstractLLMClient, case: EvalCase) -> str:
     raise ValueError(f"unknown eval task: {task!r}")
 
 
-async def run_case(llm: AbstractLLMClient, case: EvalCase, judge: AbstractJudge) -> CaseResult:
+async def run_case(
+    llm: AbstractLLMClient,
+    case: EvalCase,
+    judge: AbstractJudge,
+    agent: AbstractRecapAgent | None = None,
+) -> CaseResult:
     """Produce, check, and (optionally) judge a single case."""
-    output = await produce_output(llm, case)
+    output = await produce_output(llm, case, agent)
     checks = run_checks(output, case)
 
     judge_score: float | None = None
@@ -83,12 +115,13 @@ async def run_eval(
     llm: AbstractLLMClient,
     cases: list[EvalCase],
     judge: AbstractJudge | None = None,
+    agent: AbstractRecapAgent | None = None,
 ) -> EvalReport:
     """Run every case and aggregate into an ``EvalReport``.
 
-    *judge* defaults to a ``DummyJudge`` (deterministic, model-free) so the
-    harness is usable in CI without a real model.
+    *judge* defaults to a ``DummyJudge`` (deterministic, model-free); *agent* is
+    the deep-recap agent (required only when the set has ``deep_recap`` cases).
     """
     active_judge = judge or DummyJudge()
-    results = [await run_case(llm, case, active_judge) for case in cases]
+    results = [await run_case(llm, case, active_judge, agent) for case in cases]
     return EvalReport(results=results)

@@ -13,7 +13,9 @@ from evals import (
     run_eval,
 )
 from evals.checks import run_checks
+from evals.gate import baseline_from_report, diff_baseline
 from evals.schema import CaseResult, CheckResult, EvalReport
+from slate.infrastructure.agent.dummy import DummyRecapAgent
 from slate.infrastructure.llm.dummy import DummyLLMClient
 
 
@@ -36,20 +38,34 @@ class _JudgeLLM(DummyLLMClient):
 class TestGoldenDataset:
     def test_dataset_is_well_formed(self) -> None:
         cases = golden_cases()
-        assert len(cases) == 12
-        assert {c.task for c in cases} == {"recap"}
-        assert len({c.id for c in cases}) == 12  # unique ids
+        assert len(cases) == 14  # 12 quick + 2 deep
+        assert {c.task for c in cases} == {"recap", "deep_recap"}
+        assert len({c.id for c in cases}) == 14  # unique ids
         for c in cases:
             assert "context" in c.reference
             assert c.checks == ["non_empty", "grounding", "spoiler_free", "mentions"]
+            # previous_wrap_ups carry extracted_state alongside raw_text (prod fidelity).
+            for wu in c.inputs["previous_wrap_ups"]:  # type: ignore[union-attr]
+                assert "raw_text" in wu
 
     async def test_pipeline_runs_over_the_dataset(self) -> None:
-        report = await run_eval(DummyLLMClient(), golden_cases(), DummyJudge())
-        assert len(report.results) == 12
-        assert set(report.scores_by_task()) == {"recap"}
-        # Every case produced a non-empty recap and a numeric score.
+        # The deep_recap cases need an agent; the dummy one runs the canned path.
+        report = await run_eval(DummyLLMClient(), golden_cases(), DummyJudge(), DummyRecapAgent())
+        assert len(report.results) == 14
+        assert set(report.scores_by_task()) == {"recap", "deep_recap"}
         assert all(r.output for r in report.results)
         assert all(0.0 <= r.score <= 1.0 for r in report.results)
+
+    async def test_deep_recap_task_uses_the_agent(self) -> None:
+        case = next(c for c in golden_cases() if c.task == "deep_recap")
+        output = await produce_output(DummyLLMClient(), case, DummyRecapAgent())
+        assert output  # the agent produced a recap
+        assert case.inputs["game_title"].split()[0] in output  # type: ignore[union-attr]
+
+    async def test_deep_recap_without_agent_raises(self) -> None:
+        case = next(c for c in golden_cases() if c.task == "deep_recap")
+        with pytest.raises(ValueError, match="requires a recap agent"):
+            await produce_output(DummyLLMClient(), case)
 
 
 # =====================================================================
@@ -72,13 +88,35 @@ class TestChecks:
 
     def test_spoiler_free_catches_forbidden_term(self) -> None:
         case = EvalCase(
-            id="x", task="recap", inputs={}, reference={"forbidden": ["final boss"]}, checks=[]
+            id="x",
+            task="recap",
+            inputs={},
+            reference={"forbidden": ["final boss"]},
+            checks=["spoiler_free"],
         )
-        [result] = run_checks(
-            "then you reach the FINAL BOSS",
-            EvalCase(**{**case.__dict__, "checks": ["spoiler_free"]}),
-        )
+        [result] = run_checks("then you reach the FINAL BOSS", case)
         assert not result.passed
+
+    def test_spoiler_free_word_boundary_no_substring_false_positive(self) -> None:
+        # "ending" must NOT fire on "depending"/"ended"; "story" not on "history".
+        case = EvalCase(
+            id="x",
+            task="recap",
+            inputs={},
+            reference={"forbidden": ["ending", "story"]},
+            checks=["spoiler_free"],
+        )
+        text = "Depending on your cred you ended up in Watson; the history is yours"
+        [result] = run_checks(text, case)
+        assert result.passed and result.score == 1.0
+
+    def test_mentions_word_boundary_no_substring_false_positive(self) -> None:
+        # "camp" must NOT be satisfied by "campaign".
+        case = EvalCase(
+            id="x", task="recap", inputs={}, reference={"mentions": ["camp"]}, checks=["mentions"]
+        )
+        [result] = run_checks("you joined the campaign", case)
+        assert not result.passed and result.score == 0.0
 
     def test_mentions_scores_recall(self) -> None:
         case = EvalCase(
@@ -225,3 +263,52 @@ class TestSchemaAndRunner:
         )
         report = await run_eval(DummyLLMClient(), [case])
         assert not report.results[0].passed
+
+
+# =====================================================================
+# Baseline regression gate
+# =====================================================================
+
+
+def _report(*pairs: tuple[str, float]) -> EvalReport:
+    """A report of recap cases whose single check 'grounding' has the given score."""
+    return EvalReport(
+        results=[
+            CaseResult(
+                case_id=cid,
+                task="recap",
+                output="x",
+                checks=[CheckResult(name="grounding", passed=True, score=score)],
+                judge_score=None,
+            )
+            for cid, score in pairs
+        ]
+    )
+
+
+class TestGate:
+    def test_baseline_is_flat_metrics(self) -> None:
+        baseline = baseline_from_report(_report(("a", 1.0), ("b", 0.5)))
+        assert baseline["overall"] == pytest.approx(0.75)
+        assert baseline["task:recap"] == pytest.approx(0.75)
+        assert baseline["check:grounding"] == pytest.approx(0.75)
+
+    def test_no_regression_within_tolerance(self) -> None:
+        baseline = baseline_from_report(_report(("a", 1.0), ("b", 0.8)))
+        # Drop of 0.04 on grounding, under the 0.05 tolerance → no regression.
+        current = _report(("a", 1.0), ("b", 0.72))
+        assert diff_baseline(current, baseline, 0.05) == []
+
+    def test_regression_beyond_tolerance_is_flagged(self) -> None:
+        baseline = baseline_from_report(_report(("a", 1.0), ("b", 0.8)))
+        current = _report(("a", 1.0), ("b", 0.40))  # grounding tanks
+        regressions = diff_baseline(current, baseline, 0.05)
+        assert any("check:grounding" in r for r in regressions)
+        assert any("overall" in r for r in regressions)
+
+    def test_new_metric_absent_from_baseline_is_not_a_regression(self) -> None:
+        baseline = {"overall": 0.9}  # baseline predates per-check metrics
+        current = _report(("a", 0.2))
+        # overall regresses, but the new check:grounding key is ignored.
+        regressions = diff_baseline(current, baseline, 0.05)
+        assert all("check:" not in r for r in regressions)
