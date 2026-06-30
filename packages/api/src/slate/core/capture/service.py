@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from uuid import UUID
 
-import structlog
 from fastapi import HTTPException, status
 
 from slate.config import Settings
@@ -23,8 +22,7 @@ from slate.core.capture.ports import (
     LibraryImportProcessor,
 )
 from slate.core.library.igdb_budget import igdb_budget_allows
-from slate.core.safety.injection import detect_injection
-from slate.core.sanitization import sanitize_untrusted_text
+from slate.core.safety.guard import sanitize_and_audit
 from slate.infrastructure.catalog.base import AbstractCatalogMatcher
 from slate.infrastructure.db.models import Capture, CaptureCandidate, LibraryEntry
 from slate.infrastructure.db.repositories.capture import (
@@ -38,8 +36,6 @@ from slate.infrastructure.db.repositories.usage import UsageCounterRepository
 from slate.infrastructure.igdb.base import IGDBSearchClient
 from slate.infrastructure.llm.base import AbstractLLMClient
 from slate.infrastructure.ocr.base import AbstractOCRClient
-
-logger = structlog.get_logger()
 
 
 class CaptureService:
@@ -85,24 +81,11 @@ class CaptureService:
         self._settings = settings or default_settings
 
     async def submit_text(self, user_id: int, raw_text: str, input_type: str = "text") -> Capture:
-        """Create a new capture with status ``queued``.
-
-        The raw text is untrusted and later flows into the extraction prompt, so it
-        is sanitized at the edge (control/bidi/zero-width stripped, length-capped)
-        before it is stored or prompted (Epic 26). Injection attempts are flagged +
-        logged but not blocked here — the prompt fences the text in <user_data> and
-        the output is strict JSON, so the blast radius is already bounded.
-        """
-        clean_text = sanitize_untrusted_text(raw_text)
-        verdict = detect_injection(clean_text)
-        if verdict.flagged:
-            logger.warning(
-                "capture_injection_flagged", matches=list(verdict.matches), user_id=user_id
-            )
+        """Create a new capture with status ``queued`` (untrusted text sanitized + audited)."""
         return await self._capture_repo.create(
             user_id=user_id,
             input_type=input_type,
-            raw_text=clean_text,
+            raw_text=sanitize_and_audit(raw_text, surface="capture", user_id=user_id),
         )
 
     async def submit_photo(self, user_id: int, image_path: str) -> Capture:
