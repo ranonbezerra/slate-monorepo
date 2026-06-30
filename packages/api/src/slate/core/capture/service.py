@@ -22,6 +22,7 @@ from slate.core.capture.ports import (
     LibraryImportProcessor,
 )
 from slate.core.library.igdb_budget import igdb_budget_allows
+from slate.core.sanitization import sanitize_untrusted_text
 from slate.infrastructure.catalog.base import AbstractCatalogMatcher
 from slate.infrastructure.db.models import Capture, CaptureCandidate, LibraryEntry
 from slate.infrastructure.db.repositories.capture import (
@@ -80,11 +81,16 @@ class CaptureService:
         self._settings = settings or default_settings
 
     async def submit_text(self, user_id: int, raw_text: str, input_type: str = "text") -> Capture:
-        """Create a new capture with status ``queued``."""
+        """Create a new capture with status ``queued``.
+
+        The raw text is untrusted and later flows into the extraction prompt, so it
+        is sanitized at the edge (control/bidi/zero-width stripped, length-capped)
+        before it is stored or prompted (Epic 26).
+        """
         return await self._capture_repo.create(
             user_id=user_id,
             input_type=input_type,
-            raw_text=raw_text,
+            raw_text=sanitize_untrusted_text(raw_text),
         )
 
     async def submit_photo(self, user_id: int, image_path: str) -> Capture:

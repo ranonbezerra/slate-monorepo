@@ -14,6 +14,7 @@ from datetime import datetime
 
 from slate.config import Settings
 from slate.config import settings as default_settings
+from slate.core.sanitization import sanitize_untrusted_text
 from slate.core.stats.service import StatsService
 from slate.infrastructure.agent.base import AbstractRecapAgent
 from slate.infrastructure.agent.concierge.base import (
@@ -173,6 +174,7 @@ class ConciergeService:
         Buffered path (non-streaming): runs to completion, validates the pick
         with a single reroll, else degrades. ``reply_stream`` is the live path.
         """
+        message = sanitize_untrusted_text(message)  # untrusted chat turn (Epic 26)
         write_tools_enabled = await dynamic_config.get_bool("concierge_write_tools_enabled")
         tools = self._build_tools(
             user_id, user_created_at, write_tools_enabled=write_tools_enabled
@@ -220,6 +222,7 @@ class ConciergeService:
         degrade-in-stream; the guard guarantee (no invalid pick shown as valid)
         is preserved.
         """
+        message = sanitize_untrusted_text(message)  # untrusted chat turn (Epic 26)
         write_tools_enabled = await dynamic_config.get_bool("concierge_write_tools_enabled")
         tools = self._build_tools(
             user_id, user_created_at, write_tools_enabled=write_tools_enabled
