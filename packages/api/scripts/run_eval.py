@@ -5,12 +5,11 @@ Defaults to the deterministic ``DummyLLMClient`` + ``DummyJudge`` + ``DummyRecap
 (``LLM_PROVIDER`` / ``AGENT_PROVIDER``) with the model-graded ``LLMJudge`` and the
 real deep-recap agent.
 
-Set ``JUDGE_MODEL`` to judge on a different model than the one being graded —
-avoids the self-evaluation leniency of a model scoring itself. Prefer an
-instruction-tuned model at least as large as the generator (e.g.
-``qwen2.5:14b-instruct``): an A/B vs ``qwen3:8b`` showed the thinking model's
-reasoning overruns the output budget before it emits the verdict JSON (empty,
-unparseable scores), while the instruct model returns a calibrated 0.5-1.0 range.
+The judge defaults to ``qwen2.5:14b-instruct`` — a different, instruction-tuned
+model at least as large as the generator, so it can't grade itself leniently. An
+A/B vs ``qwen3:8b`` picked it: the thinking model's reasoning overruns the output
+budget before it emits the verdict JSON (empty, unparseable scores), while the
+instruct model returns a calibrated 0.5-1.0 range. Override with ``JUDGE_MODEL``.
 
 Every run writes its scores to results/latest.json. Use that to commit the run
 you actually inspected, instead of re-rolling a fresh one:
@@ -89,16 +88,12 @@ async def _run() -> EvalReport:
         llm = TracedLLMClient(base) if settings.tracing_enabled else base
         agent = get_recap_agent(settings, base)
 
-        # Self-eval guard: judge on a DIFFERENT model than the one being graded
-        # (set JUDGE_MODEL=qwen2.5:14b-instruct) so the judge can't favour its own
-        # output. Instruct > thinking here: a thinking judge truncates its verdict.
-        judge_model = os.getenv("JUDGE_MODEL")
-        if judge_model:
-            judge_llm = get_llm_client(
-                settings.model_copy(update={"ollama_smart_model": judge_model})
-            )
-        else:
-            judge_llm = base
+        # Self-eval guard: judge on a DIFFERENT model than the one being graded so
+        # the judge can't favour its own output. Defaults to the A/B-winning instruct
+        # model (qwen2.5:14b-instruct); JUDGE_MODEL overrides. Instruct > thinking
+        # here: a thinking judge truncates its verdict before emitting the score.
+        judge_model = os.getenv("JUDGE_MODEL", "qwen2.5:14b-instruct")
+        judge_llm = get_llm_client(settings.model_copy(update={"ollama_smart_model": judge_model}))
         return await run_eval(llm, golden_cases(), LLMJudge(judge_llm), agent)
 
     return await run_eval(DummyLLMClient(), golden_cases(), DummyJudge(), DummyRecapAgent())
