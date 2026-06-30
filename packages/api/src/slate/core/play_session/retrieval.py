@@ -19,6 +19,9 @@ from __future__ import annotations
 from slate.config import settings as _settings
 from slate.infrastructure.db.models import PlaySession
 from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
+from slate.infrastructure.db.repositories.play_session_embedding import (
+    PlaySessionEmbeddingRepository,
+)
 from slate.infrastructure.embedding import select_grounding_ids
 from slate.infrastructure.embedding.factory import get_embedding_client
 
@@ -45,7 +48,8 @@ async def _semantic(
 ) -> list[PlaySession]:
     """The latest session + the (limit-1) most similar older ones; [] if none embedded."""
     model = get_embedding_client(_settings).model
-    candidates = await play_session_repo.get_embedded_for_entry(library_entry_id, model)
+    embedding_repo = PlaySessionEmbeddingRepository(play_session_repo.session)
+    candidates = await embedding_repo.get_embedded_for_entry(library_entry_id, model)
     if not candidates:
         return []
 

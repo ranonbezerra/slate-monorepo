@@ -13,7 +13,9 @@ from collections.abc import Mapping
 
 import structlog
 
-from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
+from slate.infrastructure.db.repositories.play_session_embedding import (
+    PlaySessionEmbeddingRepository,
+)
 from slate.infrastructure.embedding.base import AbstractEmbeddingClient
 
 logger = structlog.get_logger()
@@ -44,7 +46,7 @@ def build_embedding_text(
 
 async def embed_session(
     embedding_client: AbstractEmbeddingClient,
-    play_session_repo: PlaySessionRepository,
+    embedding_repo: PlaySessionEmbeddingRepository,
     play_session_id: int,
     wrap_up_text: str | None,
     extracted_state: Mapping[str, object] | None,
@@ -58,5 +60,5 @@ async def embed_session(
     except Exception:
         logger.warning("session_embedding_failed", play_session_id=play_session_id, exc_info=True)
         return False
-    await play_session_repo.set_embedding(play_session_id, vector, embedding_client.model)
+    await embedding_repo.set_embedding(play_session_id, vector, embedding_client.model)
     return True

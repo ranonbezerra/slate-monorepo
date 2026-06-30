@@ -5,12 +5,14 @@ from __future__ import annotations
 from typing import cast
 
 from slate.core.play_session.embedding import build_embedding_text, embed_session
-from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
+from slate.infrastructure.db.repositories.play_session_embedding import (
+    PlaySessionEmbeddingRepository,
+)
 from slate.infrastructure.embedding import DummyEmbeddingClient
 
 
 class _RecordingRepo:
-    """Stub PlaySessionRepository that records set_embedding calls (no DB)."""
+    """Stub PlaySessionEmbeddingRepository that records set_embedding calls (no DB)."""
 
     def __init__(self) -> None:
         self.calls: list[tuple[int, list[float], str]] = []
@@ -24,10 +26,6 @@ class _RecordingRepo:
 class _BrokenEmbeddingClient(DummyEmbeddingClient):
     async def embed(self, texts: list[str]) -> list[list[float]]:
         raise RuntimeError("embedding backend down")
-
-
-def _repo() -> PlaySessionRepository:
-    return cast(PlaySessionRepository, _RecordingRepo())
 
 
 class TestBuildEmbeddingText:
@@ -51,7 +49,11 @@ class TestEmbedSession:
         repo = _RecordingRepo()
         client = DummyEmbeddingClient(dimensions=64)
         stored = await embed_session(
-            client, cast(PlaySessionRepository, repo), 42, "beat Margit", {"location": "Stormveil"}
+            client,
+            cast(PlaySessionEmbeddingRepository, repo),
+            42,
+            "beat Margit",
+            {"location": "Stormveil"},
         )
         assert stored is True
         assert len(repo.calls) == 1
@@ -63,7 +65,7 @@ class TestEmbedSession:
     async def test_empty_text_skips_without_storing(self) -> None:
         repo = _RecordingRepo()
         stored = await embed_session(
-            DummyEmbeddingClient(), cast(PlaySessionRepository, repo), 1, None, None
+            DummyEmbeddingClient(), cast(PlaySessionEmbeddingRepository, repo), 1, None, None
         )
         assert stored is False
         assert repo.calls == []
@@ -72,7 +74,7 @@ class TestEmbedSession:
         # A failing embedding backend must never break extraction.
         repo = _RecordingRepo()
         stored = await embed_session(
-            _BrokenEmbeddingClient(), cast(PlaySessionRepository, repo), 1, "note", None
+            _BrokenEmbeddingClient(), cast(PlaySessionEmbeddingRepository, repo), 1, "note", None
         )
         assert stored is False
         assert repo.calls == []

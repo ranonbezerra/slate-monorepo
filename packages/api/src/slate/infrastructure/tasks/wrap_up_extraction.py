@@ -26,6 +26,9 @@ async def extract_wrap_up_state_task(
     from slate.core.play_session.embedding import embed_session
     from slate.infrastructure.db.repositories.library import LibraryRepository
     from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
+    from slate.infrastructure.db.repositories.play_session_embedding import (
+        PlaySessionEmbeddingRepository,
+    )
     from slate.infrastructure.db.session import async_session_factory
     from slate.infrastructure.embedding.factory import get_embedding_client
     from slate.infrastructure.llm.factory import get_llm_client
@@ -55,7 +58,7 @@ async def extract_wrap_up_state_task(
             # (Epic 24). Best-effort: a failure here never fails the extraction.
             await embed_session(
                 get_embedding_client(app_settings),
-                play_session_repo,
+                PlaySessionEmbeddingRepository(session),
                 play_session_id,
                 wrap_up_text,
                 state_dict,

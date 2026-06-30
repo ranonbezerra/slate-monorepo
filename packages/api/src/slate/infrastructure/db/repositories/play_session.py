@@ -9,7 +9,7 @@ from uuid import UUID
 
 from sqlalchemy import ColumnElement, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, undefer
+from sqlalchemy.orm import joinedload
 
 from slate.infrastructure.db.models import Game, LibraryEntry, PlaySession, User
 
@@ -19,6 +19,11 @@ class PlaySessionRepository:
 
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    @property
+    def session(self) -> AsyncSession:
+        """The underlying session, so sibling repos can share this unit of work."""
+        return self._session
 
     async def create(
         self,
@@ -220,49 +225,6 @@ class PlaySessionRepository:
         if play_session is not None:
             play_session.extracted_state = dict(extracted_state)
             await self._session.flush()
-
-    async def set_embedding(
-        self,
-        play_session_id: int,
-        embedding: list[float],
-        model: str,
-    ) -> None:
-        """Store the wrap-up embedding and the model that produced it (Epic 24)."""
-        play_session = await self._session.get(PlaySession, play_session_id)
-        if play_session is not None:
-            play_session.embedding = embedding
-            play_session.embedding_model = model
-            await self._session.flush()
-
-    async def get_embedded_for_entry(
-        self,
-        library_entry_id: int,
-        model: str,
-        limit: int = 200,
-    ) -> list[tuple[PlaySession, list[float]]]:
-        """Ended sessions for the entry embedded by *model*, newest first.
-
-        Loads the (otherwise deferred) ``embedding`` column and returns each session
-        with its vector as a plain ``list[float]`` (pgvector returns an array on
-        Postgres; SQLite a list — both are coerced). Scoped to one entry and one
-        embedding model, so retrieval never mixes vector spaces across a model swap.
-        """
-        stmt = (
-            select(PlaySession)
-            .options(undefer(PlaySession.embedding))
-            .where(
-                PlaySession.library_entry_id == library_entry_id,
-                PlaySession.ended_at.is_not(None),
-                PlaySession.extracted_state.is_not(None),
-                PlaySession.embedding.is_not(None),
-                PlaySession.embedding_model == model,
-            )
-            .order_by(PlaySession.ended_at.desc())
-            .limit(limit)
-        )
-        result = await self._session.execute(stmt)
-        sessions = list(result.scalars().all())
-        return [(s, [float(x) for x in s.embedding or []]) for s in sessions]
 
     async def end_play_session(
         self,
