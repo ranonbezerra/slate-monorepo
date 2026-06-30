@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from slate.infrastructure.cache.base import AbstractCache
 from slate.infrastructure.embedding import DummyEmbeddingClient
 from slate.infrastructure.llm.base import ExtractedGame
@@ -116,3 +118,16 @@ class TestCaptureCache:
         await cache.parse_capture_text("asdf qwer")
         await cache.parse_capture_text("asdf qwer")  # would be an exact hit if cached
         assert inner.calls == 2
+
+    async def test_stats_track_each_layer(self) -> None:
+        inner = _CountingLLM(_GAMES)
+        cache = _cache(inner)
+        await cache.parse_capture_text("Elden Ring")  # miss (live)
+        await cache.parse_capture_text("Elden Ring")  # exact hit
+        await cache.parse_capture_text("Elden Ring pc")  # semantic hit
+        assert cache.stats.misses == 1
+        assert cache.stats.exact_hits == 1
+        assert cache.stats.semantic_hits == 1
+        assert cache.stats.total == 3
+        assert cache.stats.hit_rate == pytest.approx(2 / 3)
+        assert cache.stats.semantic_gain == pytest.approx(1 / 3)

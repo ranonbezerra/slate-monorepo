@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 import structlog
@@ -30,6 +31,32 @@ _WS = re.compile(r"\s+")
 # Capture always runs the fast model in JSON mode; these tag the cache scope.
 _ROLE = "fast"
 _JSON = True
+
+
+@dataclass
+class CaptureCacheStats:
+    """Per-layer outcome counters, so the hit-rate gain over exact-only is legible."""
+
+    exact_hits: int = 0
+    semantic_hits: int = 0
+    misses: int = 0
+
+    @property
+    def total(self) -> int:
+        return self.exact_hits + self.semantic_hits + self.misses
+
+    @property
+    def hit_rate(self) -> float:
+        return (self.exact_hits + self.semantic_hits) / self.total if self.total else 0.0
+
+    @property
+    def exact_hit_rate(self) -> float:
+        return self.exact_hits / self.total if self.total else 0.0
+
+    @property
+    def semantic_gain(self) -> float:
+        """The slice of requests the semantic layer caught that exact-match missed."""
+        return self.semantic_hits / self.total if self.total else 0.0
 
 
 def _normalize(text: str) -> str:
@@ -86,6 +113,7 @@ class SemanticCaptureCache(AbstractLLMClient):
         self._ttl = ttl_seconds
         self._threshold = threshold
         self._enabled = enabled
+        self.stats = CaptureCacheStats()
 
     async def parse_capture_text(self, text: str) -> list[ExtractedGame]:
         normalized = _normalize(text)
@@ -95,6 +123,7 @@ class SemanticCaptureCache(AbstractLLMClient):
         key = capture_key(self._model, normalized)
         cached = await self._exact.get_json(key)
         if cached is not None:
+            self.stats.exact_hits += 1
             logger.info("capture_cache", layer="exact", outcome="hit")
             return _payload_to_games(cached)
 
@@ -108,9 +137,11 @@ class SemanticCaptureCache(AbstractLLMClient):
         if embedding is not None:
             hit = await self._semantic_lookup(embedding)
             if hit is not None:
+                self.stats.semantic_hits += 1
                 logger.info("capture_cache", layer="semantic", outcome="hit")
                 return hit
 
+        self.stats.misses += 1
         logger.info("capture_cache", layer="live", outcome="miss")
         games = await self._inner.parse_capture_text(text)
         if embedding is not None and games:
