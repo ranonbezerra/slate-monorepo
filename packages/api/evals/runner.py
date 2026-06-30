@@ -12,9 +12,9 @@ import json
 from dataclasses import asdict
 from typing import cast
 
-from slate.core.eval.checks import run_checks
-from slate.core.eval.judge import AbstractJudge, DummyJudge
-from slate.core.eval.schema import CaseResult, EvalCase, EvalReport
+from evals.checks import run_checks
+from evals.judge import AbstractJudge, DummyJudge
+from evals.schema import CaseResult, EvalCase, EvalReport
 from slate.infrastructure.llm.base import AbstractLLMClient
 
 

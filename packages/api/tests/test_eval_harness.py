@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from slate.core.eval import (
+from evals import (
     DummyJudge,
     EvalCase,
     LLMJudge,
@@ -12,8 +12,8 @@ from slate.core.eval import (
     produce_output,
     run_eval,
 )
-from slate.core.eval.checks import run_checks
-from slate.core.eval.schema import CaseResult, CheckResult, EvalReport
+from evals.checks import run_checks
+from evals.schema import CaseResult, CheckResult, EvalReport
 from slate.infrastructure.llm.dummy import DummyLLMClient
 
 
@@ -28,23 +28,28 @@ class _JudgeLLM(DummyLLMClient):
 
 
 # =====================================================================
-# Golden run (end-to-end, deterministic under the dummy)
+# Golden dataset — well-formed + the pipeline runs (quality is judged
+# against a real model, not the dummy, so we don't assert pass-rate here)
 # =====================================================================
 
 
-class TestGoldenRun:
-    async def test_all_golden_cases_pass(self) -> None:
-        report = await run_eval(DummyLLMClient(), golden_cases(), DummyJudge())
-        assert report.pass_rate == 1.0
-        assert report.overall_score > 0.9
-        assert set(report.scores_by_task()) == {"recap", "wrap_up", "capture", "pick"}
+class TestGoldenDataset:
+    def test_dataset_is_well_formed(self) -> None:
+        cases = golden_cases()
+        assert len(cases) == 12
+        assert {c.task for c in cases} == {"recap"}
+        assert len({c.id for c in cases}) == 12  # unique ids
+        for c in cases:
+            assert "context" in c.reference
+            assert c.checks == ["non_empty", "grounding", "spoiler_free", "mentions"]
 
-    async def test_recap_grounding_is_deterministic(self) -> None:
-        cases = [c for c in golden_cases() if c.id == "recap-with-context"]
-        report = await run_eval(DummyLLMClient(), cases, DummyJudge())
-        grounding = next(c for c in report.results[0].checks if c.name == "grounding")
-        assert grounding.passed
-        assert grounding.score == pytest.approx(0.5)
+    async def test_pipeline_runs_over_the_dataset(self) -> None:
+        report = await run_eval(DummyLLMClient(), golden_cases(), DummyJudge())
+        assert len(report.results) == 12
+        assert set(report.scores_by_task()) == {"recap"}
+        # Every case produced a non-empty recap and a numeric score.
+        assert all(r.output for r in report.results)
+        assert all(0.0 <= r.score <= 1.0 for r in report.results)
 
 
 # =====================================================================
@@ -74,6 +79,24 @@ class TestChecks:
             EvalCase(**{**case.__dict__, "checks": ["spoiler_free"]}),
         )
         assert not result.passed
+
+    def test_mentions_scores_recall(self) -> None:
+        case = EvalCase(
+            id="x",
+            task="recap",
+            inputs={},
+            reference={"mentions": ["Watson", "Regina"]},
+            checks=["mentions"],
+        )
+        [hit] = run_checks("you are in Watson doing Regina's gigs", case)
+        assert hit.passed and hit.score == pytest.approx(1.0)
+        [partial] = run_checks("you are in Watson", case)
+        assert not partial.passed and partial.score == pytest.approx(0.5)
+
+    def test_mentions_passes_when_none_required(self) -> None:
+        case = EvalCase(id="x", task="recap", inputs={}, reference={}, checks=["mentions"])
+        [result] = run_checks("anything", case)
+        assert result.passed and result.score == 1.0
 
     def test_json_valid_rejects_non_json(self) -> None:
         case = EvalCase(id="x", task="capture", inputs={}, checks=["json_valid"])

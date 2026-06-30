@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 
-from slate.core.eval.schema import CheckResult, EvalCase
+from evals.schema import CheckResult, EvalCase
 from slate.core.play_session.anti_hallucination import validate_recap
 
 
@@ -59,6 +59,22 @@ def check_spoiler_free(output: str, case: EvalCase) -> CheckResult:
     )
 
 
+def check_mentions(output: str, case: EvalCase) -> CheckResult:
+    """Output should mention each term in ``reference['mentions']`` (recall)."""
+    mentions = case.reference.get("mentions", [])
+    terms = [t for t in mentions if isinstance(t, str)] if isinstance(mentions, list) else []
+    if not terms:
+        return CheckResult(name="mentions", passed=True, score=1.0)
+    low = output.lower()
+    missing = [t for t in terms if t.lower() not in low]
+    return CheckResult(
+        name="mentions",
+        passed=not missing,
+        score=(len(terms) - len(missing)) / len(terms),
+        detail=f"missing={missing}" if missing else "",
+    )
+
+
 def check_json_valid(output: str, case: EvalCase) -> CheckResult:
     """The output must parse as JSON (structured tasks)."""
     try:
@@ -92,6 +108,7 @@ REGISTRY: dict[str, Callable[[str, EvalCase], CheckResult]] = {
     "non_empty": check_non_empty,
     "grounding": check_grounding,
     "spoiler_free": check_spoiler_free,
+    "mentions": check_mentions,
     "json_valid": check_json_valid,
     "uuid_in_candidates": check_uuid_in_candidates,
 }

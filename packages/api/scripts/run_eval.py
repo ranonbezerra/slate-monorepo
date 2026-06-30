@@ -13,8 +13,12 @@ from __future__ import annotations
 
 import asyncio
 import sys
+from pathlib import Path
 
-from slate.core.eval import DummyJudge, EvalReport, LLMJudge, golden_cases, run_eval
+# Make the package-local ``evals`` harness importable when run as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from evals import DummyJudge, EvalReport, LLMJudge, golden_cases, run_eval
 from slate.infrastructure.llm.dummy import DummyLLMClient
 
 

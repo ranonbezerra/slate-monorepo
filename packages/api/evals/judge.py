@@ -11,15 +11,20 @@ from __future__ import annotations
 import json
 from abc import ABC, abstractmethod
 
-from slate.core.eval.schema import EvalCase
+from evals.schema import EvalCase
 from slate.infrastructure.llm.base import AbstractLLMClient
 
 # Per-task rubric: what "good" means for the judge to grade against.
 _RUBRICS: dict[str, str] = {
     "recap": (
-        "A good recap faithfully summarises where the player left off using ONLY "
-        "their notes, suggests a concrete next step, and never reveals unseen "
-        "spoilers. Penalise invented facts and spoilers heavily."
+        "Grade a video-game session recap ('previously on...'). It may rely ONLY on "
+        "the player's notes (reference.context). Score high when it faithfully "
+        "summarises where they left off, suggests a concrete next step grounded in "
+        "the notes, and keeps a neutral, blame-free tone (no 'you haven't played in "
+        "X days', no streaks). HARD RULE: any named entity (place, boss, item, "
+        "character) NOT present in the notes — or any beat from unplayed content — "
+        "is a hallucination/spoiler and caps the score low, however well-written. "
+        "Use reference.behavior as the expected behaviour for this case."
     ),
     "wrap_up": "Good extraction captures location, next action, level, and quest accurately.",
     "capture": "Good extraction lists exactly the game titles present in the input, no extras.",
