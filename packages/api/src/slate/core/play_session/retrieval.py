@@ -19,7 +19,7 @@ from __future__ import annotations
 from slate.config import settings as _settings
 from slate.infrastructure.db.models import PlaySession
 from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
-from slate.infrastructure.embedding import rank_by_similarity
+from slate.infrastructure.embedding import select_grounding_ids
 from slate.infrastructure.embedding.factory import get_embedding_client
 
 
@@ -49,16 +49,9 @@ async def _semantic(
     if not candidates:
         return []
 
-    # Newest first → the latest session is the query and is always included.
-    query_session, query_vector = candidates[0]
-    older = candidates[1:]
-    if not older or limit <= 1:
-        return [query_session]
-
-    by_id = {session.id: session for session, _ in older}
-    ranked = rank_by_similarity(
-        query_vector,
-        [(session.id, vector) for session, vector in older],
-        top_k=limit - 1,
+    by_id = {session.id: session for session, _ in candidates}
+    chosen_ids = select_grounding_ids(
+        [(session.id, vector) for session, vector in candidates],
+        top_k=limit,
     )
-    return [query_session] + [by_id[session_id] for session_id, _ in ranked]
+    return [by_id[session_id] for session_id in chosen_ids]

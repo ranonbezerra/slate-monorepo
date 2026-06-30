@@ -40,3 +40,20 @@ def rank_by_similarity(
     scored = [(cid, cosine_similarity(query, vec)) for cid, vec in candidates]
     scored.sort(key=lambda pair: pair[1], reverse=True)
     return scored[:top_k]
+
+
+def select_grounding_ids(candidates: list[tuple[int, list[float]]], top_k: int) -> list[int]:
+    """Pick the ids to ground a recap on: the latest + the (top_k-1) most similar to it.
+
+    *candidates* is ``(id, vector)`` **newest-first**. The first (latest) is always
+    kept as the immediate "where I left off"; the remaining slots go to the sessions
+    most similar to it. Pure so the DB retrieval and the eval A/B share one rule.
+    """
+    if not candidates:
+        return []
+    query_id, query_vector = candidates[0]
+    older = candidates[1:]
+    if not older or top_k <= 1:
+        return [query_id]
+    ranked = rank_by_similarity(query_vector, older, top_k=top_k - 1)
+    return [query_id] + [cid for cid, _ in ranked]

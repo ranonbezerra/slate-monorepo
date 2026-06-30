@@ -13,6 +13,7 @@ from slate.infrastructure.embedding import (
     cosine_similarity,
     get_embedding_client,
     rank_by_similarity,
+    select_grounding_ids,
 )
 
 
@@ -81,6 +82,23 @@ class TestRankBySimilarity:
 
     def test_empty_candidates(self) -> None:
         assert rank_by_similarity([1.0, 0.0], [], top_k=3) == []
+
+
+class TestSelectGroundingIds:
+    def test_latest_first_plus_most_similar(self) -> None:
+        # Newest-first: latest=0; id1 is close to it, id2 is orthogonal.
+        candidates = [(0, [1.0, 0.0]), (1, [1.0, 0.1]), (2, [0.0, 1.0])]
+        assert select_grounding_ids(candidates, top_k=2) == [0, 1]
+
+    def test_top_k_one_keeps_only_latest(self) -> None:
+        candidates = [(0, [1.0, 0.0]), (1, [1.0, 0.1])]
+        assert select_grounding_ids(candidates, top_k=1) == [0]
+
+    def test_empty(self) -> None:
+        assert select_grounding_ids([], top_k=3) == []
+
+    def test_single_candidate(self) -> None:
+        assert select_grounding_ids([(5, [1.0, 0.0])], top_k=3) == [5]
 
 
 class TestFactory:
