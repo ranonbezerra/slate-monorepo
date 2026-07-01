@@ -93,11 +93,17 @@ Content-Type: application/json
 | POST | `/login` | Get access + refresh tokens |
 | POST | `/refresh` | Refresh access token |
 | POST | `/logout` | Revoke refresh token |
+| POST | `/logout-all` | Revoke every session (token_version bump) |
+| GET | `/sessions` | List the caller's active sessions (devices) |
+| DELETE | `/sessions/{public_id}` | Revoke one session by handle (owner-scoped) |
 | GET | `/me` | Current user profile |
+| GET | `/me/export` | Export the caller's personal data (GDPR/LGPD portability) |
+| POST | `/delete-account` | Permanently erase the account (password re-auth; GDPR/LGPD erasure) |
 
 The auth surface also includes (see the live `/docs` for schemas):
 
 - **Email verification & password recovery** — `/v1/auth/verify-email`, `/v1/auth/forgot-password`, `/v1/auth/reset-password`, `/v1/auth/change-password` (single-use, session-invalidating reset tokens).
+- **Email change** — `POST /v1/auth/change-email` (password re-auth → confirm link to the new address, notice to the old) then `POST /v1/auth/confirm-email-change` (token-gated).
 - **Two-factor (TOTP)** — `/v1/auth/mfa/*` (`status`, `enroll`, `confirm`, challenge/verify, disable; encrypted-at-rest secrets + single-use recovery codes).
 - **Social login (OAuth)** — `GET /v1/auth/oauth/{provider}/start` and `/callback` (Google, Twitch; Authorization Code + PKCE).
 

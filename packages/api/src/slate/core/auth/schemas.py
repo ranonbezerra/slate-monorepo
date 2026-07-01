@@ -8,6 +8,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from slate.config import settings
+from slate.core.auth.password_breach import is_common_password
 from slate.core.sanitization import sanitize_display_name
 
 
@@ -26,6 +28,10 @@ def _validate_password_complexity(v: str) -> str:
         raise ValueError("Password must contain at least one lowercase letter")
     if not re.search(r"\d", v):
         raise ValueError("Password must contain at least one digit")
+    # Reject known-common passwords (NIST 800-63B) — the ones that pass the rules
+    # above but are still trivially guessable (Password1, Qwerty123, Welcome2024…).
+    if settings.password_blocklist_enabled and is_common_password(v):
+        raise ValueError("This password is too common — choose a less predictable one")
     return v
 
 
@@ -52,6 +58,33 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class DeleteAccountRequest(BaseModel):
+    # Re-auth for the destructive erasure. Required for password accounts; may be
+    # empty for OAuth-only accounts (which have no password to confirm).
+    password: str = ""
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr
+    password: str = ""  # re-auth; empty for OAuth-only accounts
+
+
+class ConfirmEmailChangeRequest(BaseModel):
+    token: str = Field(min_length=1)
+
+
+class SessionResponse(BaseModel):
+    """One active refresh-token session (device) for the session-management UI."""
+
+    public_id: UUID
+    device_label: str | None
+    created_at: datetime
+    last_used_at: datetime | None
+    expires_at: datetime
+
+    model_config = {"from_attributes": True}
 
 
 class RefreshRequest(BaseModel):
