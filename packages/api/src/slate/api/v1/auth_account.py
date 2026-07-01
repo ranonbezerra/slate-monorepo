@@ -18,12 +18,31 @@ from slate.core.auth.schemas import (
     ConfirmEmailChangeRequest,
     DeleteAccountRequest,
     MessageResponse,
+    UpdateProfileRequest,
+    UserResponse,
 )
 from slate.deps.account import AccountServiceDep, EmailChangeServiceDep
 from slate.deps.auth import CurrentUserDep
 from slate.infrastructure.email.validation import EmailRejectedError
 
 router = APIRouter(prefix="/v1/auth", tags=["auth"])
+
+
+@router.patch("/me", response_model=UserResponse)
+async def update_profile(
+    current_user: CurrentUserDep,
+    service: AccountServiceDep,
+    body: UpdateProfileRequest,
+) -> UserResponse:
+    """Update the caller's profile (display name / locale / timezone)."""
+    updated = await service.update_profile(
+        current_user,
+        display_name=body.display_name,
+        locale=body.locale,
+        timezone=body.timezone,
+    )
+    return UserResponse.model_validate(updated)
+
 
 # Modest per-user cap: erasure re-auths with the password, so bound the attempts a
 # hijacked session could use to guess it. Export is a heavier read — cap it too.

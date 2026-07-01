@@ -5,10 +5,13 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from uuid import UUID
+from zoneinfo import available_timezones
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from slate.core.sanitization import sanitize_display_name
+
+_LOCALE_RE = re.compile(r"^[a-z]{2,3}(-[A-Z]{2})?$")
 
 
 def _validate_password_complexity(v: str) -> str:
@@ -49,6 +52,33 @@ class RegisterRequest(BaseModel):
     @classmethod
     def password_complexity(cls, v: str) -> str:
         return _validate_password_complexity(v)
+
+
+class UpdateProfileRequest(BaseModel):
+    """Partial profile update — any omitted field is left unchanged."""
+
+    display_name: str | None = Field(default=None, min_length=1, max_length=100)
+    locale: str | None = Field(default=None, max_length=10)
+    timezone: str | None = Field(default=None, max_length=64)
+
+    @field_validator("display_name")
+    @classmethod
+    def _clean_display_name(cls, v: str | None) -> str | None:
+        return sanitize_display_name(v) if v is not None else None
+
+    @field_validator("locale")
+    @classmethod
+    def _valid_locale(cls, v: str | None) -> str | None:
+        if v is not None and not _LOCALE_RE.match(v):
+            raise ValueError("Invalid locale (expected e.g. 'en' or 'pt-BR')")
+        return v
+
+    @field_validator("timezone")
+    @classmethod
+    def _valid_timezone(cls, v: str | None) -> str | None:
+        if v is not None and v not in available_timezones():
+            raise ValueError("Unknown timezone")
+        return v
 
 
 class LoginRequest(BaseModel):
@@ -204,6 +234,7 @@ __all__ = [
     "ResendVerificationRequest",
     "ResetPasswordRequest",
     "TokenResponse",
+    "UpdateProfileRequest",
     "UserResponse",
     "VerifyEmailRequest",
 ]

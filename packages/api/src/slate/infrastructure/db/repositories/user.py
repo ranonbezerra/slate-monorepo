@@ -111,6 +111,24 @@ class UserRepository:
         user.email_verified = True
         await self._session.flush()
 
+    async def update_profile(
+        self,
+        user: User,
+        *,
+        display_name: str | None,
+        locale: str | None,
+        timezone: str | None,
+    ) -> User:
+        """Apply the provided (non-None) profile fields to *user*."""
+        if display_name is not None:
+            user.display_name = display_name
+        if locale is not None:
+            user.locale = locale
+        if timezone is not None:
+            user.timezone = timezone
+        await self._session.flush()
+        return user
+
     async def set_password_and_bump(self, user: User, password_hash: str) -> None:
         """Set *user*'s password hash and bump ``token_version`` in one flush.
 
