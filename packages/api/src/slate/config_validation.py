@@ -60,7 +60,11 @@ def validate_production_settings(s: Settings) -> None:
         )
 
     bad_origin = next(
-        (o for o in s.cors_origins if o == "*" or o.startswith(("http://localhost", "http://127."))),
+        (
+            o
+            for o in s.cors_origins
+            if o == "*" or o.startswith(("http://localhost", "http://127."))
+        ),
         None,
     )
     if bad_origin is not None:
