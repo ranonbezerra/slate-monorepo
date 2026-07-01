@@ -1,45 +1,17 @@
-"""Cache observability + reference-tier tests (ROADMAP Epic 18 Phase 4)."""
+"""Reference-tier caching tests (genres, platforms) — ROADMAP Epic 18.
+
+The ``/internal/v1/cache/stats`` + ``/cache/flush`` endpoint tests live in
+``test_admin_cache.py`` (they're backoffice, admin-gated).
+"""
 
 from __future__ import annotations
 
 from types import SimpleNamespace
 from typing import Any
 
-from httpx import AsyncClient
-
 from slate.core.library.service import LibraryService
 from slate.infrastructure.cache.keys import reference_key
-from slate.infrastructure.cache.layer import cached_call, reset_cache_stats
 from tests.test_cache_layer import FakeCache
-
-# ── /v1/cache/stats endpoint ─────────────────────────────────────────────
-
-
-async def test_cache_stats_endpoint_reports_counters(
-    async_client: AsyncClient, auth_headers: dict[str, str]
-) -> None:
-    reset_cache_stats()
-    cache = FakeCache()
-
-    async def compute() -> int:
-        return 1
-
-    # One miss then one hit under a known namespace.
-    await cached_call(cache=cache, key="k", ttl_seconds=10, namespace="probe", compute=compute)
-    await cached_call(cache=cache, key="k", ttl_seconds=10, namespace="probe", compute=compute)
-
-    resp = await async_client.get("/v1/cache/stats", headers=auth_headers)
-
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["probe"] == {"hit": 1, "miss": 1, "hit_rate": 0.5}
-
-
-async def test_cache_stats_endpoint_requires_auth(async_client: AsyncClient) -> None:
-    """The namespace telemetry is internal — unauthenticated calls are rejected."""
-    resp = await async_client.get("/v1/cache/stats")
-    assert resp.status_code == 401
-
 
 # ── Reference tier: list_genres ──────────────────────────────────────────
 

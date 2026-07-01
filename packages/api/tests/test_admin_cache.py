@@ -8,7 +8,7 @@ from httpx import AsyncClient
 from sqlalchemy import func, select
 
 from slate.core.cache.invalidation import _ALL_NAMESPACES, invalidate_all_cache
-from slate.infrastructure.cache.layer import process_tier
+from slate.infrastructure.cache.layer import cached_call, process_tier, reset_cache_stats
 from slate.infrastructure.db.models import AdminAuditLog, User
 from slate.infrastructure.db.repositories.admin import AdminRepository
 from tests.conftest import _TestSessionFactory
@@ -85,4 +85,36 @@ class TestFlushEndpoint:
 
     async def test_unauthenticated_rejected(self, async_client: AsyncClient) -> None:
         resp = await async_client.post("/internal/v1/cache/flush")
+        assert resp.status_code == 401
+
+
+# ── GET /internal/v1/cache/stats (admin observability) ───────────────────
+
+
+class TestStatsEndpoint:
+    async def test_admin_reads_counters(self, async_client: AsyncClient) -> None:
+        reset_cache_stats()
+        cache = FakeCache()
+
+        async def compute() -> int:
+            return 1
+
+        # One miss then one hit under a known namespace.
+        await cached_call(cache=cache, key="k", ttl_seconds=10, namespace="probe", compute=compute)
+        await cached_call(cache=cache, key="k", ttl_seconds=10, namespace="probe", compute=compute)
+
+        headers = await _admin_headers(async_client, "statsadmin@example.com")
+        resp = await async_client.get("/internal/v1/cache/stats", headers=headers)
+
+        assert resp.status_code == 200
+        assert resp.json()["probe"] == {"hit": 1, "miss": 1, "hit_rate": 0.5}
+
+    async def test_non_admin_forbidden(self, async_client: AsyncClient) -> None:
+        tokens = await _register(async_client, "statsplain@example.com")
+        headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+        resp = await async_client.get("/internal/v1/cache/stats", headers=headers)
+        assert resp.status_code == 403
+
+    async def test_unauthenticated_rejected(self, async_client: AsyncClient) -> None:
+        resp = await async_client.get("/internal/v1/cache/stats")
         assert resp.status_code == 401

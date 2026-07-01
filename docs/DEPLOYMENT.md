@@ -427,7 +427,7 @@ to the box; 256–512 MB is ample for a single-VPS deployment.
 **Operational knobs** (all env, see `config.py`): `CACHE_ENABLED=false` is a
 global kill-switch (every read degrades to a live compute); per-namespace TTLs
 are `*_CACHE_TTL_SECONDS`; the in-process reference tier is
-`REFERENCE_PROCESS_TTL_SECONDS`. Watch hit-rates via `GET /v1/cache/stats` (or
+`REFERENCE_PROCESS_TTL_SECONDS`. Watch hit-rates via `GET /internal/v1/cache/stats` (or
 `make cache-stats`) and tune the TTLs against real traffic.
 
 ---
