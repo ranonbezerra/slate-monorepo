@@ -52,29 +52,32 @@ def evaluate_local_relevance(
 ) -> RelevanceVerdict:
     """Grade whether the retrieved local history is enough to ground a recap.
 
-    Deterministic and model-free: counts the content-bearing sessions and the distinct
-    "interesting" tokens (proper nouns / numbers) across them.
+    Deterministic and model-free: measures the distinct "interesting" tokens (proper
+    nouns / numbers) across the content-bearing retrieved sessions.
 
-    - ``incorrect`` — no local history, or too thin to ground on → escalate to web.
-    - ``correct`` — enough sessions *and* enough concrete content → the cheap local path.
-    - ``ambiguous`` — borderline → escalate and let the deep path blend local + web.
+    - ``correct`` — stay on the cheap quick path. This covers **both** rich local history
+      (enough to ground on) **and** a cold start (no history at all — a new game / first
+      session). Escalating a game with zero player context to web research is expensive
+      and low-value; the quick recap already handles first sessions well, and deep stays a
+      deliberate manual choice there.
+    - ``incorrect`` — the player *has* played but the notes are too thin to ground on →
+      deep web research can genuinely augment them.
+    - ``ambiguous`` — borderline → let the deep path blend local + web.
     """
     content = [s for s in sessions if (s.wrap_up_text or s.extracted_state)]
     if not content:
-        return "incorrect"
+        return "correct"  # cold start: quick, not deep (see docstring — this is the cost guard)
 
     tokens: set[str] = set()
     for session in content:
         tokens |= extract_interesting_tokens(_session_text(session))
     richness = len(tokens)
 
-    if len(content) >= settings.adaptive_min_correct_sessions and (
-        richness >= settings.adaptive_rich_token_min
-    ):
-        return "correct"
+    if richness >= settings.adaptive_rich_token_min:
+        return "correct"  # enough concrete local content — even a single detailed note
     if richness < settings.adaptive_sparse_token_max:
-        return "incorrect"
-    return "ambiguous"
+        return "incorrect"  # played, but notes too thin → deep augments
+    return "ambiguous"  # borderline
 
 
 def route_recap(verdict: RelevanceVerdict, *, entitled_to_deep: bool) -> RecapPath:

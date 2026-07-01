@@ -56,12 +56,13 @@ class Settings(BaseSettings):
     recap_retrieval: str = "recent"  # recent | semantic — the A/B grounding source
 
     # ── Corrective / Adaptive RAG: relevance-gated recap routing (Epic 29) ──
-    # When `mode="auto"`, a relevance evaluator over the retrieved local history
-    # picks quick (local RAG is enough) vs deep (escalate to web research).
-    adaptive_recap_enabled: bool = False  # feature flag / A/B toggle
-    adaptive_min_correct_sessions: int = 2  # >= this many rich sessions ⇒ "correct" (quick)
-    adaptive_rich_token_min: int = 12  # distinct interesting tokens for a "correct" verdict
-    adaptive_sparse_token_max: int = 5  # below this ⇒ "incorrect" (escalate)
+    # When `mode="auto"`, a relevance evaluator over the retrieved local history picks
+    # quick (local RAG is enough, OR a cold-start new game) vs deep (the player has
+    # played but the notes are too thin — web research augments). A new game never
+    # auto-escalates to the expensive deep path — that keeps the cost bounded.
+    adaptive_recap_enabled: bool = True  # feature flag / A/B toggle
+    adaptive_rich_token_min: int = 12  # distinct interesting tokens ⇒ "correct" (quick)
+    adaptive_sparse_token_max: int = 5  # below this (but non-empty) ⇒ "incorrect" (escalate)
     # Placeholder entitlement gate: a free-tier user is never auto-escalated to the
     # paid deep path. Replaced by a real per-user tier check when monetization lands.
     adaptive_deep_entitled_default: bool = True

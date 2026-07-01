@@ -122,17 +122,19 @@ def adaptive_cases() -> list[AdaptiveCase]:
             ),
             ideal_path="quick",
         ),
-        # Thin: one sparse note → not enough to ground; escalate to web.
+        # Thin: one sparse note → the player has played but there's nothing concrete to
+        # ground on; deep web research augments it.
         AdaptiveCase(
             id="thin_one_note",
             sessions=(("played a bit", None),),
             ideal_path="deep",
         ),
-        # Empty: no prior history at all → escalate.
+        # Cold start: a brand-new game with no history → quick, never deep (the cost
+        # guard). Deep on a game with zero player context is expensive and low-value.
         AdaptiveCase(
-            id="no_history",
+            id="new_game_cold_start",
             sessions=(),
-            ideal_path="deep",
+            ideal_path="quick",
         ),
     ]
 

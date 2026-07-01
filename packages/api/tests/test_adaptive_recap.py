@@ -57,10 +57,13 @@ class TestRelevanceEvaluator:
         sessions = [_ns("cleared the castle", _RICH_A), _ns("ran the heist", _RICH_B)]
         assert evaluate_local_relevance(sessions, _settings()) == "correct"
 
-    def test_no_history_is_incorrect(self) -> None:
-        assert evaluate_local_relevance([], _settings()) == "incorrect"
+    def test_cold_start_stays_quick(self) -> None:
+        # New game / first session: no history → quick, NOT deep. A brand-new game must
+        # never auto-escalate to the expensive web path (the cost guard).
+        assert evaluate_local_relevance([], _settings()) == "correct"
 
     def test_thin_history_is_incorrect(self) -> None:
+        # Played, but the note carries no concrete tokens → deep can augment.
         assert evaluate_local_relevance([_ns("played a bit")], _settings()) == "incorrect"
 
     def test_borderline_history_is_ambiguous(self) -> None:
@@ -168,6 +171,14 @@ class TestResolveAutoMode:
             await _seed(s, user, entry, "played a bit", {"location": "somewhere"})
             await s.commit()
         assert await _resolve(entry.id, enabled=True, entitled=False) == "quick"
+
+    async def test_new_game_cold_start_routes_quick(self) -> None:
+        # No prior sessions at all → a new game must stay quick (never auto-deep). This
+        # is the cost guard: adding games shouldn't fan out into expensive web research.
+        async with _TestSessionFactory() as s:
+            _, entry = await _fixtures(s)
+            await s.commit()
+        assert await _resolve(entry.id, enabled=True, entitled=True) == "quick"
 
     async def test_disabled_flag_stays_quick(self) -> None:
         async with _TestSessionFactory() as s:
