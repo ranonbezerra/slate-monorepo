@@ -119,8 +119,8 @@ class TestEmailChange:
             headers=auth_headers,
             json={
                 "new_email": "x@example.com",
-                "password": "WrongPass123",
-            },  # pragma: allowlist secret
+                "password": "WrongPass123",  # pragma: allowlist secret
+            },
         )
         assert resp.status_code == 403
 
