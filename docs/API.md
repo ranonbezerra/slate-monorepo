@@ -93,7 +93,10 @@ Content-Type: application/json
 | POST | `/login` | Get access + refresh tokens |
 | POST | `/refresh` | Refresh access token |
 | POST | `/logout` | Revoke refresh token |
+| POST | `/logout-all` | Revoke every session (token_version bump) |
 | GET | `/me` | Current user profile |
+| GET | `/me/export` | Export the caller's personal data (GDPR/LGPD portability) |
+| POST | `/delete-account` | Permanently erase the account (password re-auth; GDPR/LGPD erasure) |
 
 The auth surface also includes (see the live `/docs` for schemas):
 

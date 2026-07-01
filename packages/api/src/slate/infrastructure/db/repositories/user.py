@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import ColumnElement, CursorResult, func, or_, select, update
+from sqlalchemy import ColumnElement, CursorResult, delete, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -121,6 +121,16 @@ class UserRepository:
         """Increment *user_id*'s ``token_version`` (kills outstanding access tokens)."""
         stmt = update(User).where(User.id == user_id).values(token_version=User.token_version + 1)
         await self._session.execute(stmt)
+
+    async def hard_delete(self, user_id: int) -> None:
+        """Permanently delete *user_id* (GDPR/LGPD erasure).
+
+        A real ``DELETE`` (not the soft-delete mixin): FK cascades remove the
+        user's owned rows (library, play sessions, captures, picks, sessions,
+        MFA, OAuth), while audit references are ``ON DELETE SET NULL`` so the
+        admin trail survives without pointing at a deleted user.
+        """
+        await self._session.execute(delete(User).where(User.id == user_id))
 
     async def consume_reset_and_set_password(
         self, *, user_id: int, password_hash: str, expected_token_version: int

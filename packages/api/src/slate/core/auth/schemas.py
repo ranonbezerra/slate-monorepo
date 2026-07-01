@@ -54,6 +54,12 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class DeleteAccountRequest(BaseModel):
+    # Re-auth for the destructive erasure. Required for password accounts; may be
+    # empty for OAuth-only accounts (which have no password to confirm).
+    password: str = ""
+
+
 class RefreshRequest(BaseModel):
     # Optional so cookie-mode web callers can POST refresh/logout with no body;
     # in that case the token is read from the httpOnly cookie instead.
