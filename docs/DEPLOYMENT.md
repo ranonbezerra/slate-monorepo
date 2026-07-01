@@ -408,21 +408,23 @@ backstop for failures that only surface against real production data.
 
 ### 1.11 Redis memory & the cache layer (Epic 18)
 
-Redis holds two kinds of data: **durable counters** (rate limits, cost-guard
-usage) and the **application cache** (deep recaps, stats, LLM completions, web
-research, IGDB, reference data). The cache is content-addressed and TTL-only, so
-keys accumulate orphans by design and must be evictable under memory pressure.
-Bound Redis RAM and let it evict cold cache keys:
+Redis holds three kinds of data: **TTL'd keys with a TTL** — the application
+cache (deep recaps, stats, LLM completions, web research, IGDB, reference data),
+the rate-limit / cost-guard counters, and OAuth state — and the **Taskiq job
+queue** (broker LISTs), which have **no TTL**. The compose `redis` service
+already bounds RAM and picks the eviction policy accordingly:
 
 ```conf
-# redis.conf (or `--maxmemory` flags)
-maxmemory 512mb
-maxmemory-policy allkeys-lru   # evict least-recently-used keys when full
+# already set in docker-compose.yml's redis command
+maxmemory 400mb
+maxmemory-policy volatile-lru   # evict least-recently-used key *that has a TTL*
 ```
 
-`allkeys-lru` is safe here because every cached value is reconstructible (a miss
-just recomputes) and the durable counters carry their own TTLs. Size `maxmemory`
-to the box; 256–512 MB is ample for a single-VPS deployment.
+Use **`volatile-lru`, not `allkeys-lru`**: only keys with a TTL are eviction
+candidates, so under memory pressure Redis drops cold cache entries (safe — a
+miss just recomputes) while the **no-TTL Taskiq queue is never evicted**, so
+queued background jobs survive. `allkeys-lru` would let Redis discard queued jobs
+— data loss. Size `maxmemory` to the box; 256–512 MB is ample for a single VPS.
 
 **Operational knobs** (all env, see `config.py`): `CACHE_ENABLED=false` is a
 global kill-switch (every read degrades to a live compute); per-namespace TTLs
