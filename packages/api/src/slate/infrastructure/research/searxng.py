@@ -34,7 +34,7 @@ def _resolve_public_ip(hostname: str) -> str | None:
     except (socket.gaierror, UnicodeError):
         return None
 
-    addresses = [info[4][0] for info in infos]
+    addresses = [str(info[4][0]) for info in infos]
     if not addresses:
         return None
 
@@ -105,7 +105,7 @@ class SearxngResearchClient(AbstractResearchClient):
 
         hostname = urlsplit(url).hostname
         pinned_ip = _resolve_public_ip(hostname) if hostname else None
-        if pinned_ip is None:
+        if hostname is None or pinned_ip is None:
             logger.warning("searxng_scrape_blocked", url=url)
             return ""
 
