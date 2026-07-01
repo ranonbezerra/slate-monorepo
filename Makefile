@@ -363,6 +363,22 @@ fmt: api-fmt web-fmt backoffice-fmt ## Format all packages
 check: lint test ## Quick check (lint + test, no security/coverage)
 
 # ─────────────────────────────────────────────
+# Security audits (LLM-driven, read-only). See audits/README.md.
+# Reports land in audits/reports/. Knobs: AUDIT_MODEL, AUDIT_PARALLEL, AUDIT_MAX_BUDGET.
+# ─────────────────────────────────────────────
+
+.PHONY: audit audit-list
+audit: ## Run ALL security audits (LLM agents, read-only) -> audits/reports/
+	@bash scripts/run-audit.sh
+
+audit-list: ## List audit modules (run one with: make audit-<name>, e.g. audit-auth)
+	@bash scripts/run-audit.sh --list
+
+# Pattern target: `make audit-auth`, `make audit-llm`, ... (one per audits/<name>.md)
+audit-%:
+	@bash scripts/run-audit.sh $*
+
+# ─────────────────────────────────────────────
 # Help
 # ─────────────────────────────────────────────
 
