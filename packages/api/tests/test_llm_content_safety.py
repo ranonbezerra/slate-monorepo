@@ -1,15 +1,15 @@
 """Phase 2, Block 2 — LLM content safety.
 
 Covers (a) data-delimiting of untrusted user/shared/library text in the recap
-and concierge prompts as a stored-prompt-injection defense, and (b) the
-concierge topic guard that stops the chat being used as a free general-purpose
+and let_me_carry prompts as a stored-prompt-injection defense, and (b) the
+let_me_carry topic guard that stops the chat being used as a free general-purpose
 LLM proxy. Pure-function and rendered-prompt assertions — no real LLM (the Dummy
 provider is used where a model is needed).
 """
 
 from __future__ import annotations
 
-from slate.core.concierge.service import SYSTEM_PROMPT
+from slate.core.let_me_carry.service import SYSTEM_PROMPT
 from slate.core.sanitization import (
     USER_DATA_CLOSE,
     USER_DATA_OPEN,
@@ -145,7 +145,7 @@ def test_pick_selection_wraps_candidate_titles_not_ids() -> None:
     assert f"{USER_DATA_OPEN}{pid}" not in rendered
 
 
-# -- concierge tool output (DB-free) --------------------------------------------
+# -- let_me_carry tool output (DB-free) --------------------------------------------
 
 
 class _StubGame:
@@ -169,7 +169,7 @@ class _StubEntry:
 
 
 def test_entry_line_fences_title_and_next_action() -> None:
-    from slate.infrastructure.agent.concierge.tools import _entry_line
+    from slate.infrastructure.agent.let_me_carry.tools import _entry_line
 
     line = _entry_line(_StubEntry(_BREAKOUT, _INJECTION))
     # Title + next action fenced; forged close tag from the title defanged.
@@ -179,10 +179,10 @@ def test_entry_line_fences_title_and_next_action() -> None:
     assert "(id: 22222222-2222-4222-8222-222222222222)" in line
 
 
-# -- concierge topic guard + system rules ---------------------------------------
+# -- let_me_carry topic guard + system rules ---------------------------------------
 
 
-def test_concierge_system_prompt_has_topic_refusal() -> None:
+def test_let_me_carry_system_prompt_has_topic_refusal() -> None:
     assert "ONLY help" in SYSTEM_PROMPT
     assert "general-purpose assistant" in SYSTEM_PROMPT
     # Names representative off-topic asks it must refuse.
@@ -191,7 +191,7 @@ def test_concierge_system_prompt_has_topic_refusal() -> None:
     assert "decline" in SYSTEM_PROMPT
 
 
-def test_concierge_system_prompt_has_user_data_rule() -> None:
+def test_let_me_carry_system_prompt_has_user_data_rule() -> None:
     assert "<user_data>" in SYSTEM_PROMPT
     assert "never instructions" in SYSTEM_PROMPT
     assert "NEVER" in SYSTEM_PROMPT

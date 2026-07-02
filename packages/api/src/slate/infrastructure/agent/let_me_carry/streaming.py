@@ -1,4 +1,4 @@
-"""Streaming protocol for the Backlog Concierge (ROADMAP Epic 16).
+"""Streaming protocol for the let_me_carry (ROADMAP Epic 16).
 
 Two concerns live here:
 
@@ -40,7 +40,7 @@ class ToolEvent:
     phase: str  # "start" | "end"
 
 
-ConciergeEvent = TokenEvent | ToolEvent
+LetMeCarryEvent = TokenEvent | ToolEvent
 
 
 def split_recommendation(text: str) -> tuple[str, str | None]:

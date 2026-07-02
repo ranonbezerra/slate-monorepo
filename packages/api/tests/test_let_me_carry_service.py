@@ -1,4 +1,4 @@
-"""Tests for ConciergeService: the UUID guard, reroll, and degrade paths."""
+"""Tests for LetMeCarryService: the UUID guard, reroll, and degrade paths."""
 
 from __future__ import annotations
 
@@ -8,15 +8,15 @@ from uuid import uuid4
 
 import pytest
 
-from slate.core.concierge.service import ConciergeService
+from slate.core.let_me_carry.service import LetMeCarryService
 from slate.core.stats.service import StatsService
-from slate.infrastructure.agent.concierge.base import (
-    AbstractConciergeAgent,
-    ConciergeReply,
-    ConciergeRequest,
+from slate.infrastructure.agent.let_me_carry.base import (
+    AbstractLetMeCarryAgent,
+    LetMeCarryReply,
+    LetMeCarryRequest,
 )
-from slate.infrastructure.agent.concierge.dummy import DummyConciergeAgent
-from slate.infrastructure.agent.concierge.streaming import (
+from slate.infrastructure.agent.let_me_carry.dummy import DummyLetMeCarryAgent
+from slate.infrastructure.agent.let_me_carry.streaming import (
     split_recommendation as _split_recommendation,
 )
 from slate.infrastructure.db.repositories.library import LibraryRepository
@@ -51,8 +51,8 @@ async def _seed(session: Any, *, with_entry: bool = True) -> tuple[int, str | No
     return user.id, str(entry.public_id)
 
 
-def _service(session: Any, agent: AbstractConciergeAgent) -> ConciergeService:
-    return ConciergeService(
+def _service(session: Any, agent: AbstractLetMeCarryAgent) -> LetMeCarryService:
+    return LetMeCarryService(
         library_repo=LibraryRepository(session),
         play_session_repo=PlaySessionRepository(session),
         stats_service=StatsService(StatsRepository(session)),
@@ -61,29 +61,29 @@ def _service(session: Any, agent: AbstractConciergeAgent) -> ConciergeService:
     )
 
 
-class _AlwaysInvalidAgent(AbstractConciergeAgent):
+class _AlwaysInvalidAgent(AbstractLetMeCarryAgent):
     """Recommends a non-existent game on every turn (forces degrade)."""
 
-    async def respond(self, req: ConciergeRequest) -> ConciergeReply:
-        return ConciergeReply(text=f"Try this one.\nRECOMMEND: {_FAKE_ID}")
+    async def respond(self, req: LetMeCarryRequest) -> LetMeCarryReply:
+        return LetMeCarryReply(text=f"Try this one.\nRECOMMEND: {_FAKE_ID}")
 
 
-class _NoPickAgent(AbstractConciergeAgent):
+class _NoPickAgent(AbstractLetMeCarryAgent):
     """Chats without ever recommending a specific game."""
 
-    async def respond(self, req: ConciergeRequest) -> ConciergeReply:
-        return ConciergeReply(text="Tell me how much time you have and I'll suggest something.")
+    async def respond(self, req: LetMeCarryRequest) -> LetMeCarryReply:
+        return LetMeCarryReply(text="Tell me how much time you have and I'll suggest something.")
 
 
-class _CapturingAgent(AbstractConciergeAgent):
+class _CapturingAgent(AbstractLetMeCarryAgent):
     """Records the thread_id it is invoked with (no pick, so no reroll)."""
 
     def __init__(self) -> None:
         self.seen_thread_ids: list[str] = []
 
-    async def respond(self, req: ConciergeRequest) -> ConciergeReply:
+    async def respond(self, req: LetMeCarryRequest) -> LetMeCarryReply:
         self.seen_thread_ids.append(req.thread_id)
-        return ConciergeReply(text="Hi there.")
+        return LetMeCarryReply(text="Hi there.")
 
 
 async def test_thread_id_is_namespaced_per_user() -> None:
@@ -174,7 +174,7 @@ async def test_valid_recommendation_passes_through() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        service = _service(session, DummyConciergeAgent())
+        service = _service(session, DummyLetMeCarryAgent())
         text = await service.reply(
             user_id=user_id,
             user_created_at=datetime.now(UTC),
@@ -193,7 +193,7 @@ async def test_invalid_recommendation_rerolls_to_valid() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        service = _service(session, DummyConciergeAgent())
+        service = _service(session, DummyLetMeCarryAgent())
         # "[invalid]" makes the dummy recommend a fake id on the first turn;
         # the reroll (no marker) then recommends a real one.
         text = await service.reply(
@@ -247,7 +247,7 @@ async def test_empty_library_makes_no_pick() -> None:
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        service = _service(session, DummyConciergeAgent())
+        service = _service(session, DummyLetMeCarryAgent())
         text = await service.reply(
             user_id=user_id,
             user_created_at=datetime.now(UTC),
@@ -258,7 +258,7 @@ async def test_empty_library_makes_no_pick() -> None:
         assert "RECOMMEND" not in text
 
 
-async def _collect(service: ConciergeService, **kwargs: Any) -> list[dict[str, Any]]:
+async def _collect(service: LetMeCarryService, **kwargs: Any) -> list[dict[str, Any]]:
     return [e async for e in service.reply_stream(**kwargs)]
 
 
@@ -269,7 +269,7 @@ async def test_reply_stream_valid_recommendation() -> None:
 
     async with _TestSessionFactory() as session:
         events = await _collect(
-            _service(session, DummyConciergeAgent()),
+            _service(session, DummyLetMeCarryAgent()),
             user_id=user_id,
             user_created_at=datetime.now(UTC),
             thread_id="s1",
@@ -313,21 +313,21 @@ async def test_reply_stream_invalid_recommendation_degrades() -> None:
 @pytest.mark.parametrize(
     ("provider", "app_env", "expected"),
     [
-        ("dummy", "testing", "DummyConciergeAgent"),
-        ("langgraph", "production", "LangGraphConciergeAgent"),
+        ("dummy", "testing", "DummyLetMeCarryAgent"),
+        ("langgraph", "production", "LangGraphLetMeCarryAgent"),
     ],
 )
 def test_factory_selects_provider(provider: str, app_env: str, expected: str) -> None:
     from slate.config import Settings
-    from slate.infrastructure.agent.concierge.factory import get_concierge_agent
+    from slate.infrastructure.agent.let_me_carry.factory import get_let_me_carry_agent
 
-    agent = get_concierge_agent(Settings(concierge_provider=provider, app_env=app_env))
+    agent = get_let_me_carry_agent(Settings(let_me_carry_provider=provider, app_env=app_env))
     assert type(agent).__name__ == expected
 
 
 def test_factory_rejects_unknown_provider() -> None:
     from slate.config import Settings
-    from slate.infrastructure.agent.concierge.factory import get_concierge_agent
+    from slate.infrastructure.agent.let_me_carry.factory import get_let_me_carry_agent
 
-    with pytest.raises(ValueError, match="Unknown concierge provider"):
-        get_concierge_agent(Settings(concierge_provider="bogus", app_env="production"))
+    with pytest.raises(ValueError, match="Unknown let_me_carry provider"):
+        get_let_me_carry_agent(Settings(let_me_carry_provider="bogus", app_env="production"))

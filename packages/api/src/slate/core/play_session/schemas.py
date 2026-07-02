@@ -15,7 +15,7 @@ class ExtractedState(BaseModel):
     """Structured state extracted from a play_session wrap_up by the LLM.
 
     Mirrors the shape persisted by ``extract_wrap_up_state_task`` /
-    ``ConciergeService`` (see ``infrastructure.llm.base.ExtractedState``). All
+    ``LetMeCarryService`` (see ``infrastructure.llm.base.ExtractedState``). All
     fields are optional so older rows and partial extractions still validate;
     unknown keys are ignored for forward/backward compatibility with the JSONB
     column.

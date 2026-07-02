@@ -1,10 +1,10 @@
-"""Read-only tool functions for the Backlog Concierge.
+"""Read-only tool functions for the let_me_carry.
 
 Thin wrappers over existing repositories/services, returning LLM-friendly text.
 Deliberately framework-free (no LangChain import) so the dummy provider and the
 unit tests stay model-free; the LangGraph provider wraps these as tool objects.
 
-Every function is scoped to a ``user_id`` — the Concierge can only read the
+Every function is scoped to a ``user_id`` — the LetMeCarry can only read the
 caller's own data.
 """
 
@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 
 from slate.core.sanitization import wrap_user_data
 from slate.core.stats.service import StatsService
-from slate.infrastructure.agent.concierge.base import ConciergeTool
+from slate.infrastructure.agent.let_me_carry.base import LetMeCarryTool
 from slate.infrastructure.db.models import LibraryEntry
 from slate.infrastructure.db.repositories.library import LibraryRepository
 from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
@@ -30,7 +30,7 @@ def _entry_line(entry: LibraryEntry) -> str:
     """One-line summary of a library entry, including its id for recommendations.
 
     Game titles and saved next-actions are user/shared content, so they are
-    fenced in a <user_data> block (the concierge SYSTEM prompt tells the model to
+    fenced in a <user_data> block (the let_me_carry SYSTEM prompt tells the model to
     treat that as DATA, never instructions). Platform, status, and id are trusted
     system values left unwrapped so the model can still use them for filtering
     and recommendations.
@@ -221,14 +221,14 @@ class SessionFitArgs(BaseModel):
     minutes: int = Field(..., description="Minutes available to play right now.")
 
 
-def build_concierge_tools(
+def build_let_me_carry_tools(
     *,
     user_id: int,
     user_created_at: datetime,
     library_repo: LibraryRepository,
     play_session_repo: PlaySessionRepository,
     stats_service: StatsService,
-) -> list[ConciergeTool]:
+) -> list[LetMeCarryTool]:
     """Build the per-request tool set, each bound to *user_id* and the repos."""
 
     async def _search(
@@ -259,7 +259,7 @@ def build_concierge_tools(
         )
 
     return [
-        ConciergeTool(
+        LetMeCarryTool(
             name="search_library",
             description="List the user's games, optionally filtered by status, platform, or "
             "genre. Returns each game with its id — use that id with the other tools and "
@@ -267,21 +267,21 @@ def build_concierge_tools(
             args_schema=SearchLibraryArgs,
             coroutine=_search,
         ),
-        ConciergeTool(
+        LetMeCarryTool(
             name="get_play_session_history",
             description="Recent session notes for one game: where the player left off and their "
             "saved next action.",
             args_schema=PlaySessionHistoryArgs,
             coroutine=_history,
         ),
-        ConciergeTool(
+        LetMeCarryTool(
             name="get_play_stats",
             description="The user's overall play stats: totals, recent activity, top genres and "
             "platforms.",
             args_schema=PlayStatsArgs,
             coroutine=_stats,
         ),
-        ConciergeTool(
+        LetMeCarryTool(
             name="estimate_session_fit",
             description="A 0-100 score for how well one game fits the minutes the player has now.",
             args_schema=SessionFitArgs,

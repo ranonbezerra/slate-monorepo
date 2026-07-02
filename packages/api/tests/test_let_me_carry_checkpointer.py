@@ -1,4 +1,4 @@
-"""Tests for the Concierge thread checkpointer selection (ROADMAP Epic 16).
+"""Tests for the LetMeCarry thread checkpointer selection (ROADMAP Epic 16).
 
 The live Postgres saver needs a real database (integration-only); here we cover
 the pure conninfo conversion and the memory-fallback selection.
@@ -12,8 +12,8 @@ import pytest
 from langgraph.checkpoint.memory import MemorySaver
 
 from slate.config import Settings
-from slate.infrastructure.agent.concierge import checkpointer as cp
-from slate.infrastructure.agent.concierge.checkpointer import (
+from slate.infrastructure.agent.let_me_carry import checkpointer as cp
+from slate.infrastructure.agent.let_me_carry.checkpointer import (
     get_checkpointer,
     to_psycopg_conninfo,
 )
@@ -36,7 +36,7 @@ def test_to_psycopg_conninfo_strips_asyncpg_driver() -> None:
 
 
 async def test_memory_checkpointer_is_selected_for_non_postgres() -> None:
-    saver = await get_checkpointer(Settings(concierge_checkpointer="memory"))
+    saver = await get_checkpointer(Settings(let_me_carry_checkpointer="memory"))
     assert isinstance(saver, MemorySaver)
 
 
@@ -51,7 +51,7 @@ async def test_postgres_branch_inits_once_then_caches(
         return sentinel
 
     monkeypatch.setattr(cp, "_init_postgres", _fake_init)
-    settings = Settings(concierge_checkpointer="postgres")
+    settings = Settings(let_me_carry_checkpointer="postgres")
 
     first = await get_checkpointer(settings)
     second = await get_checkpointer(settings)
@@ -68,5 +68,5 @@ async def test_postgres_init_failure_falls_back_to_memory(
         return None  # mimics a Postgres init failure
 
     monkeypatch.setattr(cp, "_init_postgres", _failed_init)
-    saver = await get_checkpointer(Settings(concierge_checkpointer="postgres"))
+    saver = await get_checkpointer(Settings(let_me_carry_checkpointer="postgres"))
     assert isinstance(saver, MemorySaver)

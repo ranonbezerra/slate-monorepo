@@ -1,4 +1,4 @@
-"""Tests for the Backlog Concierge SSE chat endpoint."""
+"""Tests for the let_me_carry SSE chat endpoint."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ def _parse_sse(body: str) -> list[dict[str, Any]]:
 
 
 async def test_chat_requires_auth(async_client: AsyncClient) -> None:
-    resp = await async_client.post("/v1/concierge/chat", json={"message": "hi"})
+    resp = await async_client.post("/v1/let_me_carry/chat", json={"message": "hi"})
     assert resp.status_code == 401
 
 
@@ -46,7 +46,7 @@ async def test_chat_streams_guarded_reply(
     await _seed_entry_for("test@example.com")
 
     resp = await async_client.post(
-        "/v1/concierge/chat",
+        "/v1/let_me_carry/chat",
         json={"message": "What should I play tonight?"},
         headers=auth_headers,
     )
@@ -71,7 +71,7 @@ async def test_chat_reuses_thread_id(
     await _seed_entry_for("test@example.com")
 
     resp = await async_client.post(
-        "/v1/concierge/chat",
+        "/v1/let_me_carry/chat",
         json={"message": "Anything good?", "thread_id": "my-thread-123"},
         headers=auth_headers,
     )
@@ -84,7 +84,7 @@ async def test_chat_rejects_empty_message(
     async_client: AsyncClient, auth_headers: dict[str, str]
 ) -> None:
     resp = await async_client.post(
-        "/v1/concierge/chat", json={"message": ""}, headers=auth_headers
+        "/v1/let_me_carry/chat", json={"message": ""}, headers=auth_headers
     )
     assert resp.status_code == 422
 
@@ -93,17 +93,17 @@ async def test_chat_emits_error_event_on_failure(
     async_client: AsyncClient, auth_headers: dict[str, str]
 ) -> None:
     """An agent failure degrades to a clean SSE error event, not a 500."""
-    from slate.deps.concierge import get_concierge_service
+    from slate.deps.let_me_carry import get_let_me_carry_service
     from slate.main import app
 
     class _BoomService:
         async def reply(self, **_: object) -> str:
             raise RuntimeError("model unavailable")
 
-    app.dependency_overrides[get_concierge_service] = _BoomService
+    app.dependency_overrides[get_let_me_carry_service] = _BoomService
     try:
         resp = await async_client.post(
-            "/v1/concierge/chat",
+            "/v1/let_me_carry/chat",
             json={"message": "what should I play?"},
             headers=auth_headers,
         )
@@ -113,7 +113,7 @@ async def test_chat_emits_error_event_on_failure(
         assert errors and "unavailable" in errors[0]["error"]
         assert any(e.get("done") for e in events)
     finally:
-        app.dependency_overrides.pop(get_concierge_service, None)
+        app.dependency_overrides.pop(get_let_me_carry_service, None)
 
 
 async def test_chat_times_out_without_hanging(
@@ -122,22 +122,22 @@ async def test_chat_times_out_without_hanging(
     """A stalled agent closes the stream with a timeout event, never hangs."""
     import asyncio
 
-    from slate.api.v1 import concierge as concierge_module
-    from slate.deps.concierge import get_concierge_service
+    from slate.api.v1 import let_me_carry as let_me_carry_module
+    from slate.deps.let_me_carry import get_let_me_carry_service
     from slate.main import app
 
     # Make the ceiling tiny and the agent slower than it.
-    monkeypatch.setattr(concierge_module, "_REPLY_TIMEOUT_SECONDS", 0.05)
+    monkeypatch.setattr(let_me_carry_module, "_REPLY_TIMEOUT_SECONDS", 0.05)
 
     class _SlowService:
         async def reply_stream(self, **_: object) -> Any:
             await asyncio.sleep(5)
             yield {"token": "too late"}
 
-    app.dependency_overrides[get_concierge_service] = _SlowService
+    app.dependency_overrides[get_let_me_carry_service] = _SlowService
     try:
         resp = await async_client.post(
-            "/v1/concierge/chat",
+            "/v1/let_me_carry/chat",
             json={"message": "what should I play?"},
             headers=auth_headers,
         )
@@ -147,4 +147,4 @@ async def test_chat_times_out_without_hanging(
         assert errors and "too long" in errors[0]["error"]
         assert any(e.get("done") for e in events)  # stream always closes
     finally:
-        app.dependency_overrides.pop(get_concierge_service, None)
+        app.dependency_overrides.pop(get_let_me_carry_service, None)

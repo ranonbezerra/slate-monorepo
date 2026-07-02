@@ -1,4 +1,4 @@
-"""Conversation-thread checkpointer for the Concierge (ROADMAP Epic 16).
+"""Conversation-thread checkpointer for the LetMeCarry (ROADMAP Epic 16).
 
 ``MemorySaver`` loses threads on restart and isn't shared across workers.
 ``AsyncPostgresSaver`` persists thread state to the existing PostgreSQL so
@@ -40,10 +40,10 @@ def to_psycopg_conninfo(database_url: str) -> str:
 async def get_checkpointer(settings: Settings) -> Any:
     """Return the configured checkpointer, falling back to the in-memory one.
 
-    ``concierge_checkpointer='postgres'`` persists threads to PostgreSQL; any
+    ``let_me_carry_checkpointer='postgres'`` persists threads to PostgreSQL; any
     other value (or a Postgres init failure) uses the in-memory saver.
     """
-    if settings.concierge_checkpointer != "postgres":
+    if settings.let_me_carry_checkpointer != "postgres":
         return _memory
     global _postgres, _postgres_tried
     if not _postgres_tried:
@@ -72,8 +72,8 @@ async def _init_postgres(settings: Settings) -> Any:  # pragma: no cover - needs
         await pool.open()
         saver = AsyncPostgresSaver(pool)  # type: ignore[arg-type]
         await saver.setup()  # idempotent: creates the checkpoint tables
-        logger.info("concierge_postgres_checkpointer_ready")
+        logger.info("let_me_carry_postgres_checkpointer_ready")
         return saver
     except Exception:
-        logger.warning("concierge_postgres_checkpointer_init_failed", exc_info=True)
+        logger.warning("let_me_carry_postgres_checkpointer_init_failed", exc_info=True)
         return None

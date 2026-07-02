@@ -1,4 +1,4 @@
-"""Unit tests for the Backlog Concierge write tool functions (Epic 12).
+"""Unit tests for the let_me_carry write tool functions (Epic 12).
 
 These exercise the same guard rails the REST surface enforces — UUID-existence
 on every pick and one active play_session per user — driving the tools directly so no
@@ -11,8 +11,8 @@ from typing import Any
 from uuid import uuid4
 
 from slate.config import settings
-from slate.infrastructure.agent.concierge.tools_write import (
-    build_concierge_write_tools,
+from slate.infrastructure.agent.let_me_carry.tools_write import (
+    build_let_me_carry_write_tools,
     generate_recap,
     set_status,
     start_play_session,
@@ -436,13 +436,13 @@ async def test_set_status_unknown_game() -> None:
 # -- builder --------------------------------------------------------------------
 
 
-async def test_build_concierge_write_tools_shapes() -> None:
+async def test_build_let_me_carry_write_tools_shapes() -> None:
     async with _TestSessionFactory() as session:
         user_id, _, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        tools = build_concierge_write_tools(
+        tools = build_let_me_carry_write_tools(
             user_id=user_id,
             library_repo=LibraryRepository(session),
             play_session_repo=PlaySessionRepository(session),

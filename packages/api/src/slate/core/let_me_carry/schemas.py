@@ -1,4 +1,4 @@
-"""Request schemas for the Backlog Concierge chat endpoint."""
+"""Request schemas for the let_me_carry chat endpoint."""
 
 from __future__ import annotations
 

@@ -91,14 +91,14 @@ class Settings(BaseSettings):
     deep_recap_rerank_enabled: bool = True
     deep_recap_rerank_top_n: int = 4  # keep the top-N after reranking; feeds synthesize
 
-    # ── Backlog Concierge (Epic 11) ──────────────────────────────────────
-    concierge_provider: str = "dummy"  # langgraph | dummy
+    # ── let_me_carry (Epic 11) ──────────────────────────────────────
+    let_me_carry_provider: str = "dummy"  # langgraph | dummy
     # Tool-calling model — qwen2.5-instruct: fast, coherent tool use.
     ollama_agent_model: str = "qwen2.5:7b-instruct"
-    concierge_agent_reasoning: bool = False
-    concierge_max_tool_loops: int = 6
-    concierge_checkpointer: str = "postgres"  # postgres survives restarts, else memory (Epic 16)
-    concierge_write_tools_enabled: bool = True  # write tools drive the pipeline (Epic 12)
+    let_me_carry_agent_reasoning: bool = False
+    let_me_carry_max_tool_loops: int = 6
+    let_me_carry_checkpointer: str = "postgres"  # survives restarts; else in-memory
+    let_me_carry_write_tools_enabled: bool = True  # write tools drive the pipeline (Epic 12)
 
     # ── STT ──────────────────────────────────────────────────────────────
     stt_provider: str = "dummy"
@@ -220,7 +220,7 @@ class Settings(BaseSettings):
     login_stepup_after_failures: int = 5
     login_stepup_window_seconds: int = 900
     rate_limit_register_per_minute: int = 5
-    rate_limit_concierge_chat_per_minute: int = 6
+    rate_limit_let_me_carry_chat_per_minute: int = 6
     rate_limit_play_session_recap_per_minute: int = 4
     rate_limit_pick_create_per_minute: int = 10
     rate_limit_capture_submit_per_minute: int = 15

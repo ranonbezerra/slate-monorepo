@@ -1,4 +1,4 @@
-"""Backlog Concierge service: runs the agent, then enforces the UUID guard.
+"""let_me_carry service: runs the agent, then enforces the UUID guard.
 
 Two paths share the same guard. ``reply`` is the buffered path — run to
 completion, validate the pick (reroll once, else degrade). ``reply_stream``
@@ -21,30 +21,30 @@ from slate.core.safety.pii import redact_pii
 from slate.core.sanitization import sanitize_untrusted_text
 from slate.core.stats.service import StatsService
 from slate.infrastructure.agent.base import AbstractRecapAgent
-from slate.infrastructure.agent.concierge.base import (
-    AbstractConciergeAgent,
-    ConciergeRequest,
-    ConciergeTool,
+from slate.infrastructure.agent.let_me_carry.base import (
+    AbstractLetMeCarryAgent,
+    LetMeCarryRequest,
+    LetMeCarryTool,
 )
-from slate.infrastructure.agent.concierge.streaming import (
+from slate.infrastructure.agent.let_me_carry.streaming import (
     RecommendationGate,
     TokenEvent,
     ToolEvent,
     split_recommendation,
 )
-from slate.infrastructure.agent.concierge.tools import (
+from slate.infrastructure.agent.let_me_carry.tools import (
     _resolve_entry,
-    build_concierge_tools,
+    build_let_me_carry_tools,
     validate_recommendation,
 )
-from slate.infrastructure.agent.concierge.tools_write import build_concierge_write_tools
+from slate.infrastructure.agent.let_me_carry.tools_write import build_let_me_carry_write_tools
 from slate.infrastructure.config.dynamic import dynamic_config
 from slate.infrastructure.db.repositories.library import LibraryRepository
 from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
 from slate.infrastructure.llm.base import AbstractLLMClient
 
 SYSTEM_PROMPT = (
-    "You are the Backlog Concierge for Slate — a friendly, concise gaming "
+    "You are let_me_carry, Slate's — a friendly, concise gaming "
     "companion that helps the player decide what to play from THEIR OWN library.\n"
     "\n"
     "SCOPE (hard limit): You ONLY help with this player's game library and gaming "
@@ -130,14 +130,14 @@ def _namespace_thread_id(user_id: int, thread_id: str) -> str:
     return f"{user_id}:{thread_id}"
 
 
-class ConciergeService:
+class LetMeCarryService:
     def __init__(
         self,
         *,
         library_repo: LibraryRepository,
         play_session_repo: PlaySessionRepository,
         stats_service: StatsService,
-        agent: AbstractConciergeAgent,
+        agent: AbstractLetMeCarryAgent,
         llm_client: AbstractLLMClient,
         recap_agent: AbstractRecapAgent | None = None,
         settings: Settings | None = None,
@@ -152,8 +152,8 @@ class ConciergeService:
 
     def _build_tools(
         self, user_id: int, user_created_at: datetime, *, write_tools_enabled: bool
-    ) -> list[ConciergeTool]:
-        tools = build_concierge_tools(
+    ) -> list[LetMeCarryTool]:
+        tools = build_let_me_carry_tools(
             user_id=user_id,
             user_created_at=user_created_at,
             library_repo=self._library_repo,
@@ -161,7 +161,7 @@ class ConciergeService:
             stats_service=self._stats_service,
         )
         if write_tools_enabled:
-            tools += build_concierge_write_tools(
+            tools += build_let_me_carry_write_tools(
                 user_id=user_id,
                 library_repo=self._library_repo,
                 play_session_repo=self._play_session_repo,
@@ -187,16 +187,16 @@ class ConciergeService:
         message = sanitize_untrusted_text(message)  # untrusted chat turn (Epic 26)
         verdict = detect_injection(message)
         if verdict.flagged:
-            logger.warning("concierge_injection_blocked", matches=list(verdict.matches))
+            logger.warning("let_me_carry_injection_blocked", matches=list(verdict.matches))
             return _INJECTION_REFUSAL
-        write_tools_enabled = await dynamic_config.get_bool("concierge_write_tools_enabled")
+        write_tools_enabled = await dynamic_config.get_bool("let_me_carry_write_tools_enabled")
         tools = self._build_tools(
             user_id, user_created_at, write_tools_enabled=write_tools_enabled
         )
         agent_thread_id = _namespace_thread_id(user_id, thread_id)
 
         reply = await self._agent.respond(
-            ConciergeRequest(
+            LetMeCarryRequest(
                 thread_id=agent_thread_id, message=message, system=SYSTEM_PROMPT, tools=tools
             )
         )
@@ -205,7 +205,7 @@ class ConciergeService:
         if rec_id is not None and not await self._is_valid(user_id, rec_id):
             # Reroll once with a correction (Epic 7 guard pattern, MAX_REROLLS=1).
             reply = await self._agent.respond(
-                ConciergeRequest(
+                LetMeCarryRequest(
                     thread_id=agent_thread_id,
                     message=_CORRECTION_MESSAGE,
                     system=SYSTEM_PROMPT,
@@ -240,10 +240,10 @@ class ConciergeService:
         message = sanitize_untrusted_text(message)  # untrusted chat turn (Epic 26)
         verdict = detect_injection(message)
         if verdict.flagged:
-            logger.warning("concierge_injection_blocked", matches=list(verdict.matches))
+            logger.warning("let_me_carry_injection_blocked", matches=list(verdict.matches))
             yield {"token": _INJECTION_REFUSAL}
             return
-        write_tools_enabled = await dynamic_config.get_bool("concierge_write_tools_enabled")
+        write_tools_enabled = await dynamic_config.get_bool("let_me_carry_write_tools_enabled")
         tools = self._build_tools(
             user_id, user_created_at, write_tools_enabled=write_tools_enabled
         )
@@ -251,7 +251,7 @@ class ConciergeService:
         agent_thread_id = _namespace_thread_id(user_id, thread_id)
 
         async for event in self._agent.astream(
-            ConciergeRequest(
+            LetMeCarryRequest(
                 thread_id=agent_thread_id, message=message, system=SYSTEM_PROMPT, tools=tools
             )
         ):

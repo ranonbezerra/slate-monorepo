@@ -1,4 +1,4 @@
-"""LLM-facing argument schemas for the Concierge write tools (ROADMAP Epic 12).
+"""LLM-facing argument schemas for the LetMeCarry write tools (ROADMAP Epic 12).
 
 Split out from ``tools_write.py`` to keep that module focused on behaviour. Each
 schema describes one write tool's arguments for the model's function-calling.

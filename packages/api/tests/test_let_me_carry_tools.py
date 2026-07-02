@@ -1,4 +1,4 @@
-"""Unit tests for the Backlog Concierge read-only tool functions."""
+"""Unit tests for the let_me_carry read-only tool functions."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ from typing import Any
 from uuid import uuid4
 
 from slate.core.stats.service import StatsService
-from slate.infrastructure.agent.concierge.tools import (
-    build_concierge_tools,
+from slate.infrastructure.agent.let_me_carry.tools import (
+    build_let_me_carry_tools,
     estimate_session_fit,
     get_play_session_history,
     get_play_stats,
@@ -196,13 +196,13 @@ async def test_validate_recommendation() -> None:
         assert await validate_recommendation(repo, user_id, "not-a-uuid") is False
 
 
-async def test_build_concierge_tools_shapes() -> None:
+async def test_build_let_me_carry_tools_shapes() -> None:
     async with _TestSessionFactory() as session:
         user_id, _, _ = await _seed(session)
         await session.commit()
 
     async with _TestSessionFactory() as session:
-        tools = build_concierge_tools(
+        tools = build_let_me_carry_tools(
             user_id=user_id,
             user_created_at=datetime.now(UTC),
             library_repo=LibraryRepository(session),

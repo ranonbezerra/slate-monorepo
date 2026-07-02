@@ -1,4 +1,4 @@
-"""Port for the Backlog Concierge chat agent."""
+"""Port for the let_me_carry chat agent."""
 
 from __future__ import annotations
 
@@ -8,11 +8,11 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel
 
-from .streaming import ConciergeEvent, TokenEvent
+from .streaming import LetMeCarryEvent, TokenEvent
 
 
 @dataclass
-class ConciergeTool:
+class LetMeCarryTool:
     """A read-only tool the agent may call.
 
     ``coroutine`` already has the user/repos bound; it accepts only the
@@ -26,31 +26,31 @@ class ConciergeTool:
 
 
 @dataclass
-class ConciergeRequest:
+class LetMeCarryRequest:
     """One chat turn. ``tools`` are built per-request, scoped to the user."""
 
     thread_id: str
     message: str
     system: str
-    tools: list[ConciergeTool]
+    tools: list[LetMeCarryTool]
 
 
 @dataclass
-class ConciergeReply:
+class LetMeCarryReply:
     """The agent's raw answer for a turn (before the UUID guard runs)."""
 
     text: str
 
 
-class AbstractConciergeAgent(ABC):
+class AbstractLetMeCarryAgent(ABC):
     """Contract for the conversational, tool-using backlog agent."""
 
     @abstractmethod
-    async def respond(self, req: ConciergeRequest) -> ConciergeReply:
+    async def respond(self, req: LetMeCarryRequest) -> LetMeCarryReply:
         """Run the tool-using loop for one turn and return the answer text."""
         ...
 
-    async def astream(self, req: ConciergeRequest) -> AsyncIterator[ConciergeEvent]:
+    async def astream(self, req: LetMeCarryRequest) -> AsyncIterator[LetMeCarryEvent]:
         """Stream one turn as typed events (prose tokens + tool calls).
 
         Emits ``TokenEvent`` for answer prose and ``ToolEvent`` for tool

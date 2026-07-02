@@ -1,8 +1,8 @@
-"""Tests for the Concierge streaming gate (ROADMAP Epic 16)."""
+"""Tests for the LetMeCarry streaming gate (ROADMAP Epic 16)."""
 
 from __future__ import annotations
 
-from slate.infrastructure.agent.concierge.streaming import (
+from slate.infrastructure.agent.let_me_carry.streaming import (
     RecommendationGate,
     split_recommendation,
 )

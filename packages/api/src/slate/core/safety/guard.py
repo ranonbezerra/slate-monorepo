@@ -2,7 +2,7 @@
 
 For flag-and-proceed surfaces (capture): sanitize the text and structured-log any
 injection match, but don't block — the prompt fence (<user_data>) + strict JSON
-output already bound the blast radius. Blocking surfaces (the Concierge) inspect the
+output already bound the blast radius. Blocking surfaces (the LetMeCarry) inspect the
 verdict themselves to refuse the turn.
 """
 

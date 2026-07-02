@@ -1,7 +1,7 @@
 """Stats invalidation hooks across every write seam (ROADMAP Epic 18, Phase 2).
 
 Proves each stats-affecting mutation busts the user's stats namespace — the
-auto-clamp worker, the library service (add/update/delete), and the concierge
+auto-clamp worker, the library service (add/update/delete), and the let_me_carry
 write tools. Invalidation is ambient (the services don't take a cache), so we
 monkeypatch the resolver to observe the bust with a spy. No DB or Redis.
 """
@@ -189,10 +189,10 @@ async def test_delete_entry_busts_stats(spy_cache: SpyCache) -> None:
     assert spy_cache.busted == [stats_namespace(5)]
 
 
-# ── Concierge write tools ────────────────────────────────────────────────
+# ── LetMeCarry write tools ────────────────────────────────────────────────
 
 
-class _ConciergeLibRepo:
+class _LetMeCarryLibRepo:
     def __init__(self) -> None:
         self.entry = type("E", (), {"id": 1, "game": type("G", (), {"title": "Hades"})()})()
 
@@ -203,11 +203,11 @@ class _ConciergeLibRepo:
         return entry
 
 
-async def test_concierge_set_status_busts_stats(spy_cache: SpyCache) -> None:
-    from slate.infrastructure.agent.concierge import tools_write
+async def test_let_me_carry_set_status_busts_stats(spy_cache: SpyCache) -> None:
+    from slate.infrastructure.agent.let_me_carry import tools_write
 
     msg = await tools_write.set_status(
-        _ConciergeLibRepo(),  # type: ignore[arg-type]
+        _LetMeCarryLibRepo(),  # type: ignore[arg-type]
         5,
         library_entry_public_id=str(uuid4()),
         status="completed",

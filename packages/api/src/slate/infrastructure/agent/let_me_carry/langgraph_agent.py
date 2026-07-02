@@ -1,4 +1,4 @@
-"""LangGraph + ChatOllama implementation of the Concierge agent.
+"""LangGraph + ChatOllama implementation of the LetMeCarry agent.
 
 Uses ``ChatOllama.bind_tools`` (via ``create_react_agent``) for the tool-calling
 loop. The tool-using model defaults to ``qwen3:8b`` — Gemma is weak at
@@ -19,9 +19,9 @@ from langchain_core.tools import StructuredTool
 from langchain_ollama import ChatOllama
 from langgraph.prebuilt import create_react_agent
 
-from .base import AbstractConciergeAgent, ConciergeReply, ConciergeRequest
+from .base import AbstractLetMeCarryAgent, LetMeCarryReply, LetMeCarryRequest
 from .checkpointer import get_checkpointer
-from .streaming import ConciergeEvent, TokenEvent, ToolEvent
+from .streaming import LetMeCarryEvent, TokenEvent, ToolEvent
 
 if TYPE_CHECKING:
     from slate.config import Settings
@@ -51,17 +51,17 @@ def _trim_history(state: dict[str, Any]) -> dict[str, Any]:
     return {"llm_input_messages": trimmed}
 
 
-class LangGraphConciergeAgent(AbstractConciergeAgent):
+class LangGraphLetMeCarryAgent(AbstractLetMeCarryAgent):
     def __init__(self, *, settings: Settings) -> None:
         self._settings = settings
 
-    async def _build(self, req: ConciergeRequest) -> tuple[Any, RunnableConfig, dict[str, Any]]:
+    async def _build(self, req: LetMeCarryRequest) -> tuple[Any, RunnableConfig, dict[str, Any]]:
         model = ChatOllama(
             base_url=self._settings.ollama_base_url,
             model=self._settings.ollama_agent_model,
             # Disable the model's hidden chain-of-thought — qwen3's <think>
             # blocks dominate latency across the multi-step ReAct loop.
-            reasoning=self._settings.concierge_agent_reasoning,
+            reasoning=self._settings.let_me_carry_agent_reasoning,
             # Bound generated tokens per model call — this is what caps
             # output-token billing on a metered backend later.
             num_predict=self._settings.llm_max_output_tokens,
@@ -84,18 +84,18 @@ class LangGraphConciergeAgent(AbstractConciergeAgent):
         )
         config: RunnableConfig = {
             "configurable": {"thread_id": req.thread_id},
-            "recursion_limit": max(4, self._settings.concierge_max_tool_loops * 2),
+            "recursion_limit": max(4, self._settings.let_me_carry_max_tool_loops * 2),
         }
         inputs: dict[str, Any] = {"messages": [HumanMessage(content=req.message)]}
         return graph, config, inputs
 
-    async def respond(self, req: ConciergeRequest) -> ConciergeReply:
+    async def respond(self, req: LetMeCarryRequest) -> LetMeCarryReply:
         graph, config, inputs = await self._build(req)
         result: Any = await graph.ainvoke(inputs, config=config)
         final = result["messages"][-1].content
-        return ConciergeReply(text=final if isinstance(final, str) else str(final))
+        return LetMeCarryReply(text=final if isinstance(final, str) else str(final))
 
-    async def astream(self, req: ConciergeRequest) -> AsyncIterator[ConciergeEvent]:
+    async def astream(self, req: LetMeCarryRequest) -> AsyncIterator[LetMeCarryEvent]:
         graph, config, inputs = await self._build(req)
         async for ev in graph.astream_events(inputs, config=config, version="v2"):
             kind = ev["event"]

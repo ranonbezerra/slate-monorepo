@@ -1,6 +1,6 @@
-"""Write tool functions for the Backlog Concierge (ROADMAP Epic 12).
+"""Write tool functions for the let_me_carry (ROADMAP Epic 12).
 
-These turn the Concierge from a recommender into the *conversational operator*
+These turn the LetMeCarry from a recommender into the *conversational operator*
 of the play_session pipeline: it can start a play_session, recap it, log an offline
 session, and update a game's status — all funnelling through the same shared
 orchestrator and guard rails the REST endpoints use.
@@ -8,7 +8,7 @@ orchestrator and guard rails the REST endpoints use.
 Like the read tools (``tools.py``) these are framework-free and return
 LLM-friendly text, never raising — service-layer ``HTTPException``s are caught
 and rendered as a sentence the model can relay. Every function is scoped to a
-``user_id`` so the Concierge can only mutate the caller's own data, and the
+``user_id`` so the LetMeCarry can only mutate the caller's own data, and the
 invariants (one active play_session per user; UUID-existence on every pick) hold here
 exactly as they do on the REST surface.
 """
@@ -24,9 +24,9 @@ from slate.core.play_session.recap import RecapMode, generate_recap_for_mode
 from slate.core.play_session.start import create_play_session_for_entry
 from slate.core.safety.guard import sanitize_and_audit
 from slate.infrastructure.agent.base import AbstractRecapAgent
-from slate.infrastructure.agent.concierge.base import ConciergeTool
-from slate.infrastructure.agent.concierge.tools import _resolve_entry
-from slate.infrastructure.agent.concierge.write_schemas import (
+from slate.infrastructure.agent.let_me_carry.base import LetMeCarryTool
+from slate.infrastructure.agent.let_me_carry.tools import _resolve_entry
+from slate.infrastructure.agent.let_me_carry.write_schemas import (
     GenerateRecapArgs,
     RetroactiveWrapUpArgs,
     SetStatusArgs,
@@ -169,7 +169,7 @@ async def submit_retroactive_wrap_up(
         if extracted.next_action:
             await library_repo.update(entry, play_session_next_action=extracted.next_action)
     except Exception:
-        logger.warning("concierge_retroactive_extraction_failed", exc_info=True)
+        logger.warning("let_me_carry_retroactive_extraction_failed", exc_info=True)
 
     await play_session_repo.create_retroactive(
         user_id=user_id,
@@ -207,7 +207,7 @@ async def set_status(
     return f"Marked {entry.game.title} as {normalised}."
 
 
-def build_concierge_write_tools(
+def build_let_me_carry_write_tools(
     *,
     user_id: int,
     library_repo: LibraryRepository,
@@ -215,7 +215,7 @@ def build_concierge_write_tools(
     llm_client: AbstractLLMClient,
     agent: AbstractRecapAgent | None,
     settings: Settings,
-) -> list[ConciergeTool]:
+) -> list[LetMeCarryTool]:
     """Build the per-request write tool set, each bound to *user_id* and the repos."""
 
     async def _start(library_entry_public_id: str, recap: str = "none") -> str:
@@ -251,7 +251,7 @@ def build_concierge_write_tools(
         )
 
     return [
-        ConciergeTool(
+        LetMeCarryTool(
             name="start_play_session",
             description="Start a play session (play_session) for one game from the library. Pass "
             "recap='quick' to include a short catch-up recap. Only one play_session can be "
@@ -259,7 +259,7 @@ def build_concierge_write_tools(
             args_schema=StartPlaySessionArgs,
             coroutine=_start,
         ),
-        ConciergeTool(
+        LetMeCarryTool(
             name="generate_recap",
             description="Write a catch-up recap for the currently active play_session "
             "and save it. Use after start_play_session, or when the player asks for a "
@@ -267,14 +267,14 @@ def build_concierge_write_tools(
             args_schema=GenerateRecapArgs,
             coroutine=_recap,
         ),
-        ConciergeTool(
+        LetMeCarryTool(
             name="submit_retroactive_wrap_up",
             description="Log a past play session the player did NOT track live (e.g. 'I played "
             "two hours offline'). Records what happened and saves their next step.",
             args_schema=RetroactiveWrapUpArgs,
             coroutine=_retro,
         ),
-        ConciergeTool(
+        LetMeCarryTool(
             name="set_status",
             description="Change a game's status in the library: backlog, playing, paused, "
             "completed, or dropped.",
