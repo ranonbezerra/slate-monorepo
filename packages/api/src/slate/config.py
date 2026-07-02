@@ -57,15 +57,14 @@ class Settings(BaseSettings):
     recap_retrieval: str = "recent"  # recent | semantic — the A/B grounding source
 
     # ── Corrective / Adaptive RAG: relevance-gated recap routing (Epic 29) ──
-    # When `mode="auto"`, a relevance evaluator over the retrieved local history picks
-    # quick (local RAG is enough, OR a cold-start new game) vs deep (the player has
-    # played but the notes are too thin — web research augments). A new game never
-    # auto-escalates to the expensive deep path — that keeps the cost bounded.
+    # `mode="auto"`: a relevance evaluator over retrieved local history picks quick
+    # (local RAG is enough, or a cold-start new game) vs deep (played but notes too
+    # thin — web research augments). A new game never auto-escalates (cost bound).
     adaptive_recap_enabled: bool = True  # feature flag / A/B toggle
     adaptive_rich_token_min: int = 12  # distinct interesting tokens ⇒ "correct" (quick)
     adaptive_sparse_token_max: int = 5  # below this (but non-empty) ⇒ "incorrect" (escalate)
-    # Placeholder entitlement gate: a free-tier user is never auto-escalated to the
-    # paid deep path. Replaced by a real per-user tier check when monetization lands.
+    # Placeholder entitlement gate: free-tier is never auto-escalated to the paid deep
+    # path. Replaced by a real per-user tier check when monetization lands.
     adaptive_deep_entitled_default: bool = True
 
     # ── Batch re-inference / backfill (Epic 28) ───────────────────────────
@@ -145,6 +144,11 @@ class Settings(BaseSettings):
     oauth_web_success_url: str = "http://localhost:5173/oauth/callback"
     oauth_web_error_url: str = "http://localhost:5173/login"
     oauth_state_ttl_seconds: int = 600  # single-use PKCE/state entry in Redis
+    # Steam account-sync (Epic 30): empty key => feature DISABLED (endpoints 503).
+    steam_api_key: str = ""
+    steam_import_max_games: int = 500  # per-call fan-out cap (truncate beyond this)
+    rate_limit_steam_import_per_minute: int = 2
+    rate_limit_steam_connect_per_minute: int = 10
 
     # ── Email (optional) ─────────────────────────────────────────────────
     smtp_host: str = ""
@@ -178,10 +182,9 @@ class Settings(BaseSettings):
     # Empty => Turnstile dependency is a no-op; set => register needs a token.
     turnstile_secret: str = ""
     turnstile_verify_url: str = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-    # Defense-in-depth token binding (opt-in). When non-empty, a solved token is
-    # accepted only if siteverify reports a matching hostname / action — so a
-    # token farmed on another site sharing the sitekey (or a different widget)
-    # can't be replayed here. Empty => not enforced (back-compat).
+    # Defense-in-depth token binding (opt-in): when non-empty, a solved token is
+    # accepted only if siteverify reports a matching hostname / action, so a token
+    # farmed on another site sharing the sitekey can't be replayed. Empty => off.
     turnstile_allowed_hostnames: list[str] = []
     turnstile_expected_action: str = ""
 
@@ -242,10 +245,8 @@ class Settings(BaseSettings):
 
     # Default per-user middleware limit (backstop for routes lacking a limiter).
     rate_limit_default_per_minute: int = 120
-
     # Per-user/day outbound-IGDB budget shared by create_game/capture. Fails OPEN.
     igdb_user_budget_per_day: int = 300
-
     # Concurrent Whisper transcriptions (mirrors ollama) + per-call token cap.
     stt_max_concurrency: int = 2
     llm_max_output_tokens: int = 1024
@@ -253,8 +254,7 @@ class Settings(BaseSettings):
     # ── Request hardening (DoS / security headers) ───────────────────────
     # Reject requests over this Content-Length with 413 before the body is read.
     max_request_body_bytes: int = 25 * 1024 * 1024
-    # HSTS max-age in seconds advertised to browsers (~2 years).
-    hsts_max_age_seconds: int = 63072000
+    hsts_max_age_seconds: int = 63072000  # HSTS max-age advertised to browsers (~2y)
     # Disable Scalar /docs + /openapi.json outside dev/test (production lockdown).
     docs_enabled: bool = True
     # Allowlist of hosts an IGDB cover_url may point at (https only); else nulled.
@@ -273,8 +273,8 @@ class Settings(BaseSettings):
     # ── Observability (optional) ─────────────────────────────────────────
     sentry_dsn: str = ""
     otel_exporter_otlp_endpoint: str = ""
-    # LLM/graph tracing (Epic 23): spans per model call + graph node; capture
-    # adds redacted prompt/completion previews (off by default — PII).
+    # LLM/graph tracing (Epic 23): spans per model call + graph node; capture adds
+    # redacted prompt/completion previews (off by default — PII).
     tracing_enabled: bool = True
     trace_capture_enabled: bool = False
 

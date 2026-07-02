@@ -54,6 +54,10 @@ class User(SoftDeleteMixin, TimestampMixin, Base):
     is_banned: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")
     )
+    # Linked SteamID64 (Epic 30). NULL until the user connects their Steam account
+    # via OpenID. Unique so one Steam identity maps to at most one Slate account.
+    # NEVER exposed in a user-facing response schema.
+    steam_id: Mapped[str | None] = mapped_column(String, nullable=True, unique=True)
 
     # Relationships
     oauth_identities: Mapped[list["OAuthIdentity"]] = relationship(back_populates="user")

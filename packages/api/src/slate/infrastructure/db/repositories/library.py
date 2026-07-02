@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, date, datetime, timedelta
 from uuid import UUID
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
@@ -197,6 +197,25 @@ class LibraryRepository:
     async def delete(self, entry: LibraryEntry) -> None:
         """Remove *entry* from the database."""
         stmt = delete(LibraryEntry).where(LibraryEntry.id == entry.id)
+        await self._session.execute(stmt)
+
+    async def set_steam_playtime(
+        self, user_id: int, game_id: int, platform_id: int, minutes: int
+    ) -> None:
+        """Set ``steam_playtime_minutes`` on the entry for the given triple.
+
+        No-op when the entry doesn't exist (a race; the import creates it first).
+        Scoped to *user_id* so one account can never touch another's playtime.
+        """
+        stmt = (
+            update(LibraryEntry)
+            .where(
+                LibraryEntry.user_id == user_id,
+                LibraryEntry.game_id == game_id,
+                LibraryEntry.platform_id == platform_id,
+            )
+            .values(steam_playtime_minutes=minutes)
+        )
         await self._session.execute(stmt)
 
     async def list_eligible_for_pick(
