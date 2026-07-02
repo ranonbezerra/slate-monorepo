@@ -7,12 +7,12 @@ import 'package:go_router/go_router.dart';
 
 /// The Play hub: the landing surface for everything related to deciding what
 /// to play. It surfaces the active session front-and-centre and offers three
-/// "doors" — let us pick, pick yourself, or ask the concierge.
+/// "doors" — let us pick, pick yourself, or ask the let_me_carry.
 class PlayPage extends StatefulWidget {
-  const PlayPage({this.conciergeEnabled = false, super.key});
+  const PlayPage({this.letMeCarryEnabled = false, super.key});
 
-  /// Whether to surface the Backlog Concierge door (gated by a feature flag).
-  final bool conciergeEnabled;
+  /// Whether to surface the let_me_carry door (gated by a feature flag).
+  final bool letMeCarryEnabled;
 
   @override
   State<PlayPage> createState() => _PlayPageState();
@@ -93,7 +93,7 @@ class _PlayPageState extends State<PlayPage> {
                       disabledHint: doorsDisabledHint,
                       onTap: () => context.go('/library'),
                     ),
-                    if (widget.conciergeEnabled) ...[
+                    if (widget.letMeCarryEnabled) ...[
                       const SizedBox(height: 12),
                       // The Ask door stays enabled even during an active
                       // playSession — it does not start anything.
@@ -102,7 +102,7 @@ class _PlayPageState extends State<PlayPage> {
                         title: 'Ask',
                         subtitle: 'Chat about what to play.',
                         accent: SlateColors.green,
-                        onTap: () => context.go('/play/concierge'),
+                        onTap: () => context.go('/play/let_me_carry'),
                       ),
                     ],
                   ],

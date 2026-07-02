@@ -1,35 +1,35 @@
-part of 'concierge_bloc.dart';
+part of 'let_me_carry_bloc.dart';
 
-enum ConciergeStatus { initial, streaming, idle, error }
+enum LetMeCarryStatus { initial, streaming, idle, error }
 
-final class ConciergeState extends Equatable {
-  const ConciergeState({
+final class LetMeCarryState extends Equatable {
+  const LetMeCarryState({
     this.messages = const [],
-    this.status = ConciergeStatus.initial,
+    this.status = LetMeCarryStatus.initial,
     this.threadId,
     this.errorMessage,
     this.activeTool,
   });
 
   final List<ChatMessage> messages;
-  final ConciergeStatus status;
+  final LetMeCarryStatus status;
   final String? threadId;
   final String? errorMessage;
 
   /// The tool the agent is currently running, shown as an affordance (Epic 16).
   final String? activeTool;
 
-  bool get isStreaming => status == ConciergeStatus.streaming;
+  bool get isStreaming => status == LetMeCarryStatus.streaming;
 
-  ConciergeState copyWith({
+  LetMeCarryState copyWith({
     List<ChatMessage>? messages,
-    ConciergeStatus? status,
+    LetMeCarryStatus? status,
     String? threadId,
     String? errorMessage,
     String? activeTool,
     bool clearActiveTool = false,
   }) {
-    return ConciergeState(
+    return LetMeCarryState(
       messages: messages ?? this.messages,
       status: status ?? this.status,
       threadId: threadId ?? this.threadId,

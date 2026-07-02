@@ -4,15 +4,15 @@ import 'package:app/core/api/api_client.dart';
 import 'package:app/core/auth/auth_repository.dart';
 import 'package:app/core/auth/auth_token_store.dart';
 import 'package:app/core/capture/capture_repository.dart';
-import 'package:app/core/concierge/concierge_repository.dart';
 import 'package:app/core/config/feature_flags.dart';
+import 'package:app/core/let_me_carry/let_me_carry_repository.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/pick/pick_repository.dart';
 import 'package:app/core/play_session/play_session_repository.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/library_import/bloc/library_import_bloc.dart';
 import 'package:app/features/pick/bloc/pick_bloc.dart';
@@ -51,7 +51,7 @@ Future<void> main() async {
   final playSessionRepository = PlaySessionRepository(apiClient: apiClient);
   final pickRepository = PickRepository(apiClient: apiClient);
   final analyticsRepository = AnalyticsRepository(apiClient: apiClient);
-  final conciergeRepository = ConciergeRepository(apiClient: apiClient);
+  final letMeCarryRepository = LetMeCarryRepository(apiClient: apiClient);
 
   final authBloc = AuthBloc(authRepository: authRepository);
 
@@ -72,7 +72,9 @@ Future<void> main() async {
     playSessionRepository: playSessionRepository,
   );
   final analyticsBloc = AnalyticsBloc(analyticsRepository: analyticsRepository);
-  final conciergeBloc = ConciergeBloc(conciergeRepository: conciergeRepository);
+  final letMeCarryBloc = LetMeCarryBloc(
+    letMeCarryRepository: letMeCarryRepository,
+  );
 
   runApp(
     App(
@@ -83,7 +85,7 @@ Future<void> main() async {
       playSessionBloc: playSessionBloc,
       pickBloc: pickBloc,
       analyticsBloc: analyticsBloc,
-      conciergeBloc: conciergeBloc,
+      letMeCarryBloc: letMeCarryBloc,
       libraryRepository: libraryRepository,
       featureFlags: featureFlags,
     ),

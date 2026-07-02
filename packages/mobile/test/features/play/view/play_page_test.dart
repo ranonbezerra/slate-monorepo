@@ -70,13 +70,13 @@ void main() {
 
   /// Wrapper with a GoRouter so `context.go()` resolves in tests, and
   /// stub destinations for each door / playSession action.
-  Widget buildSubject({bool conciergeEnabled = false}) {
+  Widget buildSubject({bool letMeCarryEnabled = false}) {
     final router = GoRouter(
       initialLocation: '/play',
       routes: [
         GoRoute(
           path: '/play',
-          builder: (_, __) => PlayPage(conciergeEnabled: conciergeEnabled),
+          builder: (_, __) => PlayPage(letMeCarryEnabled: letMeCarryEnabled),
         ),
         GoRoute(
           path: '/play/pick',
@@ -87,8 +87,8 @@ void main() {
           builder: (_, __) => const Scaffold(body: Text('PlaySessions stub')),
         ),
         GoRoute(
-          path: '/play/concierge',
-          builder: (_, __) => const Scaffold(body: Text('Concierge stub')),
+          path: '/play/let_me_carry',
+          builder: (_, __) => const Scaffold(body: Text('LetMeCarry stub')),
         ),
         GoRoute(
           path: '/library',
@@ -313,12 +313,12 @@ void main() {
         () => playSessionBloc.state,
       ).thenReturn(ActivePlaySessionLoaded(playSession: _playSession));
 
-      await tester.pumpWidget(buildSubject(conciergeEnabled: true));
+      await tester.pumpWidget(buildSubject(letMeCarryEnabled: true));
 
       await tester.tap(find.text('Ask'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Concierge stub'), findsOneWidget);
+      expect(find.text('LetMeCarry stub'), findsOneWidget);
     });
 
     testWidgets('start doors are enabled when there is no active playSession', (
@@ -352,27 +352,28 @@ void main() {
       expect(find.text("I'll choose"), findsOneWidget);
     });
 
-    testWidgets('does NOT show concierge door when conciergeEnabled is false', (
+    testWidgets(
+      'does NOT show let_me_carry door when letMeCarryEnabled is false',
+      (tester) async {
+        when(
+          () => playSessionBloc.state,
+        ).thenReturn(const ActivePlaySessionLoaded());
+
+        await tester.pumpWidget(buildSubject());
+
+        expect(find.text('Ask'), findsNothing);
+        expect(find.byIcon(Icons.auto_awesome), findsNothing);
+      },
+    );
+
+    testWidgets('shows let_me_carry door when letMeCarryEnabled is true', (
       tester,
     ) async {
       when(
         () => playSessionBloc.state,
       ).thenReturn(const ActivePlaySessionLoaded());
 
-      await tester.pumpWidget(buildSubject());
-
-      expect(find.text('Ask'), findsNothing);
-      expect(find.byIcon(Icons.auto_awesome), findsNothing);
-    });
-
-    testWidgets('shows concierge door when conciergeEnabled is true', (
-      tester,
-    ) async {
-      when(
-        () => playSessionBloc.state,
-      ).thenReturn(const ActivePlaySessionLoaded());
-
-      await tester.pumpWidget(buildSubject(conciergeEnabled: true));
+      await tester.pumpWidget(buildSubject(letMeCarryEnabled: true));
 
       expect(find.text('Ask'), findsOneWidget);
       expect(find.text('Chat about what to play.'), findsOneWidget);
@@ -407,17 +408,17 @@ void main() {
       expect(find.text('Library stub'), findsOneWidget);
     });
 
-    testWidgets('tapping Ask navigates to /play/concierge', (tester) async {
+    testWidgets('tapping Ask navigates to /play/let_me_carry', (tester) async {
       when(
         () => playSessionBloc.state,
       ).thenReturn(const ActivePlaySessionLoaded());
 
-      await tester.pumpWidget(buildSubject(conciergeEnabled: true));
+      await tester.pumpWidget(buildSubject(letMeCarryEnabled: true));
 
       await tester.tap(find.text('Ask'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Concierge stub'), findsOneWidget);
+      expect(find.text('LetMeCarry stub'), findsOneWidget);
     });
 
     testWidgets('pull to refresh re-dispatches LoadActivePlaySession', (

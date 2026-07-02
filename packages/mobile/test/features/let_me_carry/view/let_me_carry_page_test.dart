@@ -1,34 +1,34 @@
-import 'package:app/core/concierge/concierge_models.dart';
-import 'package:app/core/concierge/concierge_repository.dart';
+import 'package:app/core/let_me_carry/let_me_carry_models.dart';
+import 'package:app/core/let_me_carry/let_me_carry_repository.dart';
 import 'package:app/core/theme/slate_theme.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
-import 'package:app/features/concierge/view/concierge_page.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
+import 'package:app/features/let_me_carry/view/let_me_carry_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockConciergeRepository extends Mock implements ConciergeRepository {}
+class MockLetMeCarryRepository extends Mock implements LetMeCarryRepository {}
 
-Stream<ConciergeDelta> _deltas(List<ConciergeDelta> items) async* {
+Stream<LetMeCarryDelta> _deltas(List<LetMeCarryDelta> items) async* {
   for (final item in items) {
     yield item;
   }
 }
 
 void main() {
-  late MockConciergeRepository repository;
+  late MockLetMeCarryRepository repository;
 
   setUp(() {
-    repository = MockConciergeRepository();
+    repository = MockLetMeCarryRepository();
   });
 
   Widget buildSubject() {
     return MaterialApp(
       theme: SlateTheme.dark,
       home: BlocProvider(
-        create: (_) => ConciergeBloc(conciergeRepository: repository),
-        child: const ConciergePage(),
+        create: (_) => LetMeCarryBloc(letMeCarryRepository: repository),
+        child: const LetMeCarryPage(),
       ),
     );
   }
@@ -48,8 +48,8 @@ void main() {
       ),
     ).thenAnswer(
       (_) => _deltas(const [
-        ConciergeDelta(token: 'Try Hades.'),
-        ConciergeDelta(done: true, threadId: 't1'),
+        LetMeCarryDelta(token: 'Try Hades.'),
+        LetMeCarryDelta(done: true, threadId: 't1'),
       ]),
     );
 
@@ -74,11 +74,11 @@ void main() {
       ),
     ).thenAnswer(
       (_) => _deltas(const [
-        ConciergeDelta(token: 'Give this a go.'),
-        ConciergeDelta(
+        LetMeCarryDelta(token: 'Give this a go.'),
+        LetMeCarryDelta(
           recommendation: Recommendation(id: 'abc', title: 'Hades'),
         ),
-        ConciergeDelta(done: true, threadId: 't1'),
+        LetMeCarryDelta(done: true, threadId: 't1'),
       ]),
     );
 

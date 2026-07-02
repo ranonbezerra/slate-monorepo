@@ -1,4 +1,4 @@
-import 'package:app/core/concierge/concierge_models.dart';
+import 'package:app/core/let_me_carry/let_me_carry_models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -45,16 +45,16 @@ void main() {
     });
   });
 
-  group('ConciergeDelta', () {
+  group('LetMeCarryDelta', () {
     test('supports value equality and props', () {
-      const a = ConciergeDelta(token: 'x', done: true, threadId: 't-1');
-      const b = ConciergeDelta(token: 'x', done: true, threadId: 't-1');
+      const a = LetMeCarryDelta(token: 'x', done: true, threadId: 't-1');
+      const b = LetMeCarryDelta(token: 'x', done: true, threadId: 't-1');
       expect(a, b);
       expect(a.props, ['x', null, null, null, null, null, true, 't-1']);
     });
 
     test('default values', () {
-      const a = ConciergeDelta();
+      const a = LetMeCarryDelta();
       expect(a.token, isNull);
       expect(a.tool, isNull);
       expect(a.recommendation, isNull);
@@ -65,17 +65,17 @@ void main() {
     });
 
     test('fromJson parses prose, tool, and recommendation events', () {
-      final tokenEvent = ConciergeDelta.fromJson(const {'token': 'chunk'});
+      final tokenEvent = LetMeCarryDelta.fromJson(const {'token': 'chunk'});
       expect(tokenEvent.token, 'chunk');
 
-      final toolEvent = ConciergeDelta.fromJson(const {
+      final toolEvent = LetMeCarryDelta.fromJson(const {
         'tool': 'search_library',
         'phase': 'start',
       });
       expect(toolEvent.tool, 'search_library');
       expect(toolEvent.phase, 'start');
 
-      final recEvent = ConciergeDelta.fromJson(const {
+      final recEvent = LetMeCarryDelta.fromJson(const {
         'recommendation': {'id': 'abc', 'title': 'Hades'},
       });
       expect(
@@ -83,7 +83,7 @@ void main() {
         const Recommendation(id: 'abc', title: 'Hades'),
       );
 
-      final doneEvent = ConciergeDelta.fromJson(const {
+      final doneEvent = LetMeCarryDelta.fromJson(const {
         'done': true,
         'thread_id': 't-9',
       });
@@ -92,7 +92,7 @@ void main() {
     });
 
     test('fromJson defaults done to false and tolerates missing keys', () {
-      final delta = ConciergeDelta.fromJson(const {});
+      final delta = LetMeCarryDelta.fromJson(const {});
       expect(delta.token, isNull);
       expect(delta.error, isNull);
       expect(delta.done, false);

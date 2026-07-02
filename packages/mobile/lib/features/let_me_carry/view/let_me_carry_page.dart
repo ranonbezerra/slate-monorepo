@@ -1,6 +1,6 @@
-import 'package:app/core/concierge/concierge_models.dart';
+import 'package:app/core/let_me_carry/let_me_carry_models.dart';
 import 'package:app/core/theme/slate_theme.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,15 +17,15 @@ const _toolLabels = {
   'set_status': 'updating your library',
 };
 
-/// Conversational chat with the Backlog Concierge (Epic 11).
-class ConciergePage extends StatefulWidget {
-  const ConciergePage({super.key});
+/// Conversational chat with the let_me_carry (Epic 11).
+class LetMeCarryPage extends StatefulWidget {
+  const LetMeCarryPage({super.key});
 
   @override
-  State<ConciergePage> createState() => _ConciergePageState();
+  State<LetMeCarryPage> createState() => _LetMeCarryPageState();
 }
 
-class _ConciergePageState extends State<ConciergePage> {
+class _LetMeCarryPageState extends State<LetMeCarryPage> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
 
@@ -38,9 +38,9 @@ class _ConciergePageState extends State<ConciergePage> {
 
   void _send() {
     final text = _controller.text.trim();
-    final isStreaming = context.read<ConciergeBloc>().state.isStreaming;
+    final isStreaming = context.read<LetMeCarryBloc>().state.isStreaming;
     if (text.isEmpty || isStreaming) return;
-    context.read<ConciergeBloc>().add(SendConciergeMessage(text));
+    context.read<LetMeCarryBloc>().add(SendLetMeCarryMessage(text));
     _controller.clear();
   }
 
@@ -58,11 +58,11 @@ class _ConciergePageState extends State<ConciergePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Concierge')),
+      appBar: AppBar(title: const Text('let_me_carry')),
       body: Column(
         children: [
           Expanded(
-            child: BlocConsumer<ConciergeBloc, ConciergeState>(
+            child: BlocConsumer<LetMeCarryBloc, LetMeCarryState>(
               listener: (context, state) => _scrollToBottom(),
               builder: (context, state) {
                 if (state.messages.isEmpty) {
@@ -92,7 +92,7 @@ class _ToolActivity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tool = context.select<ConciergeBloc, String?>(
+    final tool = context.select<LetMeCarryBloc, String?>(
       (bloc) => bloc.state.activeTool,
     );
     if (tool == null) return const SizedBox.shrink();
@@ -203,7 +203,7 @@ class _Composer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isStreaming = context.select<ConciergeBloc, bool>(
+    final isStreaming = context.select<LetMeCarryBloc, bool>(
       (bloc) => bloc.state.isStreaming,
     );
     return SafeArea(
@@ -219,15 +219,15 @@ class _Composer extends StatelessWidget {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => onSend(),
                 decoration: const InputDecoration(
-                  hintText: 'Ask the concierge…',
+                  hintText: 'Ask let_me_carry…',
                 ),
               ),
             ),
             const SizedBox(width: 8),
             if (isStreaming)
               IconButton(
-                onPressed: () => context.read<ConciergeBloc>().add(
-                  const CancelConciergeStream(),
+                onPressed: () => context.read<LetMeCarryBloc>().add(
+                  const CancelLetMeCarryStream(),
                 ),
                 icon: const Icon(Icons.stop),
                 color: SlateColors.coral,

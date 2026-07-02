@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/core/api/api_client.dart';
-import 'package:app/core/concierge/concierge_models.dart';
-import 'package:app/core/concierge/concierge_repository.dart';
+import 'package:app/core/let_me_carry/let_me_carry_models.dart';
+import 'package:app/core/let_me_carry/let_me_carry_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -20,16 +20,16 @@ ResponseBody _sseBody(List<String> events) {
 void main() {
   late MockApiClient apiClient;
   late MockDio dio;
-  late ConciergeRepository repository;
+  late LetMeCarryRepository repository;
 
   setUp(() {
     apiClient = MockApiClient();
     dio = MockDio();
     when(() => apiClient.dio).thenReturn(dio);
-    repository = ConciergeRepository(apiClient: apiClient);
+    repository = LetMeCarryRepository(apiClient: apiClient);
   });
 
-  test('parses SSE delta and done events into ConciergeDeltas', () async {
+  test('parses SSE delta and done events into LetMeCarryDeltas', () async {
     when(
       () => dio.post<ResponseBody>(
         any(),
@@ -39,7 +39,7 @@ void main() {
       ),
     ).thenAnswer(
       (_) async => Response(
-        requestOptions: RequestOptions(path: '/v1/concierge/chat'),
+        requestOptions: RequestOptions(path: '/v1/let_me_carry/chat'),
         data: _sseBody([
           'data: {"token": "Play "}\n\n',
           'data: {"token": "Hades."}\n\n',
@@ -51,9 +51,9 @@ void main() {
     final deltas = await repository.streamChat(message: 'hi').toList();
 
     expect(deltas, [
-      const ConciergeDelta(token: 'Play '),
-      const ConciergeDelta(token: 'Hades.'),
-      const ConciergeDelta(done: true, threadId: 't1'),
+      const LetMeCarryDelta(token: 'Play '),
+      const LetMeCarryDelta(token: 'Hades.'),
+      const LetMeCarryDelta(done: true, threadId: 't1'),
     ]);
   });
 
@@ -67,13 +67,13 @@ void main() {
       ),
     ).thenAnswer(
       (_) async => Response(
-        requestOptions: RequestOptions(path: '/v1/concierge/chat'),
+        requestOptions: RequestOptions(path: '/v1/let_me_carry/chat'),
         data: _sseBody([': keep-alive\n', '\n', 'data: {"token": "Hi"}\n\n']),
       ),
     );
 
     final deltas = await repository.streamChat(message: 'hi').toList();
 
-    expect(deltas, [const ConciergeDelta(token: 'Hi')]);
+    expect(deltas, [const LetMeCarryDelta(token: 'Hi')]);
   });
 }

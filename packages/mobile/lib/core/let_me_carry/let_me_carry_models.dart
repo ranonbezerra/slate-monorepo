@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Who authored a chat message.
 enum ChatRole { user, assistant }
 
-/// A validated game pick surfaced by the Concierge (Epic 16).
+/// A validated game pick surfaced by the LetMeCarry (Epic 16).
 class Recommendation extends Equatable {
   const Recommendation({required this.id, required this.title});
 
@@ -21,7 +21,7 @@ class Recommendation extends Equatable {
   List<Object?> get props => [id, title];
 }
 
-/// A single message in a Concierge conversation.
+/// A single message in a LetMeCarry conversation.
 class ChatMessage extends Equatable {
   const ChatMessage({
     required this.role,
@@ -47,13 +47,13 @@ class ChatMessage extends Equatable {
   List<Object?> get props => [role, text, recommendation];
 }
 
-/// One Server-Sent Event from `POST /v1/concierge/chat` (ROADMAP Epic 16).
+/// One Server-Sent Event from `POST /v1/let_me_carry/chat` (ROADMAP Epic 16).
 ///
 /// As a turn streams, events carry a [token] of prose, a [tool] call (with
 /// [phase]), a validated [recommendation], or a [degrade] nudge. The final
 /// event has [done] set and supplies the [threadId] for the next turn.
-class ConciergeDelta extends Equatable {
-  const ConciergeDelta({
+class LetMeCarryDelta extends Equatable {
+  const LetMeCarryDelta({
     this.token,
     this.tool,
     this.phase,
@@ -64,9 +64,9 @@ class ConciergeDelta extends Equatable {
     this.threadId,
   });
 
-  factory ConciergeDelta.fromJson(Map<String, dynamic> json) {
+  factory LetMeCarryDelta.fromJson(Map<String, dynamic> json) {
     final rec = json['recommendation'] as Map<String, dynamic>?;
-    return ConciergeDelta(
+    return LetMeCarryDelta(
       token: json['token'] as String?,
       tool: json['tool'] as String?,
       phase: json['phase'] as String?,

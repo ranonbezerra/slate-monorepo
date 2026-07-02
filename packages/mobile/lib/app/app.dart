@@ -5,7 +5,7 @@ import 'package:app/core/theme/slate_theme.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/library_import/bloc/library_import_bloc.dart';
 import 'package:app/features/pick/bloc/pick_bloc.dart';
@@ -23,7 +23,7 @@ class App extends StatefulWidget {
     required this.playSessionBloc,
     required this.pickBloc,
     required this.analyticsBloc,
-    required this.conciergeBloc,
+    required this.letMeCarryBloc,
     required this.libraryRepository,
     required this.featureFlags,
     super.key,
@@ -36,7 +36,7 @@ class App extends StatefulWidget {
   final PlaySessionBloc playSessionBloc;
   final PickBloc pickBloc;
   final AnalyticsBloc analyticsBloc;
-  final ConciergeBloc conciergeBloc;
+  final LetMeCarryBloc letMeCarryBloc;
   final LibraryRepository libraryRepository;
   final FeatureFlags featureFlags;
 
@@ -75,7 +75,7 @@ class _AppState extends State<App> {
         BlocProvider<PlaySessionBloc>.value(value: widget.playSessionBloc),
         BlocProvider<PickBloc>.value(value: widget.pickBloc),
         BlocProvider<AnalyticsBloc>.value(value: widget.analyticsBloc),
-        BlocProvider<ConciergeBloc>.value(value: widget.conciergeBloc),
+        BlocProvider<LetMeCarryBloc>.value(value: widget.letMeCarryBloc),
       ],
       child: MaterialApp.router(
         title: 'Slate',

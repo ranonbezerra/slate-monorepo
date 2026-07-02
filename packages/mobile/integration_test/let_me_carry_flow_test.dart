@@ -3,25 +3,25 @@ import 'dart:typed_data';
 
 import 'package:app/core/api/api_client.dart';
 import 'package:app/core/auth/auth_token_store.dart';
-import 'package:app/core/concierge/concierge_repository.dart';
+import 'package:app/core/let_me_carry/let_me_carry_repository.dart';
 import 'package:app/core/theme/slate_theme.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
-import 'package:app/features/concierge/view/concierge_page.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
+import 'package:app/features/let_me_carry/view/let_me_carry_page.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-/// Headless integration test for the Backlog Concierge.
+/// Headless integration test for the let_me_carry.
 ///
-/// Unlike the widget test (which mocks [ConciergeRepository]), this drives the
-/// *real* stack — [ConciergeRepository] → [ApiClient]'s Dio → SSE line parsing
-/// → [ConciergeBloc] → [ConciergePage] — mocking only at the network adapter.
+/// Unlike the widget test (which mocks [LetMeCarryRepository]), this drives the
+/// *real* stack — [LetMeCarryRepository] → [ApiClient]'s Dio → SSE line parsing
+/// → [LetMeCarryBloc] → [LetMeCarryPage] — mocking only at the network adapter.
 /// It validates that the on-the-wire SSE format the API emits is decoded and
 /// rendered end to end, including the validated-recommendation Play CTA.
 ///
-/// Run headless: `fvm flutter test integration_test/concierge_flow_test.dart`.
+/// Run headless: `fvm flutter test integration_test/let_me_carry_flow_test.dart`.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -29,14 +29,14 @@ void main() {
     final dio = Dio(BaseOptions(baseUrl: 'http://localhost:8100'))
       ..httpClientAdapter = _SseMockAdapter();
     final apiClient = ApiClient(tokenStore: AuthTokenStore(), dio: dio);
-    final repository = ConciergeRepository(apiClient: apiClient);
+    final repository = LetMeCarryRepository(apiClient: apiClient);
 
     await tester.pumpWidget(
       MaterialApp(
         theme: SlateTheme.dark,
         home: BlocProvider(
-          create: (_) => ConciergeBloc(conciergeRepository: repository),
-          child: const ConciergePage(),
+          create: (_) => LetMeCarryBloc(letMeCarryRepository: repository),
+          child: const LetMeCarryPage(),
         ),
       ),
     );
@@ -57,7 +57,7 @@ void main() {
   });
 }
 
-/// A Dio adapter that replies to the concierge endpoint with a canned SSE
+/// A Dio adapter that replies to the let_me_carry endpoint with a canned SSE
 /// stream matching the API's on-the-wire event format, and `{}` to anything
 /// else so an unexpected call never hangs the test.
 class _SseMockAdapter implements HttpClientAdapter {
@@ -67,7 +67,7 @@ class _SseMockAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
-    if (options.path == '/v1/concierge/chat') {
+    if (options.path == '/v1/let_me_carry/chat') {
       const rec = '{"id": "le-hollow-knight", "title": "Hollow Knight"}';
       final sse = [
         'data: {"tool": "search_library", "phase": "start"}',

@@ -1,37 +1,38 @@
-import 'package:app/core/concierge/concierge_models.dart';
-import 'package:app/core/concierge/concierge_repository.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
+import 'package:app/core/let_me_carry/let_me_carry_models.dart';
+import 'package:app/core/let_me_carry/let_me_carry_repository.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockConciergeRepository extends Mock implements ConciergeRepository {}
+class MockLetMeCarryRepository extends Mock implements LetMeCarryRepository {}
 
-Stream<ConciergeDelta> _deltas(List<ConciergeDelta> items) async* {
+Stream<LetMeCarryDelta> _deltas(List<LetMeCarryDelta> items) async* {
   for (final item in items) {
     yield item;
   }
 }
 
 void main() {
-  late MockConciergeRepository repository;
+  late MockLetMeCarryRepository repository;
 
   setUp(() {
-    repository = MockConciergeRepository();
+    repository = MockLetMeCarryRepository();
   });
 
-  ConciergeBloc buildBloc() => ConciergeBloc(conciergeRepository: repository);
+  LetMeCarryBloc buildBloc() =>
+      LetMeCarryBloc(letMeCarryRepository: repository);
 
-  group('ConciergeBloc', () {
+  group('LetMeCarryBloc', () {
     test('initial state is empty and idle', () {
       final bloc = buildBloc();
       expect(bloc.state.messages, isEmpty);
-      expect(bloc.state.status, ConciergeStatus.initial);
+      expect(bloc.state.status, LetMeCarryStatus.initial);
       bloc.close();
     });
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'streams the reply, threads the id, and ends idle',
       setUp: () {
         when(
@@ -42,17 +43,17 @@ void main() {
           ),
         ).thenAnswer(
           (_) => _deltas(const [
-            ConciergeDelta(token: 'Play '),
-            ConciergeDelta(token: 'Hades.'),
-            ConciergeDelta(done: true, threadId: 't1'),
+            LetMeCarryDelta(token: 'Play '),
+            LetMeCarryDelta(token: 'Hades.'),
+            LetMeCarryDelta(done: true, threadId: 't1'),
           ]),
         );
       },
       build: buildBloc,
       act: (bloc) =>
-          bloc.add(const SendConciergeMessage('what should I play?')),
+          bloc.add(const SendLetMeCarryMessage('what should I play?')),
       verify: (bloc) {
-        expect(bloc.state.status, ConciergeStatus.idle);
+        expect(bloc.state.status, LetMeCarryStatus.idle);
         expect(bloc.state.threadId, 't1');
         expect(bloc.state.messages, [
           const ChatMessage(role: ChatRole.user, text: 'what should I play?'),
@@ -61,11 +62,11 @@ void main() {
       },
     );
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'ignores blank messages',
       build: buildBloc,
-      act: (bloc) => bloc.add(const SendConciergeMessage('   ')),
-      expect: () => const <ConciergeState>[],
+      act: (bloc) => bloc.add(const SendLetMeCarryMessage('   ')),
+      expect: () => const <LetMeCarryState>[],
       verify: (_) {
         verifyNever(
           () => repository.streamChat(
@@ -77,7 +78,7 @@ void main() {
       },
     );
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'emits an error state when the stream fails',
       setUp: () {
         when(
@@ -88,21 +89,21 @@ void main() {
           ),
         ).thenThrow(
           DioException(
-            requestOptions: RequestOptions(path: '/v1/concierge/chat'),
+            requestOptions: RequestOptions(path: '/v1/let_me_carry/chat'),
           ),
         );
       },
       build: buildBloc,
-      act: (bloc) => bloc.add(const SendConciergeMessage('hello')),
+      act: (bloc) => bloc.add(const SendLetMeCarryMessage('hello')),
       verify: (bloc) {
-        expect(bloc.state.status, ConciergeStatus.error);
+        expect(bloc.state.status, LetMeCarryStatus.error);
         expect(bloc.state.errorMessage, isNotNull);
         expect(bloc.state.messages.last.role, ChatRole.assistant);
         expect(bloc.state.messages.last.text, contains('something went wrong'));
       },
     );
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'surfaces a server error event as an error state',
       setUp: () {
         when(
@@ -113,21 +114,23 @@ void main() {
           ),
         ).thenAnswer(
           (_) => _deltas(const [
-            ConciergeDelta(error: 'The concierge is unavailable right now.'),
-            ConciergeDelta(done: true, threadId: 't1'),
+            LetMeCarryDelta(
+              error: 'The let_me_carry is unavailable right now.',
+            ),
+            LetMeCarryDelta(done: true, threadId: 't1'),
           ]),
         );
       },
       build: buildBloc,
-      act: (bloc) => bloc.add(const SendConciergeMessage('hi')),
+      act: (bloc) => bloc.add(const SendLetMeCarryMessage('hi')),
       verify: (bloc) {
-        expect(bloc.state.status, ConciergeStatus.error);
+        expect(bloc.state.status, LetMeCarryStatus.error);
         expect(bloc.state.errorMessage, contains('unavailable'));
         expect(bloc.state.messages.last.text, contains('unavailable'));
       },
     );
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'attaches a recommendation and surfaces tool activity',
       setUp: () {
         when(
@@ -138,21 +141,21 @@ void main() {
           ),
         ).thenAnswer(
           (_) => _deltas(const [
-            ConciergeDelta(tool: 'search_library', phase: 'start'),
-            ConciergeDelta(tool: 'search_library', phase: 'end'),
-            ConciergeDelta(token: 'Give this a go.'),
-            ConciergeDelta(
+            LetMeCarryDelta(tool: 'search_library', phase: 'start'),
+            LetMeCarryDelta(tool: 'search_library', phase: 'end'),
+            LetMeCarryDelta(token: 'Give this a go.'),
+            LetMeCarryDelta(
               recommendation: Recommendation(id: 'abc', title: 'Hades'),
             ),
-            ConciergeDelta(done: true, threadId: 't1'),
+            LetMeCarryDelta(done: true, threadId: 't1'),
           ]),
         );
       },
       build: buildBloc,
       act: (bloc) =>
-          bloc.add(const SendConciergeMessage('what should I play?')),
+          bloc.add(const SendLetMeCarryMessage('what should I play?')),
       verify: (bloc) {
-        expect(bloc.state.status, ConciergeStatus.idle);
+        expect(bloc.state.status, LetMeCarryStatus.idle);
         expect(bloc.state.activeTool, isNull); // cleared once the turn ends
         final last = bloc.state.messages.last;
         expect(last.text, 'Give this a go.');
@@ -163,7 +166,7 @@ void main() {
       },
     );
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'cancelling keeps the partial reply and settles idle',
       setUp: () {
         when(
@@ -174,21 +177,21 @@ void main() {
           ),
         ).thenThrow(
           DioException.requestCancelled(
-            requestOptions: RequestOptions(path: '/v1/concierge/chat'),
+            requestOptions: RequestOptions(path: '/v1/let_me_carry/chat'),
             reason: 'cancelled',
           ),
         );
       },
       build: buildBloc,
-      act: (bloc) => bloc.add(const SendConciergeMessage('hello')),
+      act: (bloc) => bloc.add(const SendLetMeCarryMessage('hello')),
       verify: (bloc) {
         // A cancellation is not an error — no error state, partial kept.
-        expect(bloc.state.status, ConciergeStatus.idle);
+        expect(bloc.state.status, LetMeCarryStatus.idle);
         expect(bloc.state.errorMessage, isNull);
       },
     );
 
-    blocTest<ConciergeBloc, ConciergeState>(
+    blocTest<LetMeCarryBloc, LetMeCarryState>(
       'threads the previous thread id into the next turn',
       setUp: () {
         when(
@@ -199,17 +202,17 @@ void main() {
           ),
         ).thenAnswer(
           (_) => _deltas(const [
-            ConciergeDelta(done: true, threadId: 'thread-42'),
+            LetMeCarryDelta(done: true, threadId: 'thread-42'),
           ]),
         );
       },
       build: buildBloc,
       act: (bloc) async {
-        bloc.add(const SendConciergeMessage('first'));
-        await bloc.stream.firstWhere((s) => s.status == ConciergeStatus.idle);
-        bloc.add(const SendConciergeMessage('second'));
+        bloc.add(const SendLetMeCarryMessage('first'));
+        await bloc.stream.firstWhere((s) => s.status == LetMeCarryStatus.idle);
+        bloc.add(const SendLetMeCarryMessage('second'));
         await bloc.stream.firstWhere(
-          (s) => s.status == ConciergeStatus.idle && s.messages.length == 4,
+          (s) => s.status == LetMeCarryStatus.idle && s.messages.length == 4,
         );
       },
       verify: (_) {
