@@ -118,6 +118,9 @@ class LibraryEntry(TimestampMixin, Base):
     last_played_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     play_session_next_action: Mapped[str | None] = mapped_column(String, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # All-time playtime pulled from Steam (``playtime_forever`` minutes) on account
+    # sync (Epic 30). NULL for entries added by other paths / never Steam-synced.
+    steam_playtime_minutes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
 
     # Relationships
     user: Mapped["User"] = relationship(back_populates="library_entries")

@@ -1463,7 +1463,7 @@ It's an orchestration layer *over* Epics 10/24/25, gated by a product/monetizati
 
 **Goal:** one-click "Connect Steam / GOG" that pulls the user's **entire owned library** — exact game IDs + playtime — into Slate, from the browser, no screenshots. The strict upgrade over the Epic 15 OCR path (which only sees the games *visible* in a screenshot, fuzzy-matches titles, and has no playtime).
 
-**Status:** proposed. Only these two storefronts expose an owned-library API usable from a server/browser; every other PC store needs local (desktop) integration — see Epic 31.
+**Status:** Steam shipped; GOG deferred (follow-up). Steam links via official OpenID 2.0 (`/v1/auth/steam/start` → verified `/callback`, storing `user.steam_id`) and `POST /v1/library/steam/import` pulls the owned library + playtime through the existing catalog-match funnel (idempotent add on the pc-steam platform; private/empty profiles are handled, not errored). Behind a `STEAM_API_KEY` gate + a `VITE_ENABLE_STEAM_IMPORT` web flag; the import is synchronous, capped at 500 games (async Taskiq = a documented follow-up). GOG (the other web-usable owned-library API) is the remaining piece; every other PC store needs local (desktop) integration — see Epic 31.
 
 ### Why only Steam + GOG here
 

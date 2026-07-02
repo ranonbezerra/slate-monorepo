@@ -100,6 +100,17 @@ class UserRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none() is not None
 
+    async def get_by_steam_id(self, steam_id: str) -> User | None:
+        """Return the active user linked to *steam_id* (SteamID64), or ``None``."""
+        stmt = select(User).where(User.steam_id == steam_id, User.deleted_at.is_(None))
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def set_steam_id(self, user: User, steam_id: str) -> None:
+        """Link *user* to *steam_id* (SteamID64). Idempotent for the same value."""
+        user.steam_id = steam_id
+        await self._session.flush()
+
     async def set_email_verified(self, user: User) -> None:
         """Mark *user*'s email as verified (idempotent)."""
         user.email_verified = True
