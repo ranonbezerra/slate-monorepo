@@ -52,6 +52,22 @@ export interface MessageResponse {
 	message: string;
 }
 
+/** Partial profile update — omitted fields are left unchanged server-side. */
+export interface UpdateProfileInput {
+	display_name?: string;
+	locale?: string;
+	timezone?: string;
+}
+
+/** One active refresh-token session (device), as returned by GET /v1/auth/sessions. */
+export interface SessionInfo {
+	public_id: string;
+	device_label: string | null;
+	created_at: string;
+	last_used_at: string | null;
+	expires_at: string;
+}
+
 export interface LoginRequest {
 	email: string;
 	password: string;

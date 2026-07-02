@@ -172,3 +172,51 @@ class TestEmailChange:
             "/v1/auth/confirm-email-change", json={"token": "not-a-jwt"}
         )
         assert resp.status_code == 400
+
+
+class TestProfileUpdate:
+    async def test_updates_profile_fields(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        resp = await async_client.patch(
+            "/v1/auth/me",
+            headers=auth_headers,
+            json={"display_name": "New Name", "locale": "en-US", "timezone": "America/New_York"},
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["display_name"] == "New Name"
+        assert body["locale"] == "en-US"
+        assert body["timezone"] == "America/New_York"
+
+    async def test_partial_update_leaves_others(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        before = (await async_client.get("/v1/auth/me", headers=auth_headers)).json()
+        resp = await async_client.patch(
+            "/v1/auth/me", headers=auth_headers, json={"display_name": "Only Name"}
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["display_name"] == "Only Name"
+        assert body["timezone"] == before["timezone"]  # unchanged
+
+    async def test_rejects_unknown_timezone(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        resp = await async_client.patch(
+            "/v1/auth/me", headers=auth_headers, json={"timezone": "Mars/Olympus"}
+        )
+        assert resp.status_code == 422
+
+    async def test_rejects_bad_locale(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        resp = await async_client.patch(
+            "/v1/auth/me", headers=auth_headers, json={"locale": "not a locale"}
+        )
+        assert resp.status_code == 422
+
+    async def test_requires_auth(self, async_client: AsyncClient) -> None:
+        resp = await async_client.patch("/v1/auth/me", json={"display_name": "x"})
+        assert resp.status_code == 401

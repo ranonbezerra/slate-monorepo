@@ -55,6 +55,19 @@ class AccountService:
                 raise ReauthError("Password is incorrect")
         await self._users.hard_delete(user.id)
 
+    async def update_profile(
+        self,
+        user: User,
+        *,
+        display_name: str | None,
+        locale: str | None,
+        timezone: str | None,
+    ) -> User:
+        """Apply a partial profile update (display_name / locale / timezone)."""
+        return await self._users.update_profile(
+            user, display_name=display_name, locale=locale, timezone=timezone
+        )
+
     async def export_data(self, user: User) -> dict[str, object]:
         """Assemble the user's personal data as a portable structure."""
         library = await self._library.list_for_user(user.id, limit=_EXPORT_LIMIT)
