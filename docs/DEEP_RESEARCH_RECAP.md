@@ -191,7 +191,7 @@ accumulate.
 
 No node needs **function-calling** — `search` is a fixed step in the graph, not
 a tool the LLM chooses. So `gemma3` is fine here; the tool-calling model
-(`qwen3:8b`) is only relevant for the Concierge agent in Epic 11.
+(`qwen3:8b`) is only relevant for the let_me_carry agent in Epic 11.
 
 ```python
 # infrastructure/agent/graph/nodes.py  (sketch — nodes are bound to deps in builder.py)

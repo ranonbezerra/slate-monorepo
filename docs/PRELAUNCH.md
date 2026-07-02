@@ -76,7 +76,7 @@ Required for the app to work in prod:
 - [ ] `DATABASE_URL` / `REDIS_URL` — real creds (Redis URL includes the password).
 - [ ] `CORS_ORIGINS=["https://app.example.com"]` · `TRUSTED_HOSTS=["api.example.com"]`
 - [ ] Providers off `dummy`: `AGENT_PROVIDER=langgraph`, `RESEARCH_PROVIDER=searxng`,
-      `CONCIERGE_PROVIDER=langgraph`, `STT_PROVIDER=whisper_local`.
+      `LET_ME_CARRY_PROVIDER=langgraph`, `STT_PROVIDER=whisper_local`.
 - [ ] `IGDB_CLIENT_ID/SECRET`, `GOOGLE_OAUTH_*`, `TWITCH_OAUTH_*`.
 - [ ] `OAUTH_REDIRECT_BASE_URL=https://api.example.com` ·
       `OAUTH_WEB_SUCCESS_URL=https://app.example.com/oauth/callback` ·
@@ -88,7 +88,7 @@ Required for the app to work in prod:
 - [ ] `VITE_API_URL=https://api.example.com`
 - [ ] `VITE_TURNSTILE_SITE_KEY=<from Phase 0>`
 - [ ] `VITE_OAUTH_PROVIDERS=google,twitch`
-- [ ] `VITE_ENABLE_CONCIERGE=true` (if you want the concierge live).
+- [ ] `VITE_ENABLE_LET_ME_CARRY=true` (if you want the let_me_carry live).
 
 ---
 
@@ -140,7 +140,7 @@ See DEPLOYMENT §1.9.
 - [ ] Register a test account on the web → **verification email arrives** → verify → log in.
 - [ ] **OAuth round-trip**: "Continue with Google" and "with Twitch" → land logged in.
 - [ ] Turnstile widget renders on register and blocks a scripted submit.
-- [ ] Add a game / generate a recap → works; concierge responds.
+- [ ] Add a game / generate a recap → works; let_me_carry responds.
 - [ ] Confirm **no DB/Redis port** is reachable from outside (`nmap` from off-box).
 - [ ] Rate limit: hammer `/v1/auth/login` from one IP → 429 (proves
       `--forwarded-allow-ips` is correct and per-IP isolation works).
