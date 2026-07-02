@@ -1,0 +1,459 @@
+"""Unit tests for the let_me_carry write tool functions (Epic 12).
+
+These exercise the same guard rails the REST surface enforces — UUID-existence
+on every pick and one active play_session per user — driving the tools directly so no
+model is required.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+from uuid import uuid4
+
+from slate.config import settings
+from slate.infrastructure.agent.let_me_carry.tools_write import (
+    build_let_me_carry_write_tools,
+    generate_recap,
+    set_status,
+    start_play_session,
+    submit_retroactive_wrap_up,
+)
+from slate.infrastructure.db.repositories.library import LibraryRepository
+from slate.infrastructure.db.repositories.play_session import PlaySessionRepository
+from slate.infrastructure.llm.dummy import DummyLLMClient
+from tests.conftest import _TestSessionFactory
+
+
+async def _seed(session: Any, *, status: str = "playing") -> tuple[int, str, int]:
+    """Create user + game + platform + entry. Returns (user_id, entry_public_id, entry_id)."""
+    from slate.infrastructure.db.models import Game, LibraryEntry, Platform, User
+
+    user = User(email=f"{uuid4().hex}@test.com", password_hash="h", display_name="T")
+    session.add(user)
+    await session.flush()
+
+    game = Game(slug=f"hk-{uuid4().hex[:6]}", title="Hollow Knight", metadata_source="user")
+    session.add(game)
+    await session.flush()
+
+    platform = Platform(slug=f"pc-{uuid4().hex[:6]}", label="PC", family="pc")
+    session.add(platform)
+    await session.flush()
+
+    entry = LibraryEntry(user_id=user.id, game_id=game.id, platform_id=platform.id, status=status)
+    session.add(entry)
+    await session.flush()
+    return user.id, str(entry.public_id), entry.id
+
+
+# -- start_play_session --------------------------------------------------------------
+
+
+async def test_start_play_session_creates_active_play_session() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=public_id,
+        )
+        assert "Started a play_session for Hollow Knight" in out
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        active = await PlaySessionRepository(session).get_active_for_user(user_id)
+        assert active is not None
+        assert active.recap_text is None
+
+
+async def test_start_play_session_with_quick_recap() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=public_id,
+            recap="quick",
+        )
+        assert "Recap:" in out
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        active = await PlaySessionRepository(session).get_active_for_user(user_id)
+        assert active is not None
+        assert active.recap_text
+
+
+async def test_start_play_session_unknown_game() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, _, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=str(uuid4()),
+        )
+        assert "not in the library" in out
+
+
+async def test_start_play_session_rejects_second_active() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=public_id,
+        )
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=public_id,
+        )
+        assert "already an active play_session" in out
+
+
+# -- generate_recap ----------------------------------------------------------
+
+
+async def test_generate_recap_needs_active_play_session() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, _, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await generate_recap(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+        )
+        assert "no active play_session" in out.lower()
+
+
+async def test_generate_recap_persists_on_active_play_session() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=public_id,
+        )
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await generate_recap(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+        )
+        assert "Hollow Knight" in out
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        active = await PlaySessionRepository(session).get_active_for_user(user_id)
+        assert active is not None
+        assert active.recap_text
+
+
+async def test_generate_recap_clamps_deep_to_quick() -> None:
+    """A 'deep' mode request must NOT trigger the deep-research agent."""
+
+    class _ExplodingAgent:
+        async def run(self, *args: object, **kwargs: object) -> object:
+            raise AssertionError("deep agent must not be invoked from a chat turn")
+
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        await start_play_session(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            None,
+            settings,
+            user_id,
+            library_entry_public_id=public_id,
+        )
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        # Even with mode='deep' and a (would-be) deep agent available, the quick
+        # path runs — the agent is never called.
+        out = await generate_recap(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            _ExplodingAgent(),  # type: ignore[arg-type]
+            settings,
+            user_id,
+            mode="deep",
+        )
+        assert "Hollow Knight" in out
+
+
+# -- submit_retroactive_wrap_up -------------------------------------------------
+
+
+async def test_retroactive_wrap_up_logs_session() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, entry_id = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await submit_retroactive_wrap_up(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            user_id,
+            library_entry_public_id=public_id,
+            wrap_up_text="Cleared the second boss and unlocked the dash.",
+        )
+        assert "Logged your past session" in out
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        play_sessions = await PlaySessionRepository(session).get_recent_for_entry(
+            entry_id, limit=5
+        )
+        assert len(play_sessions) == 1
+        assert play_sessions[0].play_session_type == "retroactive"
+
+
+async def test_retroactive_wrap_up_unknown_game() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, _, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await submit_retroactive_wrap_up(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            user_id,
+            library_entry_public_id=str(uuid4()),
+            wrap_up_text="played offline",
+        )
+        assert "not in the library" in out
+
+
+async def test_retroactive_wrap_up_sanitizes_stored_text() -> None:
+    """Untrusted wrap-up text is char-sanitized before it is stored + extracted + embedded."""
+    async with _TestSessionFactory() as session:
+        user_id, public_id, entry_id = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        await submit_retroactive_wrap_up(
+            LibraryRepository(session),
+            PlaySessionRepository(session),
+            DummyLLMClient(),
+            user_id,
+            library_entry_public_id=public_id,
+            wrap_up_text="Beat the boss\x00\x07 and got the​ dash",
+        )
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        sessions = await PlaySessionRepository(session).get_recent_for_entry(entry_id, limit=5)
+        assert sessions[0].wrap_up_text == "Beat the boss and got the dash"
+
+
+# -- set_status -----------------------------------------------------------------
+
+
+async def test_set_status_updates_entry() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session, status="backlog")
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await set_status(
+            LibraryRepository(session),
+            user_id,
+            library_entry_public_id=public_id,
+            status="completed",
+        )
+        assert "Marked Hollow Knight as completed" in out
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        from uuid import UUID
+
+        entry = await LibraryRepository(session).get_by_public_id(UUID(public_id), user_id)
+        assert entry is not None
+        assert entry.status == "completed"
+
+
+# -- Tool-arg abuse (Epic 26): a hijacked prompt can't drive an unsafe write --------
+
+
+async def test_set_status_rejects_status_outside_the_enum() -> None:
+    """An off-enum status (a hijacked arg) is refused and nothing is mutated."""
+    async with _TestSessionFactory() as session:
+        user_id, public_id, entry_id = await _seed(session, status="backlog")
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await set_status(
+            LibraryRepository(session),
+            user_id,
+            library_entry_public_id=public_id,
+            status="pwned",
+        )
+        assert "isn't a valid status" in out
+
+    async with _TestSessionFactory() as session:
+        from slate.infrastructure.db.models import LibraryEntry
+
+        entry = await session.get(LibraryEntry, entry_id)
+        assert entry is not None and entry.status == "backlog"  # untouched
+
+
+async def test_set_status_cannot_touch_another_users_entry() -> None:
+    """A valid public_id from ANOTHER user resolves to nothing — no cross-user write."""
+    async with _TestSessionFactory() as session:
+        from uuid import uuid4
+
+        from slate.infrastructure.db.models import User
+
+        _owner_id, public_id, entry_id = await _seed(session, status="backlog")
+        attacker = User(email=f"{uuid4().hex}@x.com", password_hash="h", display_name="A")
+        session.add(attacker)
+        await session.flush()
+        attacker_id = attacker.id
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await set_status(
+            LibraryRepository(session),
+            attacker_id,
+            library_entry_public_id=public_id,
+            status="completed",
+        )
+        assert "not in the library" in out
+
+    async with _TestSessionFactory() as session:
+        from slate.infrastructure.db.models import LibraryEntry
+
+        entry = await session.get(LibraryEntry, entry_id)
+        assert entry is not None and entry.status == "backlog"  # owner's entry untouched
+
+
+async def test_set_status_safe_on_garbage_id() -> None:
+    """A malformed (non-UUID) id is handled, not crashed."""
+    async with _TestSessionFactory() as session:
+        user_id, _, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await set_status(
+            LibraryRepository(session),
+            user_id,
+            library_entry_public_id="'; DROP TABLE library_entries; --",
+            status="completed",
+        )
+        assert "not in the library" in out
+
+
+async def test_set_status_rejects_invalid_status() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, public_id, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await set_status(
+            LibraryRepository(session),
+            user_id,
+            library_entry_public_id=public_id,
+            status="finished",
+        )
+        assert "isn't a valid status" in out
+
+
+async def test_set_status_unknown_game() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, _, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        out = await set_status(
+            LibraryRepository(session),
+            user_id,
+            library_entry_public_id=str(uuid4()),
+            status="playing",
+        )
+        assert "not in the library" in out
+
+
+# -- builder --------------------------------------------------------------------
+
+
+async def test_build_let_me_carry_write_tools_shapes() -> None:
+    async with _TestSessionFactory() as session:
+        user_id, _, _ = await _seed(session)
+        await session.commit()
+
+    async with _TestSessionFactory() as session:
+        tools = build_let_me_carry_write_tools(
+            user_id=user_id,
+            library_repo=LibraryRepository(session),
+            play_session_repo=PlaySessionRepository(session),
+            llm_client=DummyLLMClient(),
+            agent=None,
+            settings=settings,
+        )
+        names = {t.name for t in tools}
+        assert names == {
+            "start_play_session",
+            "generate_recap",
+            "submit_retroactive_wrap_up",
+            "set_status",
+        }

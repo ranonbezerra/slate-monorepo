@@ -13,7 +13,7 @@ import 'package:app/features/capture/view/capture_photo_page.dart';
 import 'package:app/features/capture/view/capture_review_page.dart';
 import 'package:app/features/capture/view/capture_text_page.dart';
 import 'package:app/features/capture/view/capture_voice_page.dart';
-import 'package:app/features/concierge/view/concierge_page.dart';
+import 'package:app/features/let_me_carry/view/let_me_carry_page.dart';
 import 'package:app/features/library/view/add_game_page.dart';
 import 'package:app/features/library/view/library_detail_page.dart';
 import 'package:app/features/library/view/library_list_page.dart';
@@ -73,8 +73,8 @@ GoRouter createRouter(
       GoRoute(path: '/pick', redirect: (context, state) => '/play/pick'),
       GoRoute(path: '/play-sessions', redirect: (context, state) => '/history'),
       GoRoute(
-        path: '/concierge',
-        redirect: (context, state) => '/play/concierge',
+        path: '/let_me_carry',
+        redirect: (context, state) => '/play/let_me_carry',
       ),
 
       // ---- Shell: bottom-nav tabs (Play, Library, History, Stats) ----
@@ -85,7 +85,7 @@ GoRouter createRouter(
           GoRoute(
             path: '/play',
             builder: (context, state) =>
-                PlayPage(conciergeEnabled: featureFlags.backlogConcierge),
+                PlayPage(letMeCarryEnabled: featureFlags.letMeCarry),
             routes: [
               GoRoute(
                 path: 'pick',
@@ -96,11 +96,11 @@ GoRouter createRouter(
                 path: 'play-sessions',
                 redirect: (context, state) => '/history',
               ),
-              // Backlog Concierge — hidden unless the feature flag is enabled.
-              if (featureFlags.backlogConcierge)
+              // let_me_carry — hidden unless the feature flag is enabled.
+              if (featureFlags.letMeCarry)
                 GoRoute(
-                  path: 'concierge',
-                  builder: (context, state) => const ConciergePage(),
+                  path: 'let_me_carry',
+                  builder: (context, state) => const LetMeCarryPage(),
                 ),
             ],
           ),

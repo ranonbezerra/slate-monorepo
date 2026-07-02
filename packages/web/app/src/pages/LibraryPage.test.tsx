@@ -46,7 +46,6 @@ vi.mock("./PlaySessionRecapModal", () => ({
 	PlaySessionRecapModal: ({ mode }: { mode: string }) =>
 		mode === "preview" ? <div data-testid="recap-preview-modal" /> : null,
 }));
-vi.mock("./PlaySessionWrapUpModal", () => ({ PlaySessionWrapUpModal: () => null }));
 vi.mock("../components/QuickAddMenu", () => ({
 	QuickAddMenu: () => <button type="button">Quick Add</button>,
 }));
@@ -742,36 +741,6 @@ describe("LibraryPage", () => {
 		expect(notifications.show).toHaveBeenCalledWith(
 			expect.objectContaining({ title: "No platform selected", color: "red" }),
 		);
-	});
-
-	// -----------------------------------------------------------------------
-	// Active playSession card
-	// -----------------------------------------------------------------------
-
-	it("shows the active playSession card when a playSession is active", () => {
-		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
-
-		renderPage();
-
-		expect(screen.getByText("Session active")).toBeInTheDocument();
-		expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "End session" })).toBeInTheDocument();
-	});
-
-	it('shows "View recap" only when the active playSession has recap text', () => {
-		(useActivePlaySession as Mock).mockReturnValue({
-			data: makePlaySession({ recapText: null }),
-		});
-
-		const { unmount } = renderPage();
-		expect(screen.queryByRole("button", { name: "View recap" })).not.toBeInTheDocument();
-		unmount();
-
-		(useActivePlaySession as Mock).mockReturnValue({
-			data: makePlaySession({ recapText: "go" }),
-		});
-		renderPage();
-		expect(screen.getByRole("button", { name: "View recap" })).toBeInTheDocument();
 	});
 
 	// -----------------------------------------------------------------------

@@ -1,0 +1,55 @@
+"""Deterministic LetMeCarry agent for tests and offline development.
+
+Exercises the tool path (calls search_library) and emits a recommendation using
+a real library id, so the service's UUID guard runs against real data without a
+model. Include ``[invalid]`` in the message to force an out-of-library id and
+exercise the reroll/degrade path.
+"""
+
+from __future__ import annotations
+
+import re
+from collections.abc import AsyncIterator
+
+from .base import AbstractLetMeCarryAgent, LetMeCarryReply, LetMeCarryRequest
+from .streaming import LetMeCarryEvent, TokenEvent, ToolEvent
+
+_ID_RE = re.compile(r"id:\s*([0-9a-fA-F-]{36})")
+_FAKE_ID = "00000000-0000-0000-0000-000000000000"
+
+
+class DummyLetMeCarryAgent(AbstractLetMeCarryAgent):
+    async def respond(self, req: LetMeCarryRequest) -> LetMeCarryReply:
+        listing = await self._search(req)
+        return LetMeCarryReply(text=self._answer(req, listing))
+
+    async def astream(self, req: LetMeCarryRequest) -> AsyncIterator[LetMeCarryEvent]:
+        # Exercise the tool affordance + token streaming + the gate: a tool
+        # call, then the answer (incl. the RECOMMEND tail) word by word.
+        yield ToolEvent(name="search_library", phase="start")
+        listing = await self._search(req)
+        yield ToolEvent(name="search_library", phase="end")
+        for chunk in _word_chunks(self._answer(req, listing)):
+            yield TokenEvent(text=chunk)
+
+    async def _search(self, req: LetMeCarryRequest) -> str:
+        for tool in req.tools:
+            if tool.name == "search_library":
+                return await tool.coroutine()
+        return ""
+
+    def _answer(self, req: LetMeCarryRequest, listing: str) -> str:
+        if "[invalid]" in req.message.lower():
+            return f"You should jump back into that one.\nRECOMMEND: {_FAKE_ID}"
+        match = _ID_RE.search(listing)
+        if match:
+            return (
+                "Based on your library and the time you have, give this a go.\n"
+                f"RECOMMEND: {match.group(1)}"
+            )
+        return "I couldn't find anything in your library to suggest right now."
+
+
+def _word_chunks(text: str) -> list[str]:
+    words = text.split(" ")
+    return [w if i == len(words) - 1 else w + " " for i, w in enumerate(words)]

@@ -171,7 +171,7 @@ remains available as an explicit override.
 | GET | `/overview` | KPI summary (games, play sessions, durations) |
 | GET | `/sessions` | Recent sessions (paginated) |
 
-### Concierge (`/v1/concierge`)
+### let_me_carry (`/v1/let_me_carry`)
 
 Tool-using conversational agent over the real library and play-session pipeline (opt-in; gated write tools are UUID-validated).
 
@@ -218,7 +218,7 @@ public origin; single-user mode is rejected outright. Non-admins get `403`.
 Every mutation appends an `admin_audit_log` row (actor, action, target, optional reason).
 
 **Dynamic config** (`/config`): a curated set of operational knobs — kill-switches
-(`rate_limit_enabled`, `cost_guard_enabled`, `concierge_write_tools_enabled`), abuse
+(`rate_limit_enabled`, `cost_guard_enabled`, `let_me_carry_write_tools_enabled`), abuse
 caps (`cost_user_per_day`, `cost_global_per_day`, `rate_limit_register_per_minute`,
 `igdb_user_budget_per_day`), and product rules (`catalog_share_threshold`,
 `block_disposable_emails`) — overridable at **runtime without a redeploy**. Precedence
@@ -275,7 +275,7 @@ Errors follow a consistent format:
 Rate limits are enforced across the API (backed by Redis, shared across workers):
 
 - **Auth routes** are IP- **and** target-account-limited (login, register, verification resend, OAuth start/callback) to blunt brute-force and distributed attacks on a single account.
-- **Expensive routes** are per-user limited — e.g. concierge chat, recap, pick, capture, and library-import each have their own cap.
+- **Expensive routes** are per-user limited — e.g. let_me_carry chat, recap, pick, capture, and library-import each have their own cap.
 - A generous **per-user backstop** applies to every authenticated request as a catch-all.
 - Limiters **fail open** (a Redis outage allows the request, logged) except on account-creation surfaces, which fail closed.
 - On top of rate limits, LLM-bearing routes pass through a **cost guard** (per-user + global token→$ spend caps) that returns `429`/`503` when a ceiling is hit.

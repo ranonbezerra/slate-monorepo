@@ -56,11 +56,11 @@ CONFIG_REGISTRY: dict[str, ConfigKeySpec] = dict(
         ),
         _spec(
             ConfigKeySpec(
-                "concierge_write_tools_enabled",
+                "let_me_carry_write_tools_enabled",
                 "bool",
-                "concierge_write_tools_enabled",
+                "let_me_carry_write_tools_enabled",
                 "kill_switch",
-                "Allow the Concierge to call write tools (create play_sessions, etc.).",
+                "Allow the LetMeCarry to call write tools (create play_sessions, etc.).",
             )
         ),
         # ── Incident-tunable caps ──

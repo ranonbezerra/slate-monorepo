@@ -16,8 +16,8 @@
 	}
 }
 
-/* ConciergePage — typing-indicator dots */
-@keyframes conciergeBlink {
+/* LetMeCarryPage — typing-indicator dots */
+@keyframes letMeCarryBlink {
 	0%,
 	80%,
 	100% {

@@ -246,10 +246,10 @@ class TestVerifiedGate:
         )
         assert resp.status_code == 403
 
-    async def test_concierge_blocked_when_unverified(self, async_client: AsyncClient) -> None:
+    async def test_let_me_carry_blocked_when_unverified(self, async_client: AsyncClient) -> None:
         headers = await self._unverified_headers(async_client)
         resp = await async_client.post(
-            "/v1/concierge/chat",
+            "/v1/let_me_carry/chat",
             json={"message": "what should I play"},
             headers=headers,
         )

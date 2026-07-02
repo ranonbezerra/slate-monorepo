@@ -35,7 +35,7 @@ _SEED: list[tuple[str, object]] = [
     # Kill-switches
     ("rate_limit_enabled", True),
     ("cost_guard_enabled", True),
-    ("concierge_write_tools_enabled", True),
+    ("let_me_carry_write_tools_enabled", True),
     # Incident-tunable caps
     ("cost_user_per_day", 200),
     ("cost_global_per_day", 5000),

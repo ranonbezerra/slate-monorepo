@@ -2,15 +2,15 @@ import 'package:app/app/app.dart';
 import 'package:app/core/analytics/analytics_repository.dart';
 import 'package:app/core/auth/auth_repository.dart';
 import 'package:app/core/capture/capture_repository.dart';
-import 'package:app/core/concierge/concierge_repository.dart';
 import 'package:app/core/config/feature_flags.dart';
+import 'package:app/core/let_me_carry/let_me_carry_repository.dart';
 import 'package:app/core/library/library_repository.dart';
 import 'package:app/core/pick/pick_repository.dart';
 import 'package:app/core/play_session/play_session_repository.dart';
 import 'package:app/features/analytics/bloc/analytics_bloc.dart';
 import 'package:app/features/auth/bloc/auth_bloc.dart';
 import 'package:app/features/capture/bloc/capture_bloc.dart';
-import 'package:app/features/concierge/bloc/concierge_bloc.dart';
+import 'package:app/features/let_me_carry/bloc/let_me_carry_bloc.dart';
 import 'package:app/features/library/bloc/library_bloc.dart';
 import 'package:app/features/library_import/bloc/library_import_bloc.dart';
 import 'package:app/features/pick/bloc/pick_bloc.dart';
@@ -32,7 +32,7 @@ class MockPickRepository extends Mock implements PickRepository {}
 
 class MockAnalyticsRepository extends Mock implements AnalyticsRepository {}
 
-class MockConciergeRepository extends Mock implements ConciergeRepository {}
+class MockLetMeCarryRepository extends Mock implements LetMeCarryRepository {}
 
 void main() {
   late MockAuthRepository mockAuthRepository;
@@ -41,7 +41,7 @@ void main() {
   late MockPlaySessionRepository mockPlaySessionRepository;
   late MockPickRepository mockPickRepository;
   late MockAnalyticsRepository mockAnalyticsRepository;
-  late MockConciergeRepository mockConciergeRepository;
+  late MockLetMeCarryRepository mockLetMeCarryRepository;
   late AuthBloc authBloc;
   late LibraryBloc libraryBloc;
   late CaptureBloc captureBloc;
@@ -49,7 +49,7 @@ void main() {
   late PlaySessionBloc playSessionBloc;
   late PickBloc pickBloc;
   late AnalyticsBloc analyticsBloc;
-  late ConciergeBloc conciergeBloc;
+  late LetMeCarryBloc letMeCarryBloc;
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
@@ -58,7 +58,7 @@ void main() {
     mockPlaySessionRepository = MockPlaySessionRepository();
     mockPickRepository = MockPickRepository();
     mockAnalyticsRepository = MockAnalyticsRepository();
-    mockConciergeRepository = MockConciergeRepository();
+    mockLetMeCarryRepository = MockLetMeCarryRepository();
 
     // Stub the hasTokens call that AppStarted will trigger.
     when(() => mockAuthRepository.hasTokens()).thenAnswer((_) async => false);
@@ -77,7 +77,9 @@ void main() {
       playSessionRepository: mockPlaySessionRepository,
     );
     analyticsBloc = AnalyticsBloc(analyticsRepository: mockAnalyticsRepository);
-    conciergeBloc = ConciergeBloc(conciergeRepository: mockConciergeRepository);
+    letMeCarryBloc = LetMeCarryBloc(
+      letMeCarryRepository: mockLetMeCarryRepository,
+    );
   });
 
   tearDown(() {
@@ -88,7 +90,7 @@ void main() {
     playSessionBloc.close();
     pickBloc.close();
     analyticsBloc.close();
-    conciergeBloc.close();
+    letMeCarryBloc.close();
   });
 
   Widget buildSubject() {
@@ -100,7 +102,7 @@ void main() {
       playSessionBloc: playSessionBloc,
       pickBloc: pickBloc,
       analyticsBloc: analyticsBloc,
-      conciergeBloc: conciergeBloc,
+      letMeCarryBloc: letMeCarryBloc,
       libraryRepository: mockLibraryRepository,
       featureFlags: const FeatureFlags(),
     );

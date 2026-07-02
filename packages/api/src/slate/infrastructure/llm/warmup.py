@@ -1,6 +1,6 @@
 """Preload Ollama models on startup so the first request isn't a cold load.
 
-A cold model load (especially the 7B concierge agent) can take tens of seconds
+A cold model load (especially the 7B let_me_carry agent) can take tens of seconds
 and, with no streamed output during the agent's first tool-deciding call, looks
 like a hang. Warming the configured models in the background at startup means
 the model is resident by the time the user sends a message.

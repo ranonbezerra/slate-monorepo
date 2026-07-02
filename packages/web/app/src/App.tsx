@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { ActiveMissionBar } from "./components/ActiveMissionBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { VerifyEmailBanner } from "./components/VerifyEmailBanner";
 import { useAuthContext } from "./contexts/AuthContext";
@@ -40,8 +41,8 @@ const AnalyticsPage = lazy(() =>
 const CapturesPage = lazy(() =>
 	import("./pages/CapturesPage").then((m) => ({ default: m.CapturesPage })),
 );
-const ConciergePage = lazy(() =>
-	import("./pages/ConciergePage").then((m) => ({ default: m.ConciergePage })),
+const LetMeCarryPage = lazy(() =>
+	import("./pages/LetMeCarryPage").then((m) => ({ default: m.LetMeCarryPage })),
 );
 const LibraryImportPage = lazy(() =>
 	import("./pages/LibraryImportPage").then((m) => ({ default: m.LibraryImportPage })),
@@ -165,8 +166,8 @@ function AppLayout() {
 					<Routes>
 						<Route path="/play" element={<PlayPage />} />
 						<Route path="/play/pick" element={<PickPage />} />
-						{FEATURES.backlogConcierge && (
-							<Route path="/play/concierge" element={<ConciergePage />} />
+						{FEATURES.letMeCarry && (
+							<Route path="/play/let-me-carry" element={<LetMeCarryPage />} />
 						)}
 						<Route path="/library" element={<LibraryPage />} />
 						<Route path="/library/import" element={<LibraryImportPage />} />
@@ -178,11 +179,12 @@ function AppLayout() {
 						<Route path="/pick" element={<Navigate to="/play/pick" replace />} />
 						<Route path="/play-sessions" element={<Navigate to="/history" replace />} />
 						<Route path="/play/play-sessions" element={<Navigate to="/history" replace />} />
-						<Route path="/concierge" element={<Navigate to="/play/concierge" replace />} />
 						<Route path="*" element={<Navigate to="/play" replace />} />
 					</Routes>
 				</Suspense>
 			</AppShell.Main>
+
+			<ActiveMissionBar />
 		</AppShell>
 	);
 }
