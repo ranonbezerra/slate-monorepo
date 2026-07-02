@@ -91,6 +91,25 @@ def test_scrub_redacts_headers_body_and_query() -> None:
     assert "?" not in req["url"]
 
 
+def test_scrub_redacts_secrets_inside_exception_values() -> None:
+    # A DSN password or a secret query param embedded in an exception message
+    # (e.g. an httpx/psycopg error) must be redacted before reaching Sentry.
+    event = {
+        "exception": {
+            "values": [
+                {"value": "postgresql://u:SUPERSECRET@h/db failed"},  # pragma: allowlist secret
+                {"value": "GET https://s/x?key=STEAMKEY123&id=1"},  # pragma: allowlist secret
+            ]
+        }
+    }
+    out = observability.sentry._scrub(event, {})
+    values = [v["value"] for v in out["exception"]["values"]]
+    assert "SUPERSECRET" not in values[0]
+    assert "://[redacted]@" in values[0]
+    assert "STEAMKEY123" not in values[1]
+    assert "key=[redacted]" in values[1]
+
+
 # ── secret_key length + trusted_hosts (#8) ───────────────────────────────
 
 

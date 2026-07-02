@@ -74,6 +74,12 @@ async def _init_postgres(settings: Settings) -> Any:  # pragma: no cover - needs
         await saver.setup()  # idempotent: creates the checkpoint tables
         logger.info("let_me_carry_postgres_checkpointer_ready")
         return saver
-    except Exception:
-        logger.warning("let_me_carry_postgres_checkpointer_init_failed", exc_info=True)
+    except Exception as exc:
+        # No exc_info: a psycopg pool/connect failure can embed the DSN (with the
+        # DB password) in its message + traceback frame locals, which would reach
+        # stdout logs and Sentry (neither scrubs exception values). Type only.
+        logger.warning(
+            "let_me_carry_postgres_checkpointer_init_failed",
+            error_type=type(exc).__name__,
+        )
         return None
