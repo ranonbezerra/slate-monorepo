@@ -1536,6 +1536,97 @@ New client platform (Tauri/Rust), OS-level filesystem + process integration, and
 
 ---
 
+## Epic 32 — `let_me_carry`: in-game Coach + Concierge rename (v1.1+)
+
+**Goal:** evolve the Concierge from a *pre-play backlog recommender* into a *during-play* companion — the "really good gamer friend" who helps a stuck player get unstuck **without spoiling the game**. Where today's Concierge (Epics 11/12) only reasons over the player's own library ("what should I play?"), the Coach reasons over the **game world** ("I'm stuck on this boss / where do I go next?") and answers grounded, at a hint level the player controls.
+
+**Status:** proposed. The premium flagship feature — it's the concrete answer to "what does a paying user get?" and the reason the monetization epic stops being abstract.
+
+### Context — half of this already exists
+
+Two agentic pillars already shipped; this epic fuses them:
+
+- **Concierge (Epics 11/12):** a LangGraph tool-agent + SSE streaming chat, per-user/thread isolated, with a UUID-existence guard. But its five tools are all library-scoped (`search_library`, `get_play_session_history`, `get_play_stats`, `estimate_session_fit`, `validate_recommendation`) — it has **zero game-world knowledge** and is *deliberately* walled off from deep research for cost (`tools_write.py` caps recap at `quick`).
+- **Deep Research Recap (Epic 10):** a LangGraph research graph over SearXNG with a `spoiler_filter` node and the token-overlap `anti_hallucination` gate.
+
+The Coach = the Concierge agent + a **`game_help` tool** that runs the Epic 10 research graph, scoped to the player's **active game and progress** (pulled from the current play session + wrap-up notes — "you left off before the water temple"). That context is the moat: unlike a generic chatbot, the Coach knows *which* game and *roughly where you are*.
+
+### Naming & product rename (Concierge → `let_me_carry`)
+
+The "Concierge" name describes a *pre-play recommender*; the companion is now your expert gamer friend who also **carries you when you're stuck**. So the whole thing is renamed — **product-wide, not just UI copy**: the `core/concierge` + `infrastructure/agent/concierge` modules, the `/play/concierge` route, the docs (PRODUCT.md / ARCHITECTURE.md), and the chat's on-screen identity all become **`let_me_carry`**. The handle is styled after the legendary selfless-helper archetype (e.g. Elden Ring's *let_me_solo_her*) — the humble expert who shows up to get you unstuck.
+
+Roles, kept distinct:
+
+- **`let_me_carry`** — the **companion / chat** (the renamed Concierge). It's *who* answers: one persona, one thread, that both chats/suggests informally **and** coaches. This is a handle (an identity), so a nickname style fits.
+- **"Carry me!"** — the **summon button** on the active-mission bar (below). It's UI copy — a plain call-to-action, **not** a handle: a leetspeak nick on a button reads wrong. Pressing it is the Souls summon-sign beat: *"`let_me_carry` entered your mission."*
+- **`git_gud`** — an **easter-egg achievement** ("you got gud") for beating an obstacle you were coached through. A wink, never the tone of the help itself.
+- **Daily Pick (Epic 7)** stays the *structured* recommender (3 questions → 1 pick). `let_me_carry` is the *conversational* layer — so renaming away from "Concierge" loses no recommend function; the two don't duplicate.
+
+The rename + the mission bar can (and should) **ship ahead of the coaching AI** — they're a rebrand + a UX foundation, independent of the spoiler-safe research work.
+
+### Active-mission bar (UX foundation — ship first)
+
+A "mission" (play session) can be started from **anywhere** — the library, the Daily Pick, the Play page — and there's exactly one active at a time. So its presence must be **global**, not bound to one page, and the "Carry me!" summon has to ride along with it.
+
+Today the active session is tracked in **two independent places** — `packages/web/app/src/pages/PlayPage.tsx` and `.../LibraryPage.tsx`, each calling `useActivePlaySession` and rendering its own active-session block. That's duplicate UI **and** duplicate tracking. **Consolidate into a single global mission bar in the app shell and delete both in-page trackers** (and the mobile equivalent is moot — the Flutter app is being retired).
+
+The bar (persistent while a mission is active, visible on every screen):
+
+```text
+🎮 Elden Ring · 0:42 ·  [ Carry me! ]   [ Wrap up ▸ ]
+```
+
+- Single source of active-session state and actions (end / wrap-up **from any screen**, not just the Play page).
+- Home of the summon: **"Carry me!"** opens `let_me_carry` in coach mode, pre-scoped to the active game + where you left off (hint ladder L0).
+- Valuable independent of the Coach (it fixes the "you can only wrap up from the Play page" gap), which is why it ships first.
+
+### Design spike — spoiler laddering (do this FIRST; it's the hard part)
+
+Spoiler control is not the recap's binary filter — a stuck player wants a *nudge*, not the ending. The spike designs **graduated disclosure**, player-controlled, before any feature code:
+
+- **Define the ladder** (proposed 4 rungs, each an explicit contract):
+  - **L0 — Nudge:** a direction, no mechanics. *"Have you tried exploring north of the village? Something there gates your progress."*
+  - **L1 — Hint:** the concrete concept, not the execution. *"That boss punishes greed — the opening is right after its second attack."*
+  - **L2 — Steps:** ordered actions, still terse. *"1) break the pots for the key, 2) the lever is behind the waterfall, 3) …"*
+  - **L3 — Solution:** the full answer, explicitly opt-in and warned. *"⚠️ full solution ahead."*
+- **The mechanic:** the research graph fetches the *truth* once; a new **`hint_ladder` node** meters how much of it surfaces per requested rung, and only escalates on an explicit player action ("more help?"). Default entry is **L0**, never L3.
+- **Extend `spoiler_filter` from binary → graded:** it must classify *how far ahead* a fact reveals (this-obstacle vs later-story) and clamp anything beyond the requested rung. A "boss opening" (this fight) is fine at L1; "and then the boss betrays you in act 3" is a story spoiler blocked at every rung below L3.
+- **Context gathering:** resolve *which game* (active session, or asked), *where the player is* (wrap-ups + progress signals), and *how stuck* (maps to entry rung).
+- **Spike deliverables:** the rung contracts above, the per-rung prompt templates, the graded-spoiler classifier design, and — critically — an **eval set** (Epic 23) of stuck-player scenarios with labeled "acceptable at rung N / leaks at rung N" cases. The spike's exit gate: the eval can *measure* leakage per rung, so the feature is provable, not vibes.
+
+### Tasks
+
+**Foundation (ships ahead of the coaching AI):**
+
+- [ ] **Rename Concierge → `let_me_carry` product-wide** — `core/concierge` + `infrastructure/agent/concierge` modules, the `/play/concierge` route, the chat's on-screen identity, and the PRODUCT.md / ARCHITECTURE.md references. Keep the write-tool cost wall (it becomes the coach's entitlement gate).
+- [ ] **Global active-mission bar** in the app shell (game + timer + **"Carry me!"** + **Wrap up**), the single source of active-session state/actions.
+- [ ] **Delete the two duplicate active-session trackers** (`PlayPage.tsx` + `LibraryPage.tsx`) so tracking lives in one place; wire end/wrap-up through the bar.
+
+**Coaching AI:**
+
+- [ ] Run the spoiler-laddering design spike above; land the rung contracts + the leakage eval set first.
+- [ ] `game_help` tool → invokes the Epic 10 research graph scoped to `{game, progress, rung}`; entitlement- + cost-gated (this is the paid surface — reuse the deep-recap gate).
+- [ ] `hint_ladder` graph node + the graded `spoiler_filter`; default rung L0, escalate only on explicit "more help" (the "Carry me!" summon opens at L0).
+- [ ] Inject active-game + wrap-up context so the Coach knows the game and roughly where the player is.
+- [ ] Streaming answers over the existing SSE chat; per-turn cost metering (in-game help is high-volume).
+- [ ] Eval gate: prove no rung leaks the rung above it, across the labeled scenario set.
+
+### Definition of Done
+
+- **Naming:** "Concierge" no longer appears in the product (code, routes, docs, UI) — the companion is `let_me_carry`; the summon CTA is **"Carry me!"**; the Daily Pick remains the structured recommender (no duplication).
+- **Tracking:** exactly **one** active-session surface (the global mission bar); the PlayPage/LibraryPage duplicates are gone; end/wrap-up work from any screen.
+- **Coach:** a stuck player taps "Carry me!" and gets a **grounded** (web-researched) answer at **L0 by default**, escalating only when they ask for more; the Epic 23 eval **proves** each rung doesn't leak the next; the surface is entitlement-gated (paid) and cost-metered; the Coach demonstrably knows the game and roughly the player's progress.
+
+### Technical highlight
+
+> **Graduated spoilers as a calibrated graph node.** The research graph fetches the *truth* once; a `hint_ladder` node meters how much of it surfaces, and the eval proves each rung is safe — the same "deterministic guards bracketing a probabilistic core" pattern as the deep recap, applied to the hardest UX in game help: telling someone *just enough*.
+
+### Why this is a separate epic
+
+It fuses two shipped pillars (Concierge + deep research) but adds the single hardest prompt problem in the product — graded, player-controlled spoiler disclosure — and it's the premium hook the monetization epic needs. Hard dependencies: Epic 10 (research graph), Epics 11/12 (Concierge agent), Epic 14 (hosted LLM — in-game help isn't viable on a single local Ollama), and the Tiers & Entitlements gate. Ships behind an entitlement flag; the design spike de-risks it before any feature code.
+
+---
+
 ## Descope guide if time runs short
 
 If at some point you feel you're pushing, these are the epics to defer to **v1.1** without destroying the vitrine:
