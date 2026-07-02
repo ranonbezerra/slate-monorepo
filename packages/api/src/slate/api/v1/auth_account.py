@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from slate.api.v1._rate_limit import rate_limit
 from slate.config import settings
 from slate.core.auth.account import ReauthError
+from slate.core.auth.export_schemas import ExportResponse
 from slate.core.auth.schemas import (
     ChangeEmailRequest,
     ConfirmEmailChangeRequest,
@@ -79,13 +80,17 @@ async def delete_account(
     return MessageResponse(message="Account permanently deleted")
 
 
-@router.get("/me/export", dependencies=[_export_rate])
+@router.get("/me/export", response_model=ExportResponse, dependencies=[_export_rate])
 async def export_account(
     current_user: CurrentUserDep,
     service: AccountServiceDep,
-) -> dict[str, object]:
-    """Return the caller's personal data as a portable JSON document."""
-    return await service.export_data(current_user)
+) -> ExportResponse:
+    """Return the caller's personal data as a portable JSON document.
+
+    Serialized through ``ExportResponse`` so the dump can only ever contain the
+    declared fields — an internal column added to the builder can't leak.
+    """
+    return ExportResponse.model_validate(await service.export_data(current_user))
 
 
 @router.post(

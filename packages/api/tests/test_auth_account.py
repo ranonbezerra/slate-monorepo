@@ -32,6 +32,17 @@ class TestDataExport:
             "picks",
         }
         assert isinstance(body["library"], list)
+        # response_model=ExportResponse clamps the profile to exactly these keys —
+        # no internal id / password_hash / token_version can ever leak through.
+        assert set(body["profile"]) == {
+            "public_id",
+            "email",
+            "display_name",
+            "email_verified",
+            "locale",
+            "timezone",
+            "created_at",
+        }
 
     async def test_export_requires_auth(self, async_client: AsyncClient) -> None:
         resp = await async_client.get("/v1/auth/me/export")
@@ -153,7 +164,9 @@ class TestEmailChange:
     ) -> None:
         async with _TestSessionFactory() as session:
             user = (await session.execute(select(User).where(User.email == _EMAIL))).scalar_one()
-            token = create_email_change_token(str(user.public_id), "confirmed@example.com")
+            token = create_email_change_token(
+                str(user.public_id), "confirmed@example.com", user.token_version
+            )
 
         resp = await async_client.post("/v1/auth/confirm-email-change", json={"token": token})
         assert resp.status_code == 200
@@ -172,6 +185,31 @@ class TestEmailChange:
             "/v1/auth/confirm-email-change", json={"token": "not-a-jwt"}
         )
         assert resp.status_code == 400
+
+    async def test_confirm_rejects_stale_link_after_session_cut(
+        self, async_client: AsyncClient, register_user: dict[str, str]
+    ) -> None:
+        # A link minted before a logout-all / password change no longer applies:
+        # its bound token_version no longer matches the user's current one. This
+        # invalidates the stale link WITHOUT revoking the session that confirms.
+        from slate.infrastructure.db.repositories.user import UserRepository
+
+        async with _TestSessionFactory() as session:
+            user = (await session.execute(select(User).where(User.email == _EMAIL))).scalar_one()
+            token = create_email_change_token(
+                str(user.public_id), "confirmed@example.com", user.token_version
+            )
+            # Something bumps token_version (logout-all / password change / ban).
+            await UserRepository(session).bump_token_version(user.id)
+            await session.commit()
+
+        resp = await async_client.post("/v1/auth/confirm-email-change", json={"token": token})
+        assert resp.status_code == 400
+        # The email did NOT change — the old address still logs in.
+        old = await async_client.post(
+            "/v1/auth/login", json={"email": _EMAIL, "password": _PASSWORD}
+        )
+        assert old.status_code == 200
 
 
 class TestProfileUpdate:

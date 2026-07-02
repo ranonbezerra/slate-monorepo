@@ -37,13 +37,19 @@ _EMAIL_CHANGE_PURPOSE = "email_change"
 _INVALID = "Invalid or expired email-change token"
 
 
-def create_email_change_token(public_id: str, new_email: str) -> str:
-    """Signed, purpose-scoped token confirming a change of *public_id*'s email."""
+def create_email_change_token(public_id: str, new_email: str, token_version: int) -> str:
+    """Signed, purpose-scoped token confirming a change of *public_id*'s email.
+
+    The current ``token_version`` is bound in so a link minted before a
+    session-cutting event (logout-all / password change / ban) can't apply
+    afterwards — without revoking the session that performs the change.
+    """
     now = datetime.now(UTC)
     payload = {
         "sub": public_id,
         "purpose": _EMAIL_CHANGE_PURPOSE,
         "new_email": new_email,
+        "tv": token_version,
         "exp": now + timedelta(hours=settings.email_verification_ttl_hours),
         "iat": now,
         **_ISS_AUD,
@@ -51,23 +57,28 @@ def create_email_change_token(public_id: str, new_email: str) -> str:
     return str(jwt.encode(payload, settings.secret_key, algorithm=_ALGORITHM))
 
 
-def decode_email_change_token(token: str) -> tuple[str, str]:
-    """Decode an email-change token → ``(public_id, new_email)``. Raises on bad token."""
+def decode_email_change_token(token: str) -> tuple[str, str, int]:
+    """Decode an email-change token → ``(public_id, new_email, token_version)``.
+
+    Raises ``ValueError`` on a malformed/expired/wrong-purpose token.
+    """
     try:
         payload = jwt.decode(token, settings.secret_key, **_DECODE_KW)
     except PyJWTError as exc:
         raise ValueError(_INVALID) from exc
     subject = payload.get("sub")
     new_email = payload.get("new_email")
+    token_version = payload.get("tv")
     if (
         payload.get("purpose") != _EMAIL_CHANGE_PURPOSE
         or not isinstance(subject, str)
         or not subject
         or not isinstance(new_email, str)
         or not new_email
+        or not isinstance(token_version, int)
     ):
         raise ValueError(_INVALID)
-    return subject, new_email
+    return subject, new_email, token_version
 
 
 class EmailChangeService:
@@ -87,19 +98,23 @@ class EmailChangeService:
         await assert_email_acceptable(new_email)  # disposable / undeliverable gate
         if await self._user_repo.email_exists(new_email):
             raise ValueError("Email already in use")
-        token = create_email_change_token(str(user.public_id), new_email)
+        token = create_email_change_token(str(user.public_id), new_email, user.token_version)
         send_email_change_verification(self._mailer, to=new_email, token=token)
         send_email_change_notice(self._mailer, to=user.email)
 
     async def confirm_change(self, token: str) -> None:
         """Apply a confirmed change: set the new email (verified). Raises on any issue."""
-        public_id_str, new_email = decode_email_change_token(token)
+        public_id_str, new_email, token_version = decode_email_change_token(token)
         try:
             public_id = UUID(public_id_str)
         except ValueError as exc:
             raise ValueError(_INVALID) from exc
         user = await self._user_repo.get_by_public_id(public_id)
         if user is None:
+            raise ValueError(_INVALID)
+        # Reject a stale link: if token_version moved since the link was minted
+        # (logout-all / password change / ban), the link no longer applies.
+        if token_version != user.token_version:
             raise ValueError(_INVALID)
         # Re-check availability: the address may have been taken since the request.
         if await self._user_repo.email_exists(new_email):
