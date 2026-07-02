@@ -882,6 +882,8 @@ It adds a new hexagonal port (`ocr/`), a catalog-matching layer, a batch capture
 
 **Goal:** upgrade the Backlog Concierge (Epic 11) from "buffer → validate → stream the guarded answer in chunks" to **true token-level streaming** — the chat types out live as the model generates — while keeping the Epic 7 UUID-existence guard intact.
 
+**Status:** done. Token-level streaming ships via `ConciergeService.reply_stream` (`self._agent.astream(...)` yielding `TokenEvent`s live) over **SSE** (`api/v1/concierge.py` → `StreamingResponse(media_type="text/event-stream")`, `data: {json}\n\n` framing) as **typed events** (`token` / `tool` / `recommendation` / `correction` / `degrade` / `done`). The Epic 7 UUID guard is enforced in-stream (the trailing `RECOMMEND` marker is withheld and validated — reroll once, else degrade). The web client consumes it via `fetch` + `ReadableStream` (not native `EventSource`, since the turn is a POST with an auth header + body).
+
 > Builds on the **operator Concierge from Epic 12**: once the Concierge can start/recap/log play sessions (not just recommend), live streaming also means surfacing those write actions as they happen ("▶ starting your play session…"), not just text and read-only tool calls.
 
 ### Context
@@ -1623,7 +1625,7 @@ Spoiler control is not the recap's binary filter — a stuck player wants a *nud
 
 ### Why this is a separate epic
 
-It fuses two shipped pillars (Concierge + deep research) but adds the single hardest prompt problem in the product — graded, player-controlled spoiler disclosure — and it's the premium hook the monetization epic needs. Hard dependencies: Epic 10 (research graph), Epics 11/12 (Concierge agent), Epic 14 (hosted LLM — in-game help isn't viable on a single local Ollama), and the Tiers & Entitlements gate. Ships behind an entitlement flag; the design spike de-risks it before any feature code.
+It fuses two shipped pillars (Concierge + deep research) but adds the single hardest prompt problem in the product — graded, player-controlled spoiler disclosure — and it's the premium hook the monetization epic needs. Hard dependencies: Epic 10 (research graph), Epics 11/12 (Concierge agent), Epic 14 (hosted LLM — needed only at **production scale**; the coach runs fine on local Ollama + SearXNG for the self-host / public-repo model, where the operator bears the compute), and the Tiers & Entitlements gate (deferred until the repo goes private — the coach ships **ungated / free** first). The design spike de-risks it before any feature code.
 
 ---
 
