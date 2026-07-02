@@ -1,17 +1,17 @@
 import { useCallback, useRef, useState } from "react";
-import { streamConcierge } from "../lib/concierge-api";
-import type { ChatMessage, Recommendation } from "../types/concierge";
+import { streamLetMeCarry } from "../lib/let-me-carry-api";
+import type { ChatMessage, Recommendation } from "../types/let-me-carry";
 
 // ---------------------------------------------------------------------------
-// useConcierge — drives a streaming chat conversation with the Backlog
-// Concierge (ROADMAP Epic 16). Renders prose token-by-token, surfaces the
+// useLetMeCarry — drives a streaming chat conversation with the Backlog
+// LetMeCarry (ROADMAP Epic 16). Renders prose token-by-token, surfaces the
 // active tool call as an affordance, attaches a validated recommendation, and
 // can cancel a turn mid-stream. Threads the server-issued thread_id across turns.
 // ---------------------------------------------------------------------------
 
 const FALLBACK_ERROR = "Sorry, something went wrong. Please try again.";
 
-export function useConcierge() {
+export function useLetMeCarry() {
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [isStreaming, setIsStreaming] = useState(false);
 	const [activeTool, setActiveTool] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function useConcierge() {
 			abortRef.current = controller;
 
 			try {
-				for await (const event of streamConcierge(text, threadId.current, controller.signal)) {
+				for await (const event of streamLetMeCarry(text, threadId.current, controller.signal)) {
 					if (event.error) {
 						setError(event.error);
 						patchAssistant((last) => ({ ...last, text: event.error ?? FALLBACK_ERROR }));

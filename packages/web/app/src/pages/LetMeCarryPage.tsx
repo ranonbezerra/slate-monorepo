@@ -20,9 +20,9 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useConcierge } from "../hooks/useConcierge";
+import { useLetMeCarry } from "../hooks/useLetMeCarry";
 import { useLibraryEntry } from "../hooks/useLibrary";
-import type { ChatMessage } from "../types/concierge";
+import type { ChatMessage } from "../types/let-me-carry";
 import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
 
 const TYPING_DOTS = ["dot-0", "dot-1", "dot-2"];
@@ -41,7 +41,7 @@ const TOOL_LABELS: Record<string, string> = {
 
 function TypingDots() {
 	return (
-		<Group gap={5} py={4} aria-label="Concierge is thinking">
+		<Group gap={5} py={4} aria-label="let_me_carry is thinking">
 			{TYPING_DOTS.map((id, i) => (
 				<Box
 					key={id}
@@ -50,7 +50,7 @@ function TypingDots() {
 					style={{
 						borderRadius: "50%",
 						backgroundColor: "var(--mantine-color-gray-5)",
-						animation: "conciergeBlink 1.2s infinite ease-in-out",
+						animation: "letMeCarryBlink 1.2s infinite ease-in-out",
 						animationDelay: `${i * 0.16}s`,
 					}}
 				/>
@@ -91,11 +91,11 @@ function MessageBubble({ message, onPlay }: { message: ChatMessage; onPlay: () =
 	);
 }
 
-export function ConciergePage() {
-	// Errors surface inline as an assistant bubble (see useConcierge); we
+export function LetMeCarryPage() {
+	// Errors surface inline as an assistant bubble (see useLetMeCarry); we
 	// deliberately don't also render a separate banner to avoid showing the
 	// same failure twice.
-	const { messages, isStreaming, activeTool, send, cancel } = useConcierge();
+	const { messages, isStreaming, activeTool, send, cancel } = useLetMeCarry();
 	const [input, setInput] = useState("");
 	// The recommended library entry the user tapped "Play" on — opens the
 	// recap-choice dialog once the full entry loads.
@@ -121,7 +121,7 @@ export function ConciergePage() {
 	return (
 		<Stack h="calc(100vh - 32px)" gap="md">
 			<div>
-				<Title order={2}>Backlog Concierge</Title>
+				<Title order={2}>let_me_carry</Title>
 				<Text c="dimmed" size="sm">
 					Ask what to play — grounded in your library, sessions, and the time you have.
 				</Text>
@@ -151,7 +151,7 @@ export function ConciergePage() {
 						/>
 					))}
 					{activeTool && (
-						<Group gap={6} c="dimmed" px="xs" aria-label="Concierge tool activity">
+						<Group gap={6} c="dimmed" px="xs" aria-label="let_me_carry tool activity">
 							<IconSearch size={14} />
 							<Text size="xs">{TOOL_LABELS[activeTool] ?? activeTool}…</Text>
 						</Group>
@@ -161,7 +161,7 @@ export function ConciergePage() {
 
 			<Box>
 				<TextInput
-					placeholder="Ask the concierge…"
+					placeholder="Ask let_me_carry…"
 					value={input}
 					onChange={(e) => setInput(e.currentTarget.value)}
 					onKeyDown={(e) => {

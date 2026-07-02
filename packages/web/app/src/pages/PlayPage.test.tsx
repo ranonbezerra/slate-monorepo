@@ -24,10 +24,10 @@ vi.mock("../hooks/usePlaySession", () => ({
 	useActivePlaySession: vi.fn(),
 }));
 
-// Force the concierge feature OFF so door-card assertions are deterministic
-// regardless of the ambient VITE_ENABLE_CONCIERGE value.
+// Force the let_me_carry feature OFF so door-card assertions are deterministic
+// regardless of the ambient VITE_ENABLE_LET_ME_CARRY value.
 vi.mock("../lib/features", () => ({
-	FEATURES: { backlogConcierge: false },
+	FEATURES: { backlogLetMeCarry: false },
 }));
 
 // The recap/wrapUp modals are rendered inline on the page now. They pull
@@ -105,11 +105,11 @@ describe("PlayPage", () => {
 		expect(screen.getByText(/No active session/)).toBeInTheDocument();
 	});
 
-	it("renders the two non-concierge door cards in order", () => {
+	it("renders the two non-let_me_carry door cards in order", () => {
 		renderPage();
 		expect(screen.getByText("What's the move?")).toBeInTheDocument();
 		expect(screen.getByText("I'll choose")).toBeInTheDocument();
-		// Concierge feature is off by default, so the Ask door is hidden.
+		// LetMeCarry feature is off by default, so the Ask door is hidden.
 		expect(screen.queryByText("Ask")).not.toBeInTheDocument();
 	});
 

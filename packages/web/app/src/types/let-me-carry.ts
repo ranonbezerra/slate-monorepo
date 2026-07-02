@@ -12,8 +12,8 @@ export interface ChatMessage {
 	recommendation?: Recommendation;
 }
 
-// One Server-Sent Event from POST /v1/concierge/chat (ROADMAP Epic 16).
-export interface ConciergeEvent {
+// One Server-Sent Event from POST /v1/let_me_carry/chat (ROADMAP Epic 16).
+export interface LetMeCarryEvent {
 	token?: string; // a chunk of prose to append live
 	tool?: string; // a tool call name (paired with `phase`)
 	phase?: "start" | "end";

@@ -154,7 +154,7 @@ export function PlayPage() {
 				</Card>
 			)}
 
-			<SimpleGrid cols={{ base: 1, sm: FEATURES.backlogConcierge ? 3 : 2 }} mt="sm">
+			<SimpleGrid cols={{ base: 1, sm: FEATURES.backlogLetMeCarry ? 3 : 2 }} mt="sm">
 				<DoorCard
 					title="What's the move?"
 					subtitle="One tap — we pick, you play."
@@ -170,12 +170,12 @@ export function PlayPage() {
 					disabled={hasActivePlaySession}
 					onClick={() => navigate("/library")}
 				/>
-				{FEATURES.backlogConcierge && (
+				{FEATURES.backlogLetMeCarry && (
 					<DoorCard
 						title="Ask"
 						subtitle="Chat about what to play."
 						icon={<IconMessageChatbot size={28} />}
-						onClick={() => navigate("/play/concierge")}
+						onClick={() => navigate("/play/let-me-carry")}
 					/>
 				)}
 			</SimpleGrid>

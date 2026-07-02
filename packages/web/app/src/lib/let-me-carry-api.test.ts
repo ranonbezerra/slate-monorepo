@@ -18,8 +18,8 @@ vi.mock("@slate/shared/api", () => {
 });
 
 import { getAccessToken } from "@slate/shared/api";
-import type { ConciergeEvent } from "../types/concierge";
-import { streamConcierge } from "./concierge-api";
+import type { LetMeCarryEvent } from "../types/let-me-carry";
+import { streamLetMeCarry } from "./let-me-carry-api";
 
 // ---------------------------------------------------------------------------
 // Helpers — build a fake fetch Response whose body streams the given chunks.
@@ -47,9 +47,9 @@ function makeStreamResponse(chunks: string[], init: { ok?: boolean; status?: num
 	};
 }
 
-async function collect(message: string, threadId?: string): Promise<ConciergeEvent[]> {
-	const events: ConciergeEvent[] = [];
-	for await (const event of streamConcierge(message, threadId)) {
+async function collect(message: string, threadId?: string): Promise<LetMeCarryEvent[]> {
+	const events: LetMeCarryEvent[] = [];
+	for await (const event of streamLetMeCarry(message, threadId)) {
 		events.push(event);
 	}
 	return events;
@@ -71,15 +71,15 @@ afterEach(() => {
 // Request shape
 // ---------------------------------------------------------------------------
 
-describe("streamConcierge request", () => {
-	it("POSTs to /v1/concierge/chat with auth header and JSON body", async () => {
+describe("streamLetMeCarry request", () => {
+	it("POSTs to /v1/let_me_carry/chat with auth header and JSON body", async () => {
 		fetchMock.mockResolvedValueOnce(makeStreamResponse(['data: {"done": true}\n']));
 
 		await collect("hello", "thread-7");
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		const [url, opts] = fetchMock.mock.calls[0];
-		expect(url).toBe("http://test/v1/concierge/chat");
+		expect(url).toBe("http://test/v1/let_me_carry/chat");
 		expect(opts.method).toBe("POST");
 		expect((opts.headers as Headers).get("Content-Type")).toBe("application/json");
 		expect((opts.headers as Headers).get("Authorization")).toBe("Bearer test-token");
@@ -102,7 +102,7 @@ describe("streamConcierge request", () => {
 // SSE parsing
 // ---------------------------------------------------------------------------
 
-describe("streamConcierge SSE parsing", () => {
+describe("streamLetMeCarry SSE parsing", () => {
 	it("parses token events followed by a done event", async () => {
 		fetchMock.mockResolvedValueOnce(
 			makeStreamResponse([
@@ -177,16 +177,16 @@ describe("streamConcierge SSE parsing", () => {
 // Error handling
 // ---------------------------------------------------------------------------
 
-describe("streamConcierge errors", () => {
+describe("streamLetMeCarry errors", () => {
 	it("throws when the response is not ok", async () => {
 		fetchMock.mockResolvedValueOnce(makeStreamResponse([], { ok: false, status: 500 }));
 
-		await expect(collect("hi")).rejects.toThrow("Concierge request failed (500)");
+		await expect(collect("hi")).rejects.toThrow("LetMeCarry request failed (500)");
 	});
 
 	it("throws when the response has no body", async () => {
 		fetchMock.mockResolvedValueOnce({ ok: true, status: 200, body: null });
 
-		await expect(collect("hi")).rejects.toThrow("Concierge response had no body");
+		await expect(collect("hi")).rejects.toThrow("LetMeCarry response had no body");
 	});
 });

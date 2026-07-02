@@ -1,19 +1,19 @@
 import { fetchWithAuthRetry } from "@slate/shared/api";
-import type { ConciergeEvent } from "../types/concierge";
+import type { LetMeCarryEvent } from "../types/let-me-carry";
 
 // ---------------------------------------------------------------------------
-// Backlog Concierge chat — consumes the SSE endpoint as an async generator
+// let_me_carry chat — consumes the SSE endpoint as an async generator
 // (ROADMAP Epic 16). The endpoint streams typed events as the turn generates:
 // `token` (prose), `tool` (+`phase`), `recommendation`, `degrade`, `error`,
 // then a final `done` carrying the `thread_id` for the next turn.
 // ---------------------------------------------------------------------------
 
-export async function* streamConcierge(
+export async function* streamLetMeCarry(
 	message: string,
 	threadId?: string,
 	signal?: AbortSignal,
-): AsyncGenerator<ConciergeEvent> {
-	const res = await fetchWithAuthRetry("/v1/concierge/chat", {
+): AsyncGenerator<LetMeCarryEvent> {
+	const res = await fetchWithAuthRetry("/v1/let_me_carry/chat", {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ message, thread_id: threadId }),
@@ -21,10 +21,10 @@ export async function* streamConcierge(
 	});
 
 	if (!res.ok) {
-		throw new Error(`Concierge request failed (${res.status})`);
+		throw new Error(`LetMeCarry request failed (${res.status})`);
 	}
 	if (!res.body) {
-		throw new Error("Concierge response had no body");
+		throw new Error("LetMeCarry response had no body");
 	}
 
 	const reader = res.body.getReader();
@@ -47,7 +47,7 @@ export async function* streamConcierge(
 				const payload = trimmed.slice("data:".length).trim();
 				if (!payload) continue;
 				try {
-					yield JSON.parse(payload) as ConciergeEvent;
+					yield JSON.parse(payload) as LetMeCarryEvent;
 				} catch {
 					// Skip malformed events rather than aborting the stream.
 				}

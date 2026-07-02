@@ -1,29 +1,29 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ConciergeEvent } from "../types/concierge";
-import { useConcierge } from "./useConcierge";
+import type { LetMeCarryEvent } from "../types/let-me-carry";
+import { useLetMeCarry } from "./useLetMeCarry";
 
-const streamConcierge = vi.fn();
+const streamLetMeCarry = vi.fn();
 
-vi.mock("../lib/concierge-api", () => ({
-	streamConcierge: (...args: unknown[]) => streamConcierge(...args),
+vi.mock("../lib/let-me-carry-api", () => ({
+	streamLetMeCarry: (...args: unknown[]) => streamLetMeCarry(...args),
 }));
 
-async function* events(items: ConciergeEvent[]): AsyncGenerator<ConciergeEvent> {
+async function* events(items: LetMeCarryEvent[]): AsyncGenerator<LetMeCarryEvent> {
 	for (const item of items) yield item;
 }
 
 afterEach(() => {
-	streamConcierge.mockReset();
+	streamLetMeCarry.mockReset();
 });
 
-describe("useConcierge", () => {
+describe("useLetMeCarry", () => {
 	it("appends the user message and streams the assistant reply token by token", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([{ token: "Play " }, { token: "Hollow Knight." }, { done: true, thread_id: "t1" }]),
 		);
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 
 		await act(async () => {
 			await result.current.send("what should I play?");
@@ -38,7 +38,7 @@ describe("useConcierge", () => {
 	});
 
 	it("attaches a validated recommendation and tracks the active tool", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([
 				{ tool: "search_library", phase: "start" },
 				{ tool: "search_library", phase: "end" },
@@ -48,7 +48,7 @@ describe("useConcierge", () => {
 			]),
 		);
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 		await act(async () => {
 			await result.current.send("what should I play?");
 		});
@@ -60,7 +60,7 @@ describe("useConcierge", () => {
 	});
 
 	it("appends a degrade nudge to the prose", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([
 				{ token: "Hmm." },
 				{ degrade: "I'm not certain that one's in your library." },
@@ -68,7 +68,7 @@ describe("useConcierge", () => {
 			]),
 		);
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 		await act(async () => {
 			await result.current.send("play something");
 		});
@@ -77,11 +77,11 @@ describe("useConcierge", () => {
 	});
 
 	it("threads the server thread_id into the next turn", async () => {
-		streamConcierge
+		streamLetMeCarry
 			.mockReturnValueOnce(events([{ token: "Hi." }, { done: true, thread_id: "thread-42" }]))
 			.mockReturnValueOnce(events([{ token: "Again." }, { done: true, thread_id: "thread-42" }]));
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 
 		await act(async () => {
 			await result.current.send("first");
@@ -90,13 +90,13 @@ describe("useConcierge", () => {
 			await result.current.send("second");
 		});
 
-		expect(streamConcierge).toHaveBeenNthCalledWith(
+		expect(streamLetMeCarry).toHaveBeenNthCalledWith(
 			1,
 			"first",
 			undefined,
 			expect.any(AbortSignal),
 		);
-		expect(streamConcierge).toHaveBeenNthCalledWith(
+		expect(streamLetMeCarry).toHaveBeenNthCalledWith(
 			2,
 			"second",
 			"thread-42",
@@ -105,18 +105,18 @@ describe("useConcierge", () => {
 	});
 
 	it("ignores empty input", async () => {
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 		await act(async () => {
 			await result.current.send("   ");
 		});
 		expect(result.current.messages).toEqual([]);
-		expect(streamConcierge).not.toHaveBeenCalled();
+		expect(streamLetMeCarry).not.toHaveBeenCalled();
 	});
 
 	it("cancelling mid-stream keeps the partial reply without an error", async () => {
 		// Stream one token, then park until the abort signal fires (rejecting
 		// like an aborted fetch would).
-		streamConcierge.mockImplementation((_msg: string, _tid: undefined, signal: AbortSignal) =>
+		streamLetMeCarry.mockImplementation((_msg: string, _tid: undefined, signal: AbortSignal) =>
 			(async function* () {
 				yield { token: "partial " };
 				await new Promise((_resolve, reject) => {
@@ -127,7 +127,7 @@ describe("useConcierge", () => {
 			})(),
 		);
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 		let sendPromise: Promise<void> = Promise.resolve();
 		await act(async () => {
 			sendPromise = result.current.send("what should I play?");
@@ -144,28 +144,28 @@ describe("useConcierge", () => {
 	});
 
 	it("surfaces a server error event", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([
-				{ error: "The concierge is unavailable right now." },
+				{ error: "The let_me_carry is unavailable right now." },
 				{ done: true, thread_id: "t1" },
 			]),
 		);
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 		await act(async () => {
 			await result.current.send("hello");
 		});
 
-		expect(result.current.error).toBe("The concierge is unavailable right now.");
+		expect(result.current.error).toBe("The let_me_carry is unavailable right now.");
 		expect(result.current.messages.at(-1)?.text).toContain("unavailable");
 	});
 
 	it("surfaces an error when the stream throws", async () => {
-		streamConcierge.mockImplementation(() => {
+		streamLetMeCarry.mockImplementation(() => {
 			throw new Error("boom");
 		});
 
-		const { result } = renderHook(() => useConcierge());
+		const { result } = renderHook(() => useLetMeCarry());
 		await act(async () => {
 			await result.current.send("hello");
 		});

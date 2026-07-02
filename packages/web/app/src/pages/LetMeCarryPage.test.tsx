@@ -3,14 +3,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ConciergeEvent } from "../types/concierge";
-import { ConciergePage } from "./ConciergePage";
+import type { LetMeCarryEvent } from "../types/let-me-carry";
+import { LetMeCarryPage } from "./LetMeCarryPage";
 
-const streamConcierge = vi.fn();
+const streamLetMeCarry = vi.fn();
 const fetchLibraryEntry = vi.fn();
 
-vi.mock("../lib/concierge-api", () => ({
-	streamConcierge: (...args: unknown[]) => streamConcierge(...args),
+vi.mock("../lib/let-me-carry-api", () => ({
+	streamLetMeCarry: (...args: unknown[]) => streamLetMeCarry(...args),
 }));
 
 vi.mock("../lib/library-api", async (importOriginal) => ({
@@ -18,7 +18,7 @@ vi.mock("../lib/library-api", async (importOriginal) => ({
 	fetchLibraryEntry: (...args: unknown[]) => fetchLibraryEntry(...args),
 }));
 
-async function* events(items: ConciergeEvent[]): AsyncGenerator<ConciergeEvent> {
+async function* events(items: LetMeCarryEvent[]): AsyncGenerator<LetMeCarryEvent> {
 	for (const item of items) yield item;
 }
 
@@ -28,7 +28,7 @@ function renderPage() {
 		<QueryClientProvider client={client}>
 			<MantineProvider>
 				<MemoryRouter>
-					<ConciergePage />
+					<LetMeCarryPage />
 				</MemoryRouter>
 			</MantineProvider>
 		</QueryClientProvider>,
@@ -36,29 +36,29 @@ function renderPage() {
 }
 
 afterEach(() => {
-	streamConcierge.mockReset();
+	streamLetMeCarry.mockReset();
 	fetchLibraryEntry.mockReset();
 });
 
-describe("ConciergePage", () => {
+describe("LetMeCarryPage", () => {
 	it("renders the empty state prompt", () => {
 		renderPage();
 		expect(screen.getByText("What should you play tonight?")).toBeInTheDocument();
 	});
 
 	it("sends a message and shows the streamed reply", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([{ token: "Try Hades." }, { done: true, thread_id: "t1" }]),
 		);
 
 		renderPage();
-		const input = screen.getByPlaceholderText("Ask the concierge…");
+		const input = screen.getByPlaceholderText("Ask let_me_carry…");
 		fireEvent.change(input, { target: { value: "something short" } });
 		fireEvent.keyDown(input, { key: "Enter" });
 
 		await waitFor(() => expect(screen.getByText("something short")).toBeInTheDocument());
 		await waitFor(() => expect(screen.getByText("Try Hades.")).toBeInTheDocument());
-		expect(streamConcierge).toHaveBeenCalledWith(
+		expect(streamLetMeCarry).toHaveBeenCalledWith(
 			"something short",
 			undefined,
 			expect.any(AbortSignal),
@@ -66,7 +66,7 @@ describe("ConciergePage", () => {
 	});
 
 	it("renders a Play CTA for a validated recommendation", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([
 				{ token: "Give this a go." },
 				{ recommendation: { id: "abc", title: "Hades" } },
@@ -75,7 +75,7 @@ describe("ConciergePage", () => {
 		);
 
 		renderPage();
-		const input = screen.getByPlaceholderText("Ask the concierge…");
+		const input = screen.getByPlaceholderText("Ask let_me_carry…");
 		fireEvent.change(input, { target: { value: "what should I play?" } });
 		fireEvent.keyDown(input, { key: "Enter" });
 
@@ -85,7 +85,7 @@ describe("ConciergePage", () => {
 	});
 
 	it("opens the recap-choice dialog when the Play CTA is clicked", async () => {
-		streamConcierge.mockReturnValue(
+		streamLetMeCarry.mockReturnValue(
 			events([
 				{ token: "Give this a go." },
 				{ recommendation: { id: "entry-1", title: "Hades" } },
@@ -101,7 +101,7 @@ describe("ConciergePage", () => {
 		});
 
 		renderPage();
-		const input = screen.getByPlaceholderText("Ask the concierge…");
+		const input = screen.getByPlaceholderText("Ask let_me_carry…");
 		fireEvent.change(input, { target: { value: "what should I play?" } });
 		fireEvent.keyDown(input, { key: "Enter" });
 
@@ -119,25 +119,25 @@ describe("ConciergePage", () => {
 		const gate = new Promise<void>((resolve) => {
 			release = resolve;
 		});
-		async function* gated(): AsyncGenerator<ConciergeEvent> {
+		async function* gated(): AsyncGenerator<LetMeCarryEvent> {
 			await gate;
 			yield { token: "Done." };
 			yield { done: true, thread_id: "t1" };
 		}
-		streamConcierge.mockReturnValue(gated());
+		streamLetMeCarry.mockReturnValue(gated());
 
 		renderPage();
-		const input = screen.getByPlaceholderText("Ask the concierge…");
+		const input = screen.getByPlaceholderText("Ask let_me_carry…");
 		fireEvent.change(input, { target: { value: "hi" } });
 		fireEvent.keyDown(input, { key: "Enter" });
 
 		// Reply hasn't arrived yet → the animated typing indicator is visible.
 		await waitFor(() =>
-			expect(screen.getByLabelText("Concierge is thinking")).toBeInTheDocument(),
+			expect(screen.getByLabelText("let_me_carry is thinking")).toBeInTheDocument(),
 		);
 
 		release();
 		await waitFor(() => expect(screen.getByText("Done.")).toBeInTheDocument());
-		expect(screen.queryByLabelText("Concierge is thinking")).not.toBeInTheDocument();
+		expect(screen.queryByLabelText("let_me_carry is thinking")).not.toBeInTheDocument();
 	});
 });
