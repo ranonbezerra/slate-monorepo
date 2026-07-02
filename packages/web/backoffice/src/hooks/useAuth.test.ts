@@ -40,7 +40,7 @@ describe("useAuth", () => {
 
 		const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
 		await result.current.login("a@b.com", "secret123");
-		expect(authFetch).toHaveBeenCalledWith("/v1/auth/login", {
+		expect(authFetch).toHaveBeenCalledWith("/internal/v1/auth/login", {
 			email: "a@b.com",
 			password: "secret123", // pragma: allowlist secret
 		});
