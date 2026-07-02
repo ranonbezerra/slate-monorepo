@@ -113,6 +113,14 @@ async def steam_callback(
         logger.warning("steam_callback_verification_failed", user_id=user.id)
         return _account_redirect("error")
 
+    # steam_id is unique. If this Steam account is already linked to a *different*
+    # Slate user, fail cleanly (no takeover, no 500) — the check reveals nothing
+    # about the other account. Re-linking your own is idempotent.
+    existing = await user_repo.get_by_steam_id(steam_id)
+    if existing is not None and existing.id != user.id:
+        logger.warning("steam_link_conflict", user_id=user.id)
+        return _account_redirect("error")
+
     await user_repo.set_steam_id(user, steam_id)
     logger.info("steam_account_linked", user_id=user.id)
     return _account_redirect("connected")

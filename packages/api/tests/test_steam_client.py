@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from slate.config import settings
+from slate.infrastructure.steam.base import SteamApiError
 from slate.infrastructure.steam.dummy import DummySteamClient
 from slate.infrastructure.steam.factory import get_steam_client, is_steam_enabled
 from slate.infrastructure.steam.http_client import SteamHttpClient, _parse_owned_games
@@ -115,6 +116,32 @@ class TestHttpClient:
             "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
         )
         assert "steamid=76561197960287930" in str(captured["url"])
+
+    async def test_api_error_never_leaks_the_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # A Steam API error must raise a sanitized SteamApiError — the request URL
+        # (which carries ?key=<secret>) must appear NOWHERE reachable from it, so
+        # it can't reach a traceback log or Sentry.
+        def _handler(_request: httpx.Request) -> httpx.Response:
+            return httpx.Response(403, text="Forbidden")
+
+        transport = httpx.MockTransport(_handler)
+        real_async_client = httpx.AsyncClient
+
+        def _patched(*args: object, **kwargs: object) -> httpx.AsyncClient:
+            kwargs["transport"] = transport
+            return real_async_client(**kwargs)  # type: ignore[arg-type]
+
+        monkeypatch.setattr(httpx, "AsyncClient", _patched)
+
+        client = SteamHttpClient("super-secret-key")  # pragma: allowlist secret
+        with pytest.raises(SteamApiError) as excinfo:
+            await client.get_owned_games("76561197960287930")
+
+        exc = excinfo.value
+        assert "super-secret-key" not in str(exc)
+        # No exception chain back to the URL-bearing httpx error.
+        assert exc.__cause__ is None
+        assert exc.__context__ is None
 
 
 class TestFactory:

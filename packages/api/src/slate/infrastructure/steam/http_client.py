@@ -13,7 +13,7 @@ from typing import Any
 import httpx
 import structlog
 
-from .base import AbstractSteamClient, OwnedGame
+from .base import AbstractSteamClient, OwnedGame, SteamApiError
 
 logger = structlog.get_logger()
 
@@ -39,11 +39,21 @@ class SteamHttpClient(AbstractSteamClient):
             "format": "json",
         }
         async with httpx.AsyncClient(timeout=_TIMEOUT_SECONDS) as client:
-            resp = await client.get(_OWNED_GAMES_URL, params=params)
-            resp.raise_for_status()
-            data = resp.json()
-
-        return _parse_owned_games(data)
+            try:
+                resp = await client.get(_OWNED_GAMES_URL, params=params)
+                resp.raise_for_status()
+                data = resp.json()
+                return _parse_owned_games(data)
+            except httpx.HTTPError as exc:
+                # The httpx exception message embeds the request URL — whose query
+                # string carries the API key. Log ONLY the status; never the error.
+                status = (
+                    exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else None
+                )
+                logger.warning("steam_owned_games_request_failed", status=status)
+        # Raised OUTSIDE the except so no `__context__`/`__cause__` links back to
+        # the URL-bearing httpx error — it can't reach a traceback log or Sentry.
+        raise SteamApiError("Steam API request failed")
 
 
 def _parse_owned_games(data: Any) -> list[OwnedGame]:

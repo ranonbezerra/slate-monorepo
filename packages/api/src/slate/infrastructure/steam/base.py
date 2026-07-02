@@ -12,6 +12,15 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 
+class SteamApiError(Exception):
+    """A Steam Web API call failed. Deliberately carries NO request detail.
+
+    The raw httpx error embeds the request URL, whose query string contains the
+    Steam API key — so the adapter raises this sanitized error instead, dropping
+    the original exception chain, to keep the key out of logs/Sentry.
+    """
+
+
 @dataclass(frozen=True)
 class OwnedGame:
     """One game the Steam account owns, with total playtime.

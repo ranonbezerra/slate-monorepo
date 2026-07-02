@@ -15,6 +15,7 @@ from slate.config import settings
 from slate.core.library.steam_schemas import SteamImportSummary
 from slate.deps import CurrentUserDep
 from slate.deps.steam import SteamImportServiceDep
+from slate.infrastructure.steam.base import SteamApiError
 from slate.infrastructure.steam.factory import is_steam_enabled
 
 router = APIRouter(prefix="/v1/library/steam", tags=["library"])
@@ -54,3 +55,9 @@ async def import_steam_library(
         return await steam_import_service.import_owned_games(current_user)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except SteamApiError as exc:
+        # Sanitized (carries no request URL/key). Surface a clean 502.
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Steam is temporarily unavailable. Try again in a moment.",
+        ) from exc

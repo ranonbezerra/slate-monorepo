@@ -266,6 +266,39 @@ class TestConnectRoutes:
         assert resp.status_code == 302
         assert "steam=error" in resp.headers["location"]
 
+    async def test_callback_conflict_when_steam_linked_elsewhere(
+        self,
+        async_client: AsyncClient,
+        register_user: dict[str, Any],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        from uuid import UUID
+
+        # Another Slate user already owns this SteamID64.
+        await _make_user(steam_id=_STEAM_ID)
+        async with _TestSessionFactory() as session:
+            user = await UserRepository(session).get_by_email("test@example.com")
+            assert user is not None
+            public_id = user.public_id
+
+        async def _fake_consume(state: str) -> UUID | None:
+            return public_id
+
+        async def _fake_verify(params: dict[str, str]) -> str | None:
+            return _STEAM_ID
+
+        monkeypatch.setattr(auth_steam, "consume_steam_state", _fake_consume)
+        monkeypatch.setattr(auth_steam, "verify_assertion", _fake_verify)
+
+        resp = await async_client.get("/v1/auth/steam/callback?state=s&openid.claimed_id=x")
+        assert resp.status_code == 302
+        assert "steam=error" in resp.headers["location"]
+        # The current user was NOT linked (no takeover).
+        async with _TestSessionFactory() as session:
+            user = await UserRepository(session).get_by_email("test@example.com")
+            assert user is not None
+            assert user.steam_id is None
+
 
 class TestImportEndpoint:
     async def test_requires_auth(self, async_client: AsyncClient) -> None:
@@ -298,6 +331,26 @@ class TestImportEndpoint:
         assert data["imported"] == 3
         assert data["unmatched"] == 1
         assert data["private_or_empty"] is False
+
+    async def test_steam_api_error_returns_clean_502(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        # A Steam API failure surfaces as a generic 502 — never the API key.
+        from slate.deps.steam import get_steam_import_service
+        from slate.infrastructure.steam.base import SteamApiError
+        from slate.main import app
+
+        class _BoomService:
+            async def import_owned_games(self, _user: object) -> None:
+                raise SteamApiError("Steam API request failed")
+
+        app.dependency_overrides[get_steam_import_service] = lambda: _BoomService()
+        try:
+            resp = await async_client.post("/v1/library/steam/import", headers=auth_headers)
+            assert resp.status_code == 502
+            assert "key" not in resp.json()["detail"].lower()
+        finally:
+            app.dependency_overrides.pop(get_steam_import_service, None)
 
     async def test_disabled_returns_503(
         self,
