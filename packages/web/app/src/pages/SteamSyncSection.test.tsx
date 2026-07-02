@@ -35,6 +35,13 @@ describe("SteamSyncSection", () => {
 		});
 	});
 
+	it("links to the user's Steam privacy settings for the public-profile requirement", () => {
+		renderSection();
+		const link = screen.getByRole("link", { name: /game details must be public/i });
+		expect(link).toHaveAttribute("href", "https://steamcommunity.com/my/edit/settings");
+		expect(link).toHaveAttribute("target", "_blank");
+	});
+
 	it("starts the Steam flow and navigates to the returned URL", async () => {
 		vi.mocked(steamStart).mockResolvedValueOnce({
 			redirect_url: "https://steamcommunity.com/openid/login?x=1",

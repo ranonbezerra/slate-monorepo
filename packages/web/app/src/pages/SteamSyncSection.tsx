@@ -1,4 +1,4 @@
-import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { Anchor, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { ApiError } from "@slate/shared/api";
 import { IconBrandSteam, IconDownload } from "@tabler/icons-react";
@@ -11,6 +11,10 @@ import { importSteamLibrary, steamStart } from "../lib/steam-api";
 // import owned games + playtime. A private profile can't be read, so we surface
 // a friendly hint in that case rather than a hard error.
 // ---------------------------------------------------------------------------
+
+// Deep-links to the signed-in user's own Steam privacy settings. Steam has no
+// API to flip this for them (privacy is user-controlled), so we point them there.
+const STEAM_PRIVACY_URL = "https://steamcommunity.com/my/edit/settings";
 
 /** A 409 from the import route means Steam hasn't been linked yet. */
 function isNotConnected(err: unknown): boolean {
@@ -43,7 +47,8 @@ export function SteamSyncSection() {
 			if (summary.private_or_empty) {
 				notifications.show({
 					title: "No games found",
-					message: "Make sure your Steam profile's game details are public, then try again.",
+					message:
+						"Make sure your Steam profile's game details are public, import, then switch it back if you like.",
 					color: "yellow",
 				});
 				return;
@@ -78,7 +83,11 @@ export function SteamSyncSection() {
 			</Title>
 			<Text c="dimmed" size="sm" mb="lg">
 				Connect your Steam account once, then import pulls your owned games and playtime into your
-				library. Your profile's game details must be public — a private profile can't be read.
+				library. Your profile's{" "}
+				<Anchor href={STEAM_PRIVACY_URL} target="_blank" rel="noopener noreferrer">
+					game details must be public
+				</Anchor>{" "}
+				— you can switch it back to private after importing.
 			</Text>
 			<Stack>
 				<Button
