@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { ActiveMissionBar } from "./components/ActiveMissionBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { VerifyEmailBanner } from "./components/VerifyEmailBanner";
 import { useAuthContext } from "./contexts/AuthContext";
@@ -165,7 +166,7 @@ function AppLayout() {
 					<Routes>
 						<Route path="/play" element={<PlayPage />} />
 						<Route path="/play/pick" element={<PickPage />} />
-						{FEATURES.backlogLetMeCarry && (
+						{FEATURES.letMeCarry && (
 							<Route path="/play/let-me-carry" element={<LetMeCarryPage />} />
 						)}
 						<Route path="/library" element={<LibraryPage />} />
@@ -182,6 +183,8 @@ function AppLayout() {
 					</Routes>
 				</Suspense>
 			</AppShell.Main>
+
+			<ActiveMissionBar />
 		</AppShell>
 	);
 }

@@ -85,7 +85,7 @@ GoRouter createRouter(
           GoRoute(
             path: '/play',
             builder: (context, state) =>
-                PlayPage(letMeCarryEnabled: featureFlags.backlogLetMeCarry),
+                PlayPage(letMeCarryEnabled: featureFlags.letMeCarry),
             routes: [
               GoRoute(
                 path: 'pick',
@@ -97,7 +97,7 @@ GoRouter createRouter(
                 redirect: (context, state) => '/history',
               ),
               // let_me_carry — hidden unless the feature flag is enabled.
-              if (featureFlags.backlogLetMeCarry)
+              if (featureFlags.letMeCarry)
                 GoRoute(
                   path: 'let_me_carry',
                   builder: (context, state) => const LetMeCarryPage(),

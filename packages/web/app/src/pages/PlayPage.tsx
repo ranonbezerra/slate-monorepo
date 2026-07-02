@@ -1,30 +1,8 @@
-import {
-	Badge,
-	Button,
-	Card,
-	Group,
-	Image,
-	SimpleGrid,
-	Stack,
-	Text,
-	Title,
-	Tooltip,
-	UnstyledButton,
-} from "@mantine/core";
-import {
-	IconBook,
-	IconDice3,
-	IconFlagCheck,
-	IconHandClick,
-	IconMessageChatbot,
-} from "@tabler/icons-react";
-import { useState } from "react";
+import { Card, SimpleGrid, Stack, Text, Title, Tooltip, UnstyledButton } from "@mantine/core";
+import { IconDice3, IconHandClick, IconMessageChatbot } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useActivePlaySession } from "../hooks/usePlaySession";
 import { FEATURES } from "../lib/features";
-import { safeImageUrl } from "../lib/safe-image";
-import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
-import { PlaySessionWrapUpModal } from "./PlaySessionWrapUpModal";
 
 interface DoorCardProps {
 	title: string;
@@ -88,8 +66,6 @@ function DoorCard({ title, subtitle, icon, accent, disabled, onClick }: DoorCard
 export function PlayPage() {
 	const navigate = useNavigate();
 	const { data: activePlaySession } = useActivePlaySession();
-	const [showRecap, setShowRecap] = useState(false);
-	const [showWrapUp, setShowWrapUp] = useState(false);
 	const hasActivePlaySession = Boolean(activePlaySession);
 
 	return (
@@ -99,62 +75,7 @@ export function PlayPage() {
 				Pick how you want to start your session.
 			</Text>
 
-			{activePlaySession ? (
-				<Card withBorder p="lg" radius="md">
-					<Stack gap="md">
-						<Group gap="md" wrap="nowrap" align="flex-start">
-							{safeImageUrl(activePlaySession.libraryEntry.game.coverUrl) && (
-								<Image
-									src={safeImageUrl(activePlaySession.libraryEntry.game.coverUrl)}
-									alt={activePlaySession.libraryEntry.game.title}
-									w={56}
-									h={76}
-									radius="sm"
-								/>
-							)}
-							<Stack gap={6}>
-								<Badge color="teal" variant="dot" size="lg" w="fit-content">
-									Session active
-								</Badge>
-								<Title order={3}>{activePlaySession.libraryEntry.game.title}</Title>
-							</Stack>
-						</Group>
-
-						{activePlaySession.recapText && (
-							<Card withBorder p="sm" radius="sm">
-								<Text size="sm" c="dimmed" lineClamp={3}>
-									{activePlaySession.recapText}
-								</Text>
-							</Card>
-						)}
-
-						<Group>
-							<Button
-								leftSection={<IconBook size={18} />}
-								variant="light"
-								onClick={() => setShowRecap(true)}
-							>
-								Recap
-							</Button>
-							<Button
-								leftSection={<IconFlagCheck size={18} />}
-								color="teal"
-								onClick={() => setShowWrapUp(true)}
-							>
-								Wrap up
-							</Button>
-						</Group>
-					</Stack>
-				</Card>
-			) : (
-				<Card withBorder p="lg" radius="md">
-					<Text c="dimmed" ta="center" py="sm">
-						No active session. Choose a door below to get rolling.
-					</Text>
-				</Card>
-			)}
-
-			<SimpleGrid cols={{ base: 1, sm: FEATURES.backlogLetMeCarry ? 3 : 2 }} mt="sm">
+			<SimpleGrid cols={{ base: 1, sm: FEATURES.letMeCarry ? 3 : 2 }} mt="sm">
 				<DoorCard
 					title="What's the move?"
 					subtitle="One tap — we pick, you play."
@@ -170,7 +91,7 @@ export function PlayPage() {
 					disabled={hasActivePlaySession}
 					onClick={() => navigate("/library")}
 				/>
-				{FEATURES.backlogLetMeCarry && (
+				{FEATURES.letMeCarry && (
 					<DoorCard
 						title="Ask"
 						subtitle="Chat about what to play."
@@ -179,18 +100,6 @@ export function PlayPage() {
 					/>
 				)}
 			</SimpleGrid>
-
-			{showRecap && activePlaySession && (
-				<PlaySessionRecapModal
-					mode="view"
-					playSession={activePlaySession}
-					onClose={() => setShowRecap(false)}
-				/>
-			)}
-			<PlaySessionWrapUpModal
-				playSession={showWrapUp ? (activePlaySession ?? null) : null}
-				onClose={() => setShowWrapUp(false)}
-			/>
 		</Stack>
 	);
 }

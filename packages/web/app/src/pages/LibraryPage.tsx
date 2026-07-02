@@ -5,7 +5,6 @@ import {
 	Card,
 	Divider,
 	Group,
-	Image,
 	MultiSelect,
 	Select,
 	Skeleton,
@@ -18,7 +17,6 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconHistory, IconPlus } from "@tabler/icons-react";
 import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import { DataTable } from "mantine-datatable";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +30,6 @@ import {
 	useUpdateEntry,
 } from "../hooks/useLibrary";
 import { useActivePlaySession } from "../hooks/usePlaySession";
-import { safeImageUrl } from "../lib/safe-image";
 import type {
 	Game,
 	LibraryEntry,
@@ -40,7 +37,6 @@ import type {
 	LibraryPlatformState,
 	LibraryStatus,
 } from "../types/library";
-import type { PlaySession } from "../types/play-session";
 import { AddGameModal } from "./AddGameModal";
 import { CapturePhotoModal } from "./CapturePhotoModal";
 import { CaptureReviewModal } from "./CaptureReviewModal";
@@ -48,9 +44,6 @@ import { CaptureTextModal } from "./CaptureTextModal";
 import { CaptureVoiceModal } from "./CaptureVoiceModal";
 import { ImageSourceModal } from "./ImageSourceModal";
 import { PlaySessionRecapModal } from "./PlaySessionRecapModal";
-import { PlaySessionWrapUpModal } from "./PlaySessionWrapUpModal";
-
-dayjs.extend(relativeTime);
 
 const STATUS_TABS: { value: string; label: string }[] = [
 	{ value: "all", label: "All" },
@@ -113,13 +106,9 @@ export function LibraryPage() {
 	const [imageChooserOpened, setImageChooserOpened] = useState(false);
 	const [reviewCaptureId, setReviewCaptureId] = useState<string | null>(null);
 
-	// View mode: viewing an existing playSession's recap
-	const [recapPlaySession, setRecapPlaySession] = useState<PlaySession | null>(null);
 	// Preview mode: starting a playSession for a specific platform entry. The
 	// recap is fetched inside the modal after the user picks quick vs deep.
 	const [previewEntry, setPreviewEntry] = useState<LibraryEntry | null>(null);
-
-	const [wrapUpPlaySession, setWrapUpPlaySession] = useState<PlaySession | null>(null);
 
 	const queryParams = {
 		status: statusFilter === "all" ? undefined : statusFilter,
@@ -128,7 +117,6 @@ export function LibraryPage() {
 	};
 
 	const { data, isLoading, isError, error, refetch } = useLibrary(queryParams);
-	const { data: activePlaySession } = useActivePlaySession();
 	const updateMutation = useUpdateEntry();
 	const deleteMutation = useDeleteEntry();
 
@@ -192,52 +180,6 @@ export function LibraryPage() {
 					</Button>
 				))}
 			</Group>
-
-			{activePlaySession && (
-				<Card withBorder p="sm" radius="md">
-					<Group justify="space-between">
-						<Group gap="sm" wrap="nowrap">
-							{safeImageUrl(activePlaySession.libraryEntry.game.coverUrl) && (
-								<Image
-									src={safeImageUrl(activePlaySession.libraryEntry.game.coverUrl)}
-									alt={activePlaySession.libraryEntry.game.title}
-									w={32}
-									h={44}
-									radius="sm"
-								/>
-							)}
-							<Badge color="teal" variant="dot" size="lg">
-								Session active
-							</Badge>
-							<Text fw={500}>{activePlaySession.libraryEntry.game.title}</Text>
-							<Text size="sm" c="dimmed">
-								{activePlaySession.libraryEntry.platform.label}
-							</Text>
-							<Text size="sm" c="dimmed">
-								started {dayjs(activePlaySession.startedAt).fromNow()}
-							</Text>
-						</Group>
-						<Group gap="xs">
-							{activePlaySession.recapText && (
-								<Button
-									size="xs"
-									variant="light"
-									onClick={() => setRecapPlaySession(activePlaySession)}
-								>
-									View recap
-								</Button>
-							)}
-							<Button
-								size="xs"
-								color="teal"
-								onClick={() => setWrapUpPlaySession(activePlaySession)}
-							>
-								End session
-							</Button>
-						</Group>
-					</Group>
-				</Card>
-			)}
 
 			{isError ? (
 				<ErrorState title="Couldn't load your library" error={error} onRetry={() => refetch()} />
@@ -395,21 +337,6 @@ export function LibraryPage() {
 					onClose={() => setPreviewEntry(null)}
 				/>
 			)}
-
-			{/* View mode: viewing an existing playSession's recap */}
-			{recapPlaySession && (
-				<PlaySessionRecapModal
-					mode="view"
-					playSession={recapPlaySession}
-					onClose={() => setRecapPlaySession(null)}
-					onPlaySessionUpdated={(updated) => setRecapPlaySession(updated)}
-				/>
-			)}
-
-			<PlaySessionWrapUpModal
-				playSession={wrapUpPlaySession}
-				onClose={() => setWrapUpPlaySession(null)}
-			/>
 		</Stack>
 	);
 }

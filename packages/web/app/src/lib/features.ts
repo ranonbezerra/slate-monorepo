@@ -9,7 +9,7 @@ function flag(value: unknown): boolean {
 export const FEATURES = {
 	// let_me_carry chat (Epic 11). Off by default until the agent is
 	// validated against a real tool-calling model.
-	backlogLetMeCarry: flag(
+	letMeCarry: flag(
 		typeof import.meta !== "undefined" && import.meta.env?.VITE_ENABLE_LET_ME_CARRY,
 	),
 } as const;

@@ -27,20 +27,7 @@ vi.mock("../hooks/usePlaySession", () => ({
 // Force the let_me_carry feature OFF so door-card assertions are deterministic
 // regardless of the ambient VITE_ENABLE_LET_ME_CARRY value.
 vi.mock("../lib/features", () => ({
-	FEATURES: { backlogLetMeCarry: false },
-}));
-
-// The recap/wrapUp modals are rendered inline on the page now. They pull
-// in their own data hooks; stub them out so this suite stays focused on the
-// PlayPage behavior and does not need a QueryClient provider.
-vi.mock("./PlaySessionRecapModal", () => ({
-	PlaySessionRecapModal: ({ mode }: { mode: string }) => (
-		<div data-testid="recap-modal">{mode}</div>
-	),
-}));
-vi.mock("./PlaySessionWrapUpModal", () => ({
-	PlaySessionWrapUpModal: ({ playSession }: { playSession: unknown }) =>
-		playSession ? <div data-testid="wrapUp-modal" /> : null,
+	FEATURES: { letMeCarry: false },
 }));
 
 function renderPage() {
@@ -100,11 +87,6 @@ describe("PlayPage", () => {
 		expect(screen.getByText("Play")).toBeInTheDocument();
 	});
 
-	it("shows an empty hint when there is no active playSession", () => {
-		renderPage();
-		expect(screen.getByText(/No active session/)).toBeInTheDocument();
-	});
-
 	it("renders the two non-let_me_carry door cards in order", () => {
 		renderPage();
 		expect(screen.getByText("What's the move?")).toBeInTheDocument();
@@ -123,45 +105,6 @@ describe("PlayPage", () => {
 		renderPage();
 		fireEvent.click(screen.getByText("I'll choose"));
 		expect(mockNavigate).toHaveBeenCalledWith("/library");
-	});
-
-	it("shows the active playSession card with the game title and recap", () => {
-		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
-		renderPage();
-		expect(screen.getByText("Session active")).toBeInTheDocument();
-		expect(screen.getByText("Hollow Knight")).toBeInTheDocument();
-		expect(screen.getByText("Your next adventure awaits")).toBeInTheDocument();
-	});
-
-	it("shows 'Recap' and 'Wrap up' buttons on the active playSession card", () => {
-		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
-		renderPage();
-		expect(screen.getByRole("button", { name: /recap/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /wrap up/i })).toBeInTheDocument();
-		// No Resume button anymore.
-		expect(screen.queryByRole("button", { name: /resume/i })).not.toBeInTheDocument();
-	});
-
-	it("opens the recap modal in view mode from the 'Recap' button", () => {
-		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
-		renderPage();
-		expect(screen.queryByTestId("recap-modal")).not.toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: /recap/i }));
-		const modal = screen.getByTestId("recap-modal");
-		expect(modal).toBeInTheDocument();
-		expect(modal).toHaveTextContent("view");
-		// Opening the recap does not navigate.
-		expect(mockNavigate).not.toHaveBeenCalled();
-	});
-
-	it("opens the wrapUp modal from the 'Wrap up' button", () => {
-		(useActivePlaySession as Mock).mockReturnValue({ data: makePlaySession() });
-		renderPage();
-		expect(screen.queryByTestId("wrapUp-modal")).not.toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: /wrap up/i }));
-		expect(screen.getByTestId("wrapUp-modal")).toBeInTheDocument();
-		// Ending/wrapping up does not navigate.
-		expect(mockNavigate).not.toHaveBeenCalled();
 	});
 
 	it("disables the start doors and does not navigate when a playSession is active", () => {
