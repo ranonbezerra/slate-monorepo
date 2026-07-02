@@ -784,7 +784,7 @@ A deep recap fires up to ~4 LLM calls (`grade` → `refine`×0–2 → `synthesi
 
 **Goal:** make bulk onboarding nearly frictionless — a user populates 50–100 games in one shot by photographing (or screenshotting) their existing library from the major platforms, with the per-import cost driven toward ~zero. Extends Epic 5 (photo capture) from "a shelf of a few games" into "my whole Steam/PSN/Xbox/Switch/GOG/Epic library at once."
 
-**Status:** not committed. Spike-then-decide, like Epics 12–13. The platform-aware parsing and the local-first OCR path are each independently shippable; descope to "Steam list-view only" if the weekend runs short.
+**Status:** superseded / mostly shipped. The **generic multi-image OCR bulk import already ships** (`api/v1/library_import.py` + the `/v1/captures` bulk flow: upload N screenshots → Tesseract OCR → catalog/IGDB match → bulk confirm). It reads any clean list-view screenshot — including Steam's — with **no platform-specific parser**, so the "platform-aware screenshot parsing" this epic proposed is redundant and dropped. The real upgrade over OCR-of-a-screenshot (which only captures *visible* games, fuzzy-matches titles, and has no playtime) is **account-sync via API** — see **Epic 30** (web: Steam/GOG) and **Epic 31** (desktop: all PC stores + launch/install).
 
 ### Context
 
@@ -1454,6 +1454,85 @@ The corrective signal is cheap to source: reuse the existing token-overlap groun
 It's an orchestration layer *over* Epics 10/24/25, gated by a product/monetization boundary (deep = paid). It only makes sense once local RAG exists (Epic 24) and the eval can measure whether the corrective loop earns its complexity (Epic 23).
 
 > **Note — prerequisite (Tiers & Entitlements):** "deep = paying user" needs a `user.tier` + an entitlement gate on the deep-recap entry point (reusing the per-user cost-metering from Epic 14). That's a distinct monetization concern, not RAG work; it's the hard dependency the router's entitlement-awareness rests on. Capture it as its own epic when monetization is on the table.
+
+---
+
+## Epic 30 — Store account-sync library import: Steam + GOG (web) (v1.1+)
+
+**Goal:** one-click "Connect Steam / GOG" that pulls the user's **entire owned library** — exact game IDs + playtime — into Slate, from the browser, no screenshots. The strict upgrade over the Epic 15 OCR path (which only sees the games *visible* in a screenshot, fuzzy-matches titles, and has no playtime).
+
+**Status:** proposed. Only these two storefronts expose an owned-library API usable from a server/browser; every other PC store needs local (desktop) integration — see Epic 31.
+
+### Why only Steam + GOG here
+
+| Store | Owned-library API (web-usable) | Path |
+| ----- | ------------------------------ | ---- |
+| **Steam** | ✅ Official | "Sign in through Steam" (**OpenID 2.0**, no password on our page) → SteamID64 → `IPlayerService/GetOwnedGames` (games + playtime). Free Web API key. Needs the profile's *game details* public; else prompt the user to flip it, or fall back to OCR. |
+| **GOG** | 🟡 Semi-official | Authenticated `embed.gog.com/user/data/games` → owned titles. Behind a flag; lower priority than Steam. |
+| PSN / Nintendo | ❌ excluded | No official API (PSN = reverse-engineered NPSSO token = the user's password, ToS-hostile; Nintendo = no public API). OCR/photo import stays the fallback. |
+| Xbox | ❌ excluded | No official consumer owned-games API (deliberately dropped — unofficial only). |
+
+### Tasks
+
+- [ ] Steam **OpenID connect** flow as a new linkable identity (distinct from the OAuth-login providers) — store the SteamID64 on the user, never a password.
+- [ ] `GetOwnedGames` → feed each `appid` + `playtime_forever` into the **existing catalog-match + bulk-confirm pipeline** (Epic 14) — account-sync is a new *source*, not a new pipeline.
+- [ ] Private-profile handling: detect the empty/blocked response, guide the user to make game details public, or degrade to the OCR import.
+- [ ] GOG owned-library adapter behind `gog_import_enabled`, same pipeline.
+- [ ] Seed Steam/GOG app-ids onto imported catalog rows so Epic 31's desktop app can reconcile installed state.
+
+### Definition of Done
+
+- Connecting Steam imports the full owned library with per-game playtime in one action; a private profile degrades gracefully (clear guidance + OCR fallback); the match/bulk-add reuses the OCR pipeline unchanged. GOG ships behind a flag.
+
+### Technical highlight
+
+> **New source, same funnel.** The Epic 14 import is provider-agnostic: OCR emitted `CatalogMatch`es into a catalog-match → bulk-confirm funnel. Steam/GOG emit *exact* app-ids into that same funnel, so account-sync is deterministic (no fuzzy OCR) and carries playtime — for free, with zero new pipeline.
+
+---
+
+## Epic 31 — Slate Desktop (PC + Mac): unify, launch & auto-track (v1.1+)
+
+**Goal:** a cross-platform desktop companion — a unified PC game launcher/library manager **with Slate's AI loop baked in**. It unifies every PC storefront into the Slate library, **launches and installs** games through each store's own client, and — the real differentiator — **auto-tracks play sessions** (launch → session opens, exit → wrap-up prompt) so the recap/Pick loop runs with zero manual bookkeeping.
+
+**Status:** proposed — the largest desktop undertaking, parallel in scope to Epic 22 (native mobile). Depends on Epic 30's provider-agnostic import funnel.
+
+### Why this MUST be a desktop app (not the web app)
+
+Only Steam (and semi-officially GOG) expose owned-library APIs. **Epic Games, EA App, Battle.net, and Ubisoft Connect have no official owned-games API at all** — the only reliable path is to read the *installed launcher's local manifest/DB files* and **launch via each store's URI scheme**. A web app fundamentally can't touch the local filesystem, detect installed games, or launch/install a title. Most existing unified launchers are Windows-only; the cross-platform reference to study is **[Heroic Games Launcher](https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher)** (Electron, genuinely runs on Windows/Mac/Linux).
+
+### Store integration matrix
+
+| Store | Owned via | Installed / launch | macOS client |
+| ----- | --------- | ------------------ | ------------ |
+| **Steam** | Web API (Epic 30) + local `appmanifest` | `steam://run/<appid>` | ✅ native |
+| **GOG** | GOG API + Galaxy local DB | Galaxy / local exe | ⚠️ Intel-only (Rosetta dies macOS 28 / 2028) |
+| **Epic** | unofficial EGS auth (legendary/Heroic) + local `.item` manifests | `com.epicgames.launcher://apps/<id>?action=launch` | ✅ native (Apple Silicon since Nov 2025) |
+| **EA App** | local manifests | EA app URI (`origin://…`) | ✅ (EA app for Mac) |
+| **Battle.net** | local product DB | `battlenet://` | ✅ native |
+| **Ubisoft Connect** | local registry | `uplay://launch/<id>` | ❌ Windows only |
+
+**macOS reality:** thinner by nature — Ubisoft has no Mac client, GOG Galaxy is Intel-only and dying, and most Windows games don't run on Mac anyway. So on Mac the app leans **sync + auto-track**; "launch everything" is a Windows story.
+
+### The Slate differentiator (vs plain unified launchers)
+
+- **Auto-import** owned + installed games across all connected stores → auto-populates the Slate library. This alone **kills the onboarding-friction problem**.
+- **Auto-tracked sessions**: watch launch/exit at the OS level → automatically open a Slate play session on launch and prompt the wrap-up on exit, with **real playtime** — no manual "start session." This removes the biggest friction in the recap loop.
+- **"Play the Pick"**: the Daily Pick / Concierge recommendation becomes a one-click launch.
+
+### Tech stack
+
+- [ ] **Tauri** (Rust core + reuse the existing React `@slate/shared` UI) — tiny binary, native FS/process access, shares the web frontend. (Electron is the fallback if a Rust store-integration crate is missing.)
+- [ ] Per-store **library plugins**: local manifest/DB readers + the web APIs from Epic 30, behind one `StoreConnector` port (hexagonal, same shape as the LLM/OCR ports).
+- [ ] Installed-game detection + **launch** via URI scheme; process-exit watcher → **auto play-session** open/close + wrap-up prompt.
+- [ ] Offline queue + sync to the Slate API; auto-update; Windows installer + **macOS code-signing/notarization**.
+
+### Definition of Done
+
+- Connect ≥ Steam + Epic + GOG on Windows and ≥ Steam + Epic on macOS; owned + installed games auto-import; launching a tracked game auto-opens a session and quitting prompts the wrap-up with real playtime; the Daily Pick launches in one click.
+
+### Why this is a separate epic
+
+New client platform (Tauri/Rust), OS-level filesystem + process integration, and code-signing/distribution — the same class of undertaking as Epic 22 (native mobile), and gated on Epic 30's import funnel. It's the surface that makes Slate's whole AI loop frictionless, but it carries a distribution + platform burden that must not block the web rollout.
 
 ---
 
