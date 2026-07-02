@@ -21,6 +21,10 @@ from slate.infrastructure.db.models import CaptureCandidate
 class CaptureCandidateRepository:
     """Thin data-access layer around the ``capture_candidates`` table."""
 
+    # Identity/ownership columns a caller-supplied field map must never set, so
+    # the ``**data`` unpack in create_bulk can't become a mass-assignment hole.
+    _PROTECTED_FIELDS = frozenset({"id", "public_id", "capture_id", "created_at"})
+
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -59,9 +63,16 @@ class CaptureCandidateRepository:
         capture_id: int,
         candidates: list[dict[str, object]],
     ) -> list[CaptureCandidate]:
-        """Insert multiple candidates at once and return them all."""
+        """Insert multiple candidates at once and return them all.
+
+        Identity/ownership keys are rejected so an untrusted field map can't
+        override ``capture_id`` or set ``id``/``public_id`` via the unpack.
+        """
         results: list[CaptureCandidate] = []
         for data in candidates:
+            bad = self._PROTECTED_FIELDS & data.keys()
+            if bad:
+                raise ValueError(f"Fields cannot be set: {', '.join(sorted(bad))}")
             candidate = CaptureCandidate(capture_id=capture_id, **data)
             self._session.add(candidate)
             results.append(candidate)
