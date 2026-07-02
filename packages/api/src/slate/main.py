@@ -29,10 +29,12 @@ from slate.api.v1.auth_mfa import router as auth_mfa_router
 from slate.api.v1.auth_oauth import router as auth_oauth_router
 from slate.api.v1.auth_password import router as auth_password_router
 from slate.api.v1.auth_sessions import router as auth_sessions_router
+from slate.api.v1.auth_steam import router as auth_steam_router
 from slate.api.v1.capture import router as capture_router
 from slate.api.v1.let_me_carry import router as let_me_carry_router
 from slate.api.v1.library import router as library_router
 from slate.api.v1.library_import import router as library_import_router
+from slate.api.v1.library_steam import router as library_steam_router
 from slate.api.v1.pick import router as pick_router
 from slate.api.v1.play_session import router as play_session_router
 from slate.api.v1.stats import router as stats_router
@@ -231,8 +233,10 @@ def create_app() -> FastAPI:
     application.include_router(auth_password_router)
     application.include_router(auth_sessions_router)
     application.include_router(auth_mfa_router)
+    application.include_router(auth_steam_router)
     application.include_router(capture_router)
     application.include_router(library_import_router)
+    application.include_router(library_steam_router)
     application.include_router(library_router)
     application.include_router(play_session_router)
     application.include_router(pick_router)
