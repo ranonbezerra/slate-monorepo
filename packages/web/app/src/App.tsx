@@ -24,6 +24,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { VerifyEmailBanner } from "./components/VerifyEmailBanner";
 import { useAuthContext } from "./contexts/AuthContext";
 import { FEATURES } from "./lib/features";
+import { ConfirmEmailChangePage } from "./pages/ConfirmEmailChangePage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
@@ -198,6 +199,9 @@ function App() {
 			{/* Public: the verification link is opened straight from the email,
 			    possibly while signed out. */}
 			<Route path="/verify-email" element={<VerifyEmailPage />} />
+			{/* Public: the confirm-email-change link is emailed to the new address;
+			    the token is the credential, so it works signed out. */}
+			<Route path="/confirm-email-change" element={<ConfirmEmailChangePage />} />
 			{/* Public: the API redirects the browser here after a social login;
 			    the page completes the cookie→session bootstrap. */}
 			<Route path="/oauth/callback" element={<OAuthCallbackPage />} />
