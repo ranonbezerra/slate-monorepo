@@ -12,4 +12,9 @@ export const FEATURES = {
 	letMeCarry: flag(
 		typeof import.meta !== "undefined" && import.meta.env?.VITE_ENABLE_LET_ME_CARRY,
 	),
+	// Steam account-sync (Epic 30): link a Steam account via OpenID, then import
+	// owned games + playtime. Off by default until STEAM_API_KEY is provisioned.
+	steamImport: flag(
+		typeof import.meta !== "undefined" && import.meta.env?.VITE_ENABLE_STEAM_IMPORT,
+	),
 } as const;
