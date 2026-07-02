@@ -35,7 +35,10 @@ export function useAuth() {
 
 	const loginMutation = useMutation({
 		mutationFn: async (vars: { email: string; password: string }) => {
-			const data = await authFetch<AuthTokens>("/v1/auth/login", {
+			// Admin-gated login: password AND admin grant are checked server-side,
+			// and either failure returns the same generic 401 — a non-admin can't
+			// tell their credentials were valid (see /internal/v1/auth/login).
+			const data = await authFetch<AuthTokens>("/internal/v1/auth/login", {
 				email: vars.email,
 				password: vars.password,
 			});
