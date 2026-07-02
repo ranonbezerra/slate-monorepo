@@ -96,6 +96,12 @@ def init_sentry() -> None:
     sentry_sdk.init(
         dsn=settings.sentry_dsn,
         send_default_pii=False,
+        # include_local_variables=False: Sentry otherwise ships each traceback
+        # frame's LOCAL VARIABLES, which the value-only `before_send` scrub can't
+        # reach — a secret held in a local at raise time (settings.database_url,
+        # an api_key/token param, a params dict) would leak. Dropping frame vars
+        # closes that whole class; the scrubbed exception message still remains.
+        include_local_variables=False,
         before_send=_scrub,
         environment=settings.app_env,
     )

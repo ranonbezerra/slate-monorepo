@@ -31,7 +31,9 @@ export class ErrorBoundary extends Component<Props, State> {
 						Something went wrong
 					</Title>
 					<Text size="sm">{this.state.error.message}</Text>
-					<Code block>{this.state.error.stack}</Code>
+					{/* The raw stack exposes internal source structure — dev-only. In
+					    production, users get the generic message above. */}
+					{import.meta.env.DEV && <Code block>{this.state.error.stack}</Code>}
 					<Button onClick={() => this.setState({ error: null })}>Try again</Button>
 				</Stack>
 			);

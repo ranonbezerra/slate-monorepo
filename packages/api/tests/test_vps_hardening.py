@@ -69,6 +69,25 @@ def test_init_sentry_noop_without_dsn(monkeypatch: pytest.MonkeyPatch) -> None:
     observability.init_sentry()  # must not raise / must not import sentry_sdk
 
 
+def test_init_sentry_disables_frame_locals(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Frame locals can hold a secret (DB URL / api_key) at raise time, which the
+    # value-only scrub can't reach — Sentry must not ship them.
+    import sys
+    import types
+
+    captured: dict[str, object] = {}
+    fake = types.ModuleType("sentry_sdk")
+    fake.init = lambda **kw: captured.update(kw)  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "sentry_sdk", fake)
+    monkeypatch.setattr(observability.sentry.settings, "sentry_dsn", "https://k@o.ingest/1")
+
+    observability.init_sentry()
+
+    assert captured["include_local_variables"] is False
+    assert captured["send_default_pii"] is False
+    assert captured["before_send"] is observability.sentry._scrub
+
+
 def test_scrub_redacts_headers_body_and_query() -> None:
     event = {
         "request": {
